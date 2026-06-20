@@ -1,0 +1,9 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+.python-version
+uv.lock
+
+# Jupyter
+.ipynb_checkpoints/

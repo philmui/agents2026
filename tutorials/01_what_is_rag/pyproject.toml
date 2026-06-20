@@ -1,0 +1,18 @@
+[project]
+name = "asdrp-tutorial-module-01"
+version = "0.1.0"
+description = "ASDRP Agentic RAG Evaluation track — Module 01: What is RAG?"
+requires-python = ">=3.13"
+dependencies = [
+    # --- only what this module actually imports ---
+    "python-dotenv",
+    # Jupyter tooling so `uv run jupyter lab` works out of the box.
+    "jupyterlab",
+    "ipykernel",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the pinned set above.
+# No [build-system] table: this is a tutorial project, not a package to publish,
+# so uv treats it as a non-packaged workspace.
+[tool.uv]
+package = false

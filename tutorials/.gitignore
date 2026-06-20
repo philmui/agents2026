@@ -1,0 +1,5 @@
+# Shared secrets for all modules — NEVER commit
+.env
+
+# A shared throwaway venv used only for verification
+_verify_venv/

@@ -1,0 +1,22 @@
+[project]
+name = "asdrp-tutorial-module-02"
+version = "0.1.0"
+description = "ASDRP Agentic RAG Evaluation track — Module 02: Embeddings & Meaning."
+requires-python = ">=3.13"
+dependencies = [
+    # --- this module's actual imports ---
+    "sentence-transformers",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "scikit-learn",
+    # Jupyter tooling so `uv run jupyter lab` works out of the box.
+    "jupyterlab",
+    "ipykernel",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the pinned set above.
+# No [build-system] table: this is a tutorial project, not a package to publish,
+# so uv treats it as a non-packaged workspace.
+[tool.uv]
+package = false

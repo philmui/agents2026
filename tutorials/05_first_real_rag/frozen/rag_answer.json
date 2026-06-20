@@ -1,0 +1,10 @@
+{
+  "_note": "Illustrative output — hand-authored to show realistic shape. Run with a real OLLAMA_API_KEY to produce live results.",
+  "question": "What factors drive gold prices higher?",
+  "response": "Gold prices are primarily driven by investor demand for safe-haven assets during periods of economic uncertainty or geopolitical tension. Additional upward pressure comes from central bank purchases, a weakening US dollar (since gold is dollar-denominated, a weaker dollar makes it cheaper for foreign buyers), and rising inflation expectations, as gold is traditionally viewed as a store of value. Physical demand from jewellery manufacturing — particularly in India and China — also contributes to price support.",
+  "retrieved_contexts": [
+    "Gold is widely regarded as a safe-haven asset. During periods of market stress, investors often rotate into gold, pushing prices higher. Central bank gold reserves have been rising steadily since 2010 as institutions diversify away from dollar-denominated assets.",
+    "The US dollar has an inverse relationship with gold. Because gold is priced in dollars, a weaker dollar lowers the effective cost for foreign buyers and typically supports higher prices. Conversely, a strong dollar tends to suppress gold prices.",
+    "Inflation expectations are a key macro driver for gold. Real interest rates — nominal rates minus inflation — are arguably the single most important short-term determinant of gold prices. When real rates fall or turn negative, the opportunity cost of holding non-yielding gold decreases, making it more attractive."
+  ]
+}
