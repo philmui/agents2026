@@ -1,0 +1,5 @@
+{
+  "_note": "Illustrative output — set OLLAMA_API_KEY in tutorials/.env to run live.",
+  "context_precision": 0.78,
+  "context_recall": 0.71
+}

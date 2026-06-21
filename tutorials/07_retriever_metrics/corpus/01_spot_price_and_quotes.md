@@ -1,0 +1,9 @@
+# How Precious Metal Prices Are Quoted
+
+The **spot price** of a precious metal is the price for immediate delivery of one unit of the metal, right now, in the wholesale market. For gold, silver, platinum, and palladium the standard unit is the **troy ounce (toz)**, which is about 31.1035 grams, slightly heavier than the ordinary avoirdupois ounce of 28.35 grams. Because the unit matters, a price feed will always state both a currency and a unit, for example "USD per troy ounce".
+
+A live quote is not a single number. Dealers publish a **bid** (the price at which they will buy from you) and an **ask** (the price at which they will sell to you). The gap between them is the **bid-ask spread**, and it is one of the real costs of trading. The **mid price** is simply the average of bid and ask. Quotes also report a daily **high** and **low**, and the **change** and **change percent** compared with the previous market day.
+
+The **London Bullion Market Association (LBMA)** publishes twice-daily reference prices known historically as the **London Fix**, set during electronic auctions in the morning (AM) and afternoon (PM). These LBMA prices, such as the LBMA Gold AM and LBMA Gold PM, are widely used as settlement benchmarks in contracts. Other authorities publish their own references, including the **London Metal Exchange (LME)** for industrial metals, the **Multi Commodity Exchange (MCX)** in India, and the **India Bullion and Jewellers Association (IBJA)**.
+
+A few practical points follow from all of this. First, two providers can show slightly different "gold prices" because they draw on different exchanges and timestamps. Second, the spot price is a wholesale figure; the price a retail buyer pays for a coin includes a **premium** over spot. Third, currency matters: a metal can rise in one currency while falling in another if exchange rates move. Always read the currency, the unit, and the timestamp before comparing two quotes.

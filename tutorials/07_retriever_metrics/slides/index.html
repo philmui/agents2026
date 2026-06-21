@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retriever Metrics — Tutorial Slides</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<style>
+  /* ---- Design tokens: match the repo's SVG palette ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings        */
+    --body:     #334155;   /* slate-700  body text       */
+    --muted:    #64748b;   /* slate-500  captions         */
+    --blue:     #2563eb;   /* primary accent (retrieval)  */
+    --violet:   #7c3aed;   /* secondary accent (generate) */
+    --blue-bg:  #eff6ff;   /* light blue surface          */
+    --violet-bg:#f5f3ff;   /* light violet surface        */
+    --line:     #e2e8f0;   /* hairlines                   */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--blue); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--violet); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--blue); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--blue); margin: 0 0 0.3em;
+  }
+  .kicker.gen { color: var(--violet); }
+
+  /* the one equation, hero */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--blue-bg), var(--violet-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.blue   { color: var(--blue); }
+  .equation b.violet { color: var(--violet); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--violet); background: var(--violet-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--blue-bg); color: var(--blue); }
+  .pill.gen { background: var(--violet-bg); color: var(--violet); }
+  .pill.grn { background: #ecfdf5; color: var(--green); }
+  .pill.amb { background: #fffbeb; color: var(--amber); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--blue); border-radius:12px; padding: 14px 18px; }
+  .card.violet { border-left-color: var(--violet); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+  .card.red    { border-left-color: var(--red); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--blue); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* comparison / metric tables */
+  .metric-table { width:100%; border-collapse: collapse; font-size: 0.7em; }
+  .metric-table th, .metric-table td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+  .metric-table th { background: var(--blue-bg); color: var(--ink); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--blue); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--blue); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--blue); border-radius: 2px; }
+
+  /* Contents / agenda slide */
+  .agenda { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 8px; }
+  .agenda .track {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    border-top: 4px solid var(--blue); padding: 18px 20px;
+  }
+  .agenda .track.violet { border-top-color: var(--violet); }
+  .agenda .track.green  { border-top-color: var(--green); }
+  .agenda .track .tnum {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.9em; height: 1.9em; border-radius: 12px; font-size: 0.72em;
+    background: var(--blue-bg); color: var(--blue); font-weight: 800; margin-bottom: 8px;
+  }
+  .agenda .track.violet .tnum { background: var(--violet-bg); color: var(--violet); }
+  .agenda .track.green  .tnum { background: #ecfdf5; color: var(--green); }
+  .agenda .track h3 { color: var(--ink); font-size: 0.98em; margin: 0 0 .5em; }
+  .agenda .track ul { margin: 0; padding-left: 1.05em; }
+  .agenda .track li { font-size: 0.74em; color: var(--body); line-height: 1.4; margin: .28em 0; }
+  .agenda .track li::marker { color: var(--blue); }
+  .agenda .track.violet li::marker { color: var(--violet); }
+  .agenda .track.green  li::marker { color: var(--green); }
+
+  /* mini inline-svg flow nodes reuse the SVG look */
+  .flow text { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer"><b>mui-group@asdrp</b> &copy;</div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">ASDRP · Agentic RAG Track · Module 07</p>
+    <h1>Retriever&nbsp;Metrics</h1>
+    <p class="lead" style="margin-top:-.2em;">Score your retriever with two complementary RAGAS metrics — context precision and context recall — and learn to read what each number is really telling you.</p>
+    <div class="equation" style="margin-top:.5em;">
+      <b class="blue">Precision</b> = are retrieved chunks <em>relevant &amp; ranked well?</em>
+      &nbsp;·&nbsp;
+      <b class="violet">Recall</b> = did we <em>find everything needed?</em>
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">ragas</span>
+      <span class="pill idx">LLMContextPrecisionWithReference</span>
+      <span class="pill gen">LLMContextRecall</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group @ ASDRP</b></span><span>· Advanced Student Directed Research Program</span></div>
+  </section>
+
+  <!-- ===================== CONTENTS ===================== -->
+  <section>
+    <p class="kicker">What we'll cover</p>
+    <h2>Contents</h2>
+    <div class="agenda">
+      <div class="track">
+        <span class="tnum">1</span>
+        <h3>Concept: the two metrics</h3>
+        <ul>
+          <li>Precision vs Recall intuition</li>
+          <li>The fishing analogy</li>
+          <li>Why they pull in opposite directions</li>
+        </ul>
+      </div>
+      <div class="track violet">
+        <span class="tnum">2</span>
+        <h3>Code: evaluate() + single-sample debug</h3>
+        <ul>
+          <li>RAGAS model setup (judge + embeddings)</li>
+          <li>Building the EvaluationDataset</li>
+          <li>evaluate() over 8 golden questions</li>
+          <li>single_turn_ascore() for one sample</li>
+        </ul>
+      </div>
+      <div class="track green">
+        <span class="tnum">3</span>
+        <h3>Cautions &amp; next steps</h3>
+        <ul>
+          <li>When precision misleads</li>
+          <li>When recall grades your test set</li>
+          <li>LLM-judge variance</li>
+          <li>Preview: Module 08 adds entity recall + noise</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Why two metrics? ===================== -->
+  <section>
+    <p class="kicker">Retriever evaluation</p>
+    <h2>Why two metrics for one retriever?</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <div class="card">
+          <strong>Context Precision</strong> — <em>quality &amp; rank</em><br>
+          Of all the chunks you returned, how many were actually useful — and were the useful ones near the top?
+        </div>
+        <div class="card violet">
+          <strong>Context Recall</strong> — <em>coverage</em><br>
+          Did the retriever surface every chunk of evidence needed to answer this question fully?
+        </div>
+        <div class="caution">
+          <span class="label">⚠ KEY INSIGHT</span><br>
+          These two metrics <b>trade off against each other</b>. Retrieving fewer chunks lifts precision but hurts recall. Retrieving many chunks improves recall but lets irrelevant noise in.
+        </div>
+      </div>
+      <div class="svg-wrap center">
+        <img src="assets/04_context_precision_recall.svg" alt="Context precision and context recall diagram">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Fishing analogy ===================== -->
+  <section>
+    <p class="kicker">Intuition</p>
+    <h2>The fishing analogy</h2>
+    <div class="stack">
+      <div class="cols">
+        <div class="card">
+          <strong>Precision</strong><br>
+          "Did I mostly catch fish, not old boots?"<br>
+          <span class="small">High precision = most returned chunks were relevant. Score drops if garbage chunks fill the top slots.</span>
+        </div>
+        <div class="card violet">
+          <strong>Recall</strong><br>
+          "Did I catch <em>all</em> the fish that were in the lake?"<br>
+          <span class="small">High recall = every useful passage was retrieved. Score drops if you left important evidence behind.</span>
+        </div>
+      </div>
+      <div class="equation">
+        You can be an excellent fisherman (high precision) and still leave half the fish uncaught (low recall) — or net everything in the lake (high recall) and haul up mostly boots (low precision).
+      </div>
+      <p class="small">Both numbers are needed. A system with 0.9 precision and 0.4 recall is broken in a different, equally serious way from one with 0.4 precision and 0.9 recall.</p>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: How RAGAS measures Precision ===================== -->
+  <section>
+    <p class="kicker">LLMContextPrecisionWithReference</p>
+    <h2>How RAGAS computes context precision</h2>
+    <pre><code class="python">from ragas.metrics import LLMContextPrecisionWithReference
+
+# RAGAS sends each (question, chunk, reference) triple to the judge LLM
+# and asks: "Is this chunk useful for answering the question given this reference?"
+# It weights the verdicts by position — top-ranked relevant chunks score higher.
+metric = LLMContextPrecisionWithReference(llm=judge_llm)
+</code></pre>
+    <div class="stack" style="margin-top:12px;">
+      <div class="card">
+        <strong>Inputs required</strong>
+        <ul class="tight">
+          <li><code>user_input</code> — the question</li>
+          <li><code>retrieved_contexts</code> — list of chunks the retriever returned</li>
+          <li><code>reference</code> — the gold-standard reference answer</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <strong>Score interpretation</strong><br>
+        0 → every top slot is irrelevant &nbsp;|&nbsp; 1 → relevant chunks dominate and rank first.<br>
+        The position weighting means a relevant chunk at rank 1 counts more than the same chunk at rank 5.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: How RAGAS measures Recall ===================== -->
+  <section>
+    <p class="kicker">LLMContextRecall</p>
+    <h2>How RAGAS computes context recall</h2>
+    <pre><code class="python">from ragas.metrics import LLMContextRecall
+
+# RAGAS decomposes the reference answer into individual statements,
+# then checks each statement: "Is there a retrieved chunk that supports this?"
+# Recall = fraction of reference statements that are covered.
+metric = LLMContextRecall(llm=judge_llm)
+</code></pre>
+    <div class="stack" style="margin-top:12px;">
+      <div class="card violet">
+        <strong>Inputs required</strong>
+        <ul class="tight">
+          <li><code>user_input</code> — the question</li>
+          <li><code>retrieved_contexts</code> — list of chunks the retriever returned</li>
+          <li><code>reference</code> — the gold-standard reference answer (decomposed into statements)</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <strong>Score interpretation</strong><br>
+        0 → no reference statement was supported by retrieved chunks &nbsp;|&nbsp; 1 → every reference statement was found.<br>
+        This grades <em>coverage</em>, not ranking.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Side-by-side summary ===================== -->
+  <section>
+    <p class="kicker">Comparison</p>
+    <h2>Precision vs Recall — side by side</h2>
+    <table class="metric-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>LLMContextPrecisionWithReference</th>
+          <th>LLMContextRecall</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Question it answers</td>
+          <td>"Are retrieved chunks relevant and well-ordered?"</td>
+          <td>"Did we retrieve all the needed information?"</td>
+        </tr>
+        <tr>
+          <td>Compares against</td>
+          <td>Reference answer (for relevance verdict)</td>
+          <td>Reference answer statements (coverage check)</td>
+        </tr>
+        <tr>
+          <td>Sensitive to ranking?</td>
+          <td><strong>Yes</strong> — position-weighted</td>
+          <td>No — only cares about presence, not order</td>
+        </tr>
+        <tr>
+          <td>Hurt by too few chunks?</td>
+          <td>No (fewer is often better)</td>
+          <td><strong>Yes</strong> — missed evidence lowers recall</td>
+        </tr>
+        <tr>
+          <td>Hurt by noisy chunks?</td>
+          <td><strong>Yes</strong> — irrelevant chunks at top = low score</td>
+          <td>No — extra noise is ignored</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== SLIDE: Setup ===================== -->
+  <section>
+    <p class="kicker">Step 0 · Setup</p>
+    <h2>Environment setup: shared .env + RAGAS stub</h2>
+    <pre><code class="python">import os
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())          # resolves to tutorials/.env
+HAVE_KEYS = bool(os.environ.get("OLLAMA_API_KEY"))
+
+# RAGAS 0.4.3 import stub — must come BEFORE importing ragas
+import sys, types
+_vx = types.ModuleType("langchain_community.chat_models.vertexai")
+class ChatVertexAI: pass
+_vx.ChatVertexAI = ChatVertexAI
+sys.modules["langchain_community.chat_models.vertexai"] = _vx
+
+import nest_asyncio; nest_asyncio.apply()   # RAGAS uses asyncio; notebooks already run a loop
+</code></pre>
+    <div class="caution" style="margin-top:10px;">
+      <span class="label">⚠ COST NOTE</span> Every <code>evaluate()</code> call sends each (question × chunk) pair to the judge LLM. With 8 golden questions and k=10 chunks each, that is ~80 LLM calls per metric. <b>Keep k small during development.</b>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: RAGAS models ===================== -->
+  <section>
+    <p class="kicker">Step 1 · RAGAS models</p>
+    <h2>Wiring the judge LLM + embeddings</h2>
+    <pre><code class="python">import litellm
+from ragas.llms import llm_factory
+from ragas.embeddings.base import embedding_factory
+
+JUDGE_MODEL     = "ollama_chat/gemma4:31b-cloud"
+EMBEDDING_MODEL = "ollama/qwen3-embedding:0.6b"
+
+judge_llm       = llm_factory(JUDGE_MODEL, provider="litellm",
+                               client=litellm.completion, temperature=0.0)
+ragas_embeddings= embedding_factory("litellm", model=EMBEDDING_MODEL,
+                                     api_base=os.environ["OLLAMA_API_BASE"])
+</code></pre>
+    <div class="card" style="margin-top:10px;">
+      <strong>Why a separate judge model?</strong><br>
+      The generator writes answers; the judge grades them. Using the same model for both creates a conflict of interest — it tends to rate its own outputs highly. <code>gemma4:31b-cloud</code> is a deliberate different model at temperature 0.
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Build dataset ===================== -->
+  <section>
+    <p class="kicker">Step 2 · Dataset</p>
+    <h2>Building the EvaluationDataset from the golden set</h2>
+    <pre><code class="python">import json
+from ragas.dataset_schema import SingleTurnSample, EvaluationDataset
+
+golden = json.load(open("golden_questions.json"))
+
+samples = [
+    SingleTurnSample(
+        user_input=g["question"],
+        retrieved_contexts=rag_result["retrieved_contexts"],
+        response=rag_result["response"],
+        reference=g["reference"],
+    )
+    for g in golden
+    for rag_result in [rag_answer(g["question"])]
+]
+
+eval_dataset = EvaluationDataset(samples=samples)
+print(f"Dataset: {len(samples)} samples")
+</code></pre>
+    <p class="small">Each <code>SingleTurnSample</code> bundles everything the metrics need: the question, what the retriever fetched, the generated answer, and the reference answer to grade against.</p>
+  </section>
+
+  <!-- ===================== SLIDE: evaluate() ===================== -->
+  <section>
+    <p class="kicker">Step 3 · Evaluate</p>
+    <h2>Running evaluate() over the full dataset</h2>
+    <pre><code class="python">from ragas import evaluate
+from ragas.metrics import LLMContextPrecisionWithReference, LLMContextRecall
+
+retriever_metrics = [
+    LLMContextPrecisionWithReference(),
+    LLMContextRecall(),
+]
+
+results = evaluate(
+    dataset=eval_dataset,
+    metrics=retriever_metrics,
+    llm=judge_llm,
+    embeddings=ragas_embeddings,
+)
+
+df = results.to_pandas()
+print(df[["user_input", "context_precision", "context_recall"]])
+</code></pre>
+    <div class="card green" style="margin-top:10px;">
+      <strong>Illustrative output</strong> (live values depend on your run):<br>
+      <code>context_precision ≈ 0.78 &nbsp;|&nbsp; context_recall ≈ 0.71</code>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: single_turn_ascore ===================== -->
+  <section>
+    <p class="kicker">Step 4 · Single-sample debug</p>
+    <h2>Debugging one sample with single_turn_ascore()</h2>
+    <pre><code class="python">import asyncio
+
+# Pick a sample that scored low on recall and inspect it
+sample = samples[6]   # the multi-hop silver question
+
+precision_score = asyncio.run(
+    LLMContextPrecisionWithReference(llm=judge_llm).single_turn_ascore(sample)
+)
+recall_score = asyncio.run(
+    LLMContextRecall(llm=judge_llm).single_turn_ascore(sample)
+)
+
+print(f"Question: {sample.user_input}")
+print(f"Precision: {precision_score:.3f}   Recall: {recall_score:.3f}")
+print(f"Retrieved {len(sample.retrieved_contexts)} chunks")
+</code></pre>
+    <div class="card amber" style="margin-top:10px;">
+      <strong>Why this matters:</strong> aggregate scores hide per-question variation. Multi-hop questions often show lower recall because a single retrieval pass may miss a second required chunk.
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Cautions ===================== -->
+  <section>
+    <p class="kicker">Watch out</p>
+    <h2>Three things that make these numbers lie</h2>
+    <div class="stack">
+      <div class="caution">
+        <span class="label">⚠ High precision + low recall is easy to miss</span><br>
+        Every chunk you returned was relevant, but you missed half of what you needed. This <em>looks</em> like success on a precision dashboard but the answer is still incomplete.
+      </div>
+      <div class="caution">
+        <span class="label">⚠ Recall grades your test set, not just your retriever</span><br>
+        Recall is measured against the <code>reference</code> you wrote. If your reference is vague or incomplete, recall will look worse than the retriever really is. The metric is only as good as the golden set.
+      </div>
+      <div class="caution">
+        <span class="label">⚠ LLM-judge variance</span><br>
+        RAGAS uses an LLM to decide relevance. Re-running the same dataset can produce slightly different scores. <b>Report means over multiple runs</b> when you need precise comparisons; don't read too much into a 0.02 difference.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <section>
+    <p class="kicker">Summary</p>
+    <h2>What you built in Module 07</h2>
+    <div class="agenda">
+      <div class="track">
+        <span class="tnum">1</span>
+        <h3>Two complementary metrics</h3>
+        <ul>
+          <li><strong>Precision</strong>: relevant chunks ranked high</li>
+          <li><strong>Recall</strong>: all needed evidence retrieved</li>
+          <li>They trade off — you need both</li>
+        </ul>
+      </div>
+      <div class="track violet">
+        <span class="tnum">2</span>
+        <h3>Live evaluation code</h3>
+        <ul>
+          <li>RAGAS judge + embeddings wired via LiteLLM</li>
+          <li><code>evaluate()</code> over 8 golden questions</li>
+          <li><code>single_turn_ascore()</code> for sample-level debug</li>
+        </ul>
+      </div>
+      <div class="track green">
+        <span class="tnum">3</span>
+        <h3>Honest limitations</h3>
+        <ul>
+          <li>Precision hides recall gaps</li>
+          <li>Recall grades the golden set too</li>
+          <li>LLM-judge variance — report means</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:14px;" class="small">
+      Run the notebook: <strong>07_retriever_metrics.ipynb</strong> &nbsp;·&nbsp;
+      Next: <strong>Module 08 — More Retriever Metrics</strong> (ContextEntityRecall + NoiseSensitivity)
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

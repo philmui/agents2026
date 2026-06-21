@@ -1,0 +1,28 @@
+[project]
+name = "asdrp-tutorial-module-07"
+version = "0.1.0"
+description = "ASDRP Agentic RAG Evaluation track — Module 07: Retriever Metrics."
+requires-python = ">=3.13"
+dependencies = [
+    # Cloud Ollama / LiteLLM (generator + judge + embeddings)
+    "langchain-ollama>=1.1.0",
+    "litellm>=1.89.2",
+    # Vector store + corpus loading
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.18.0",
+    # RAGAS evaluation framework
+    "ragas>=0.4.3",
+    # Async support — RAGAS uses asyncio; notebooks already run an event loop
+    "nest-asyncio>=1.6.0",
+    # Utilities
+    "pandas>=3.0.3",
+    "python-dotenv>=1.2.2",
+    # Jupyter tooling so `uv run jupyter lab` works out of the box
+    "jupyterlab",
+    "ipykernel",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the pinned set above.
+# No [build-system] table: this is a tutorial project, not a package to publish.
+[tool.uv]
+package = false

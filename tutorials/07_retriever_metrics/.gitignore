@@ -1,0 +1,16 @@
+# Generated notebook (rebuild with python3 _build_notebook.py)
+*.ipynb
+
+# Python artefacts
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+
+# Virtual environment created by uv
+.venv/
+
+# OS artefacts
+.DS_Store
+Thumbs.db

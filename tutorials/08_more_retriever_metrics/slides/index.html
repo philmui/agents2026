@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>More Retriever Metrics — Tutorial Slides</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<style>
+  /* ---- Design tokens: match the repo's SVG palette ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings        */
+    --body:     #334155;   /* slate-700  body text       */
+    --muted:    #64748b;   /* slate-500  captions         */
+    --blue:     #2563eb;   /* primary accent (retrieval)  */
+    --violet:   #7c3aed;   /* secondary accent (generate) */
+    --blue-bg:  #eff6ff;   /* light blue surface          */
+    --violet-bg:#f5f3ff;   /* light violet surface        */
+    --line:     #e2e8f0;   /* hairlines                   */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--blue); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--violet); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--blue); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--blue); margin: 0 0 0.3em;
+  }
+  .kicker.gen { color: var(--violet); }
+
+  /* the one equation, hero */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--blue-bg), var(--violet-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.blue   { color: var(--blue); }
+  .equation b.violet { color: var(--violet); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--violet); background: var(--violet-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--blue-bg); color: var(--blue); }
+  .pill.gen { background: var(--violet-bg); color: var(--violet); }
+  .pill.grn { background: #ecfdf5; color: var(--green); }
+  .pill.amb { background: #fffbeb; color: var(--amber); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--blue); border-radius:12px; padding: 14px 18px; }
+  .card.violet { border-left-color: var(--violet); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+  .card.red    { border-left-color: var(--red); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--blue); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* comparison / metric tables */
+  .metric-table { width:100%; border-collapse: collapse; font-size: 0.7em; }
+  .metric-table th, .metric-table td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+  .metric-table th { background: var(--blue-bg); color: var(--ink); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--blue); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--blue); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--blue); border-radius: 2px; }
+
+  /* Contents / agenda slide */
+  .agenda { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 8px; }
+  .agenda .track {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    border-top: 4px solid var(--blue); padding: 18px 20px;
+  }
+  .agenda .track.violet { border-top-color: var(--violet); }
+  .agenda .track.green  { border-top-color: var(--green); }
+  .agenda .track .tnum {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.9em; height: 1.9em; border-radius: 12px; font-size: 0.72em;
+    background: var(--blue-bg); color: var(--blue); font-weight: 800; margin-bottom: 8px;
+  }
+  .agenda .track.violet .tnum { background: var(--violet-bg); color: var(--violet); }
+  .agenda .track.green  .tnum { background: #ecfdf5; color: var(--green); }
+  .agenda .track h3 { color: var(--ink); font-size: 0.98em; margin: 0 0 .5em; }
+  .agenda .track ul { margin: 0; padding-left: 1.05em; }
+  .agenda .track li { font-size: 0.74em; color: var(--body); line-height: 1.4; margin: .28em 0; }
+  .agenda .track li::marker { color: var(--blue); }
+  .agenda .track.violet li::marker { color: var(--violet); }
+  .agenda .track.green  li::marker { color: var(--green); }
+
+  /* mini inline-svg flow nodes reuse the SVG look */
+  .flow text { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer"><b>mui-group@asdrp</b> &copy;</div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">ASDRP · Agentic RAG Track · Module 08</p>
+    <h1>More Retriever&nbsp;Metrics</h1>
+    <p class="lead" style="margin-top:-.2em;">Score whether retrieved passages capture key named entities — and whether irrelevant passages mislead the generator.</p>
+    <div class="equation" style="margin-top:.5em;">
+      <b class="blue">ContextEntityRecall</b> + <b class="violet">NoiseSensitivity</b> = deeper retriever diagnosis
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">ragas</span>
+      <span class="pill idx">OLLAMA_API_KEY</span>
+      <span class="pill gen">retriever metrics</span>
+      <span class="pill amb">inverted scale ⚠</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group @ ASDRP</b></span><span>· Advanced Student Directed Research Program</span></div>
+  </section>
+
+  <!-- ===================== CONTENTS ===================== -->
+  <section>
+    <p class="kicker">What we'll cover</p>
+    <h2>Contents</h2>
+    <div class="agenda">
+      <div class="track">
+        <span class="tnum">1</span>
+        <h3>Context Entity Recall</h3>
+        <ul>
+          <li>What named entities are</li>
+          <li>How the LLM judge extracts them</li>
+          <li>The recall formula</li>
+          <li>Run <code>ContextEntityRecall</code></li>
+        </ul>
+      </div>
+      <div class="track violet">
+        <span class="tnum">2</span>
+        <h3>Noise Sensitivity</h3>
+        <ul>
+          <li>The inverted-scale trap ⚠</li>
+          <li>How irrelevant passages mislead</li>
+          <li>Run <code>NoiseSensitivity</code></li>
+          <li>Single-sample debug pattern</li>
+        </ul>
+      </div>
+      <div class="track green">
+        <span class="tnum">3</span>
+        <h3>Evaluate &amp; Interpret</h3>
+        <ul>
+          <li>Full <code>evaluate()</code> run</li>
+          <li>Reading the results table</li>
+          <li>Connecting to Module 07</li>
+          <li>What to fix when scores are bad</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Context Entity Recall diagram ===================== -->
+  <section>
+    <p class="kicker">Track 1 · Context Entity Recall</p>
+    <h2>Did the retriever catch the key named entities?</h2>
+    <div class="cols w-svg">
+      <div>
+        <p>Precision/Recall (Module 07) score <em>whole passages</em>. Entity Recall zooms in: does the retrieved context contain the <strong>specific named things</strong> the reference answer mentions?</p>
+        <ul class="tight" style="margin-top:.6em;">
+          <li>LLM judge extracts named entities from the <strong>reference answer</strong></li>
+          <li>Checks how many appear in the <strong>retrieved context</strong></li>
+          <li>For metals: gold, silver, troy ounce, LBMA, contango, PGM…</li>
+        </ul>
+        <div class="equation" style="font-size:0.9em; margin-top:.7em;">
+          EntityRecall = <b class="blue">|entities in context|</b> / <b class="violet">|entities in reference|</b>
+        </div>
+      </div>
+      <div class="svg-wrap center">
+        <img src="assets/05_context_entities_recall.svg" alt="Context Entity Recall diagram">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Entity Recall code ===================== -->
+  <section>
+    <p class="kicker">Track 1 · Context Entity Recall</p>
+    <h2>Running <code>ContextEntityRecall</code></h2>
+    <pre><code class="python">from ragas.metrics import ContextEntityRecall
+from ragas import evaluate
+
+# metrics list contains ONLY the two new metrics for this module
+metrics = [ContextEntityRecall()]
+
+results = evaluate(
+    dataset=eval_dataset,   # EvaluationDataset with 8 golden samples
+    metrics=metrics,
+    llm=judge_llm,          # LLM judge extracts entities from reference
+    embeddings=ragas_embeddings,
+)
+print(results.to_pandas()[["user_input", "context_entity_recall"]])</code></pre>
+    <div class="card green" style="margin-top:.7em;">
+      <strong>Single-sample debug</strong> — run one sample asynchronously to inspect exactly which entities were found:
+      <pre style="margin-top:.4em;"><code class="python">import asyncio
+score = asyncio.run(
+    ContextEntityRecall(llm=judge_llm).single_turn_ascore(samples[3])
+)
+print(f"Entity recall for Q4: {score:.3f}")</code></pre>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Noise Sensitivity diagram ===================== -->
+  <section>
+    <p class="kicker">Track 2 · Noise Sensitivity</p>
+    <h2>How often does irrelevant context mislead the generator?</h2>
+    <div class="cols w-svg">
+      <div>
+        <p>Even a precise retriever can return a few <strong>irrelevant passages</strong>. NoiseSensitivity measures how often the generator makes <em>incorrect claims that trace back to those noisy passages</em>.</p>
+        <div class="caution" style="margin-top:.6em;">
+          <span class="label">⚠ CAUTION — Inverted Scale</span><br>
+          <b>Lower NoiseSensitivity is better.</b> A score of 0 means the generator was never misled. A score of 1 means every incorrect claim came from noisy context. <b>Do NOT celebrate a high score here.</b>
+        </div>
+      </div>
+      <div class="svg-wrap center">
+        <img src="assets/06_noise_sensitivity.svg" alt="Noise Sensitivity diagram">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Noise Sensitivity deep dive ===================== -->
+  <section>
+    <p class="kicker">Track 2 · Noise Sensitivity</p>
+    <h2>What the metric actually measures</h2>
+    <div class="stack">
+      <div class="card amber">
+        <strong>Step 1 — identify incorrect statements</strong><br>
+        The judge compares the generated answer to the reference and finds any claims that are wrong or unsupported.
+      </div>
+      <div class="card amber">
+        <strong>Step 2 — trace each error to the context</strong><br>
+        For each incorrect claim, the judge checks: did this error come from an irrelevant (noisy) retrieved passage?
+      </div>
+      <div class="card amber">
+        <strong>Step 3 — score</strong><br>
+        <code>NoiseSensitivity = errors_from_noise / total_statements_in_answer</code><br>
+        A retriever that returns only tight, relevant passages should keep this near 0.
+      </div>
+    </div>
+    <div class="caution" style="margin-top:.7em; font-size:0.72em;">
+      <b>Practical implication:</b> if NoiseSensitivity is high, reduce <code>k</code> (fewer retrieved chunks) or add reranking (Module 10) to filter noise before the generator sees it.
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Noise Sensitivity code ===================== -->
+  <section>
+    <p class="kicker">Track 2 · Noise Sensitivity</p>
+    <h2>Running <code>NoiseSensitivity</code></h2>
+    <pre><code class="python">from ragas.metrics import NoiseSensitivity
+
+# NoiseSensitivity: LOWER is better — it measures how often the
+# generator is misled by irrelevant retrieved passages.
+metrics = [NoiseSensitivity()]
+
+results = evaluate(
+    dataset=eval_dataset,
+    metrics=metrics,
+    llm=judge_llm,
+    embeddings=ragas_embeddings,
+)
+df = results.to_pandas()
+print(df[["user_input", "noise_sensitivity_relevant"]])
+
+# ⚠ A score of 0.18 is GOOD. A score of 0.80 is BAD.</code></pre>
+    <div class="caution" style="margin-top:.5em;">
+      <span class="label">⚠ REMINDER</span> — The column is named <code>noise_sensitivity_relevant</code>. When you sort the table, <strong>sort ascending</strong> to put the best-performing questions at the top.
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Combined evaluate() ===================== -->
+  <section>
+    <p class="kicker">Track 3 · Evaluate &amp; Interpret</p>
+    <h2>Running both metrics together</h2>
+    <pre><code class="python">from ragas.metrics import ContextEntityRecall, NoiseSensitivity
+from ragas import evaluate
+
+metrics = [
+    ContextEntityRecall(),
+    NoiseSensitivity(),      # LOWER is better
+]
+
+results = evaluate(
+    dataset=eval_dataset,
+    metrics=metrics,
+    llm=judge_llm,
+    embeddings=ragas_embeddings,
+)
+df = results.to_pandas()
+print(df[["user_input",
+          "context_entity_recall",
+          "noise_sensitivity_relevant"]])</code></pre>
+  </section>
+
+  <!-- ===================== SLIDE: Reading the results table ===================== -->
+  <section>
+    <p class="kicker">Track 3 · Evaluate &amp; Interpret</p>
+    <h2>How to read the results — the direction matters</h2>
+    <table class="metric-table" style="margin-top:.4em;">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Good score</th>
+          <th>Scale direction</th>
+          <th>What to fix when bad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>context_entity_recall</code></td>
+          <td>High (→ 1.0)</td>
+          <td>↑ Higher is better</td>
+          <td>Retriever missing entity-rich chunks; try larger <code>k</code> or better chunking</td>
+        </tr>
+        <tr>
+          <td><code>noise_sensitivity_relevant</code></td>
+          <td><strong>Low (→ 0)</strong></td>
+          <td><strong>↓ Lower is better ⚠</strong></td>
+          <td>Retriever returning noisy passages; reduce <code>k</code> or add reranking (Module 10)</td>
+        </tr>
+        <tr>
+          <td><code>context_precision</code> (M07)</td>
+          <td>High (→ 1.0)</td>
+          <td>↑ Higher is better</td>
+          <td>Too many irrelevant chunks returned</td>
+        </tr>
+        <tr>
+          <td><code>context_recall</code> (M07)</td>
+          <td>High (→ 1.0)</td>
+          <td>↑ Higher is better</td>
+          <td>Key information missing from retrieval</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="caution" style="margin-top:.6em; font-size:0.72em;">
+      <b>NoiseSensitivity is the one metric in this track where DOWN is the direction you want.</b> Keep a sticky note next to your dashboard until it's muscle memory.
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE: Connecting to Module 07 ===================== -->
+  <section>
+    <p class="kicker">Track 3 · Evaluate &amp; Interpret</p>
+    <h2>How these metrics complement Module 07</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">
+          <strong>Module 07 — Precision &amp; Recall</strong><br>
+          <span style="font-size:0.82em;">Did the retriever return the right passages? Were any key passages missed? Operates at the <em>passage</em> level.</span>
+        </div>
+        <div class="card violet">
+          <strong>Module 08 — Entity Recall &amp; Noise</strong><br>
+          <span style="font-size:0.82em;">Did those passages contain the <em>specific named entities</em> the answer needs? Did irrelevant passages slip through and mislead the generator?</span>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.88em;">Together, all four metrics give a <strong>complete retriever health check</strong>:</p>
+        <ul class="tight" style="font-size:0.82em; margin-top:.5em;">
+          <li>Precision → are returned chunks relevant?</li>
+          <li>Recall → are needed chunks present?</li>
+          <li>Entity Recall → are the right <em>facts</em> present?</li>
+          <li>Noise Sensitivity → is the generator being misled?</li>
+        </ul>
+        <div class="card green" style="margin-top:.8em; font-size:0.82em;">
+          <strong>Next step:</strong> Module 09 adds <em>generator</em> metrics — Faithfulness, ResponseRelevancy, FactualCorrectness — to complete the evaluation picture.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <section>
+    <p class="kicker">Wrap-up</p>
+    <h2>Summary</h2>
+    <div class="agenda">
+      <div class="track">
+        <span class="tnum">1</span>
+        <h3>Context Entity Recall</h3>
+        <ul>
+          <li>Measures named-entity coverage in retrieved context</li>
+          <li>LLM judge extracts entities from the reference answer</li>
+          <li>Higher → better entity coverage</li>
+          <li>Catches retrieval gaps invisible to passage-level metrics</li>
+        </ul>
+      </div>
+      <div class="track violet">
+        <span class="tnum">2</span>
+        <h3>Noise Sensitivity ⚠</h3>
+        <ul>
+          <li><strong>LOWER is better</strong> — measures how often noise misleads the generator</li>
+          <li>High score = retriever returning too much irrelevant context</li>
+          <li>Fix: reduce <code>k</code> or add reranking (Module 10)</li>
+          <li>The one inverted-scale metric in the retriever suite</li>
+        </ul>
+      </div>
+      <div class="track green">
+        <span class="tnum">3</span>
+        <h3>What's next</h3>
+        <ul>
+          <li>Module 09 adds generator metrics: Faithfulness, ResponseRelevancy, FactualCorrectness</li>
+          <li>Module 10 adds Cohere reranking to cut noise</li>
+          <li>Module 12 assembles all metrics into the full MDD loop</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:1em; font-size:0.8em; color:var(--muted);">
+      Run the notebook: <strong>08_more_retriever_metrics.ipynb</strong>
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

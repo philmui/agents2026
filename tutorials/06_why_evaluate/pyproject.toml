@@ -1,0 +1,32 @@
+[project]
+name = "asdrp-tutorial-module-06"
+version = "0.1.0"
+description = "ASDRP Agentic RAG Evaluation track — Module 06: Why Evaluate? + RAGAS Setup."
+requires-python = ">=3.13"
+dependencies = [
+    # Cloud Ollama integration (chat + embeddings)
+    "langchain-ollama>=1.1.0",
+    # LiteLLM — unified LLM gateway used by RAGAS
+    "litellm>=1.89.2",
+    # Vector store
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.18.0",
+    # Text splitting
+    "langchain-text-splitters>=1.1.2",
+    # RAGAS evaluation framework
+    "ragas>=0.4.3",
+    # Needed to run RAGAS asyncio inside a running notebook event loop
+    "nest-asyncio>=1.6.0",
+    # Data wrangling
+    "pandas>=3.0.3",
+    # Shared .env key loading
+    "python-dotenv>=1.2.2",
+    # Jupyter tooling so `uv run jupyter lab` works out of the box.
+    "jupyterlab",
+    "ipykernel",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the pinned set above.
+# No [build-system] table: this is a tutorial project, not a package to publish.
+[tool.uv]
+package = false

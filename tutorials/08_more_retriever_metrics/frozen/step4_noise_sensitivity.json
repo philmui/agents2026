@@ -1,0 +1,14 @@
+{
+  "_note": "Illustrative output — set OLLAMA_API_KEY in tutorials/.env to run live. NoiseSensitivity: LOWER is better (it measures how often the generator is misled by irrelevant passages).",
+  "noise_sensitivity_relevant": 0.18,
+  "per_question": [
+    {"question": "What is a troy ounce and how does it compare to a regular ounce?", "noise_sensitivity_relevant": 0.10},
+    {"question": "What is the gold-silver ratio and what does a high ratio suggest?", "noise_sensitivity_relevant": 0.15},
+    {"question": "Why does gold tend to do well when real interest rates are low?", "noise_sensitivity_relevant": 0.20},
+    {"question": "Why is platinum and palladium supply considered risky?", "noise_sensitivity_relevant": 0.12},
+    {"question": "How do allocated and unallocated metal holdings differ in terms of risk?", "noise_sensitivity_relevant": 0.22},
+    {"question": "What is the difference between contango and backwardation in metal futures?", "noise_sensitivity_relevant": 0.17},
+    {"question": "Why might silver outperform gold in a strong economy but fall faster in a downturn?", "noise_sensitivity_relevant": 0.25},
+    {"question": "For diversification with low counterparty risk, what are the trade-offs of physical bullion versus ETFs?", "noise_sensitivity_relevant": 0.21}
+  ]
+}

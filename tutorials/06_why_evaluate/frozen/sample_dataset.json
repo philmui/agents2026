@@ -1,0 +1,26 @@
+{
+  "_note": "Illustrative output — hand-authored plausible shape. Set OLLAMA_API_KEY in tutorials/.env to run live.",
+  "samples": [
+    {
+      "user_input": "What is a troy ounce and how does it compare to a regular ounce?",
+      "retrieved_contexts": [
+        "For gold, silver, platinum, and palladium the standard unit is the troy ounce, about 31.1035 grams, slightly heavier than the ordinary ounce of 28.35 grams.",
+        "Precious metals prices are almost always quoted per troy ounce in the major markets.",
+        "The London Bullion Market Association (LBMA) publishes benchmark prices in USD per troy ounce twice daily."
+      ],
+      "response": "A troy ounce is the standard unit for precious metals, weighing about 31.10 grams, which is slightly heavier than the everyday avoirdupois ounce of 28.35 grams.",
+      "reference": "A troy ounce is the standard unit for precious metals, about 31.1 grams, which is slightly heavier than a regular (avoirdupois) ounce of about 28.35 grams."
+    },
+    {
+      "user_input": "Why does gold tend to do well when real interest rates are low?",
+      "retrieved_contexts": [
+        "Gold pays no interest or dividend, so when real rates are high, holding gold has a high opportunity cost and its price tends to face pressure. When real rates are low or negative, that cost shrinks and gold often does well.",
+        "Central bank policy and inflation expectations are key macro drivers of gold prices.",
+        "The US dollar index tends to move inversely with gold; a weaker dollar often coincides with higher gold prices."
+      ],
+      "response": "Gold pays no interest, so when real rates are low the opportunity cost of holding it instead of interest-bearing assets is small, supporting the gold price.",
+      "reference": "Gold pays no interest, so when real rates are low or negative the opportunity cost of holding it is small, and its price tends to be supported. When real rates are high, that cost rises and gold faces pressure."
+    }
+  ],
+  "n_samples": 2
+}

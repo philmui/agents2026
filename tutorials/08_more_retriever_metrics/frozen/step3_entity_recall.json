@@ -1,0 +1,14 @@
+{
+  "_note": "Illustrative output — set OLLAMA_API_KEY in tutorials/.env to run live.",
+  "context_entity_recall": 0.64,
+  "per_question": [
+    {"question": "What is a troy ounce and how does it compare to a regular ounce?", "context_entity_recall": 0.83},
+    {"question": "What is the gold-silver ratio and what does a high ratio suggest?", "context_entity_recall": 0.75},
+    {"question": "Why does gold tend to do well when real interest rates are low?", "context_entity_recall": 0.67},
+    {"question": "Why is platinum and palladium supply considered risky?", "context_entity_recall": 0.71},
+    {"question": "How do allocated and unallocated metal holdings differ in terms of risk?", "context_entity_recall": 0.58},
+    {"question": "What is the difference between contango and backwardation in metal futures?", "context_entity_recall": 0.62},
+    {"question": "Why might silver outperform gold in a strong economy but fall faster in a downturn?", "context_entity_recall": 0.55},
+    {"question": "For diversification with low counterparty risk, what are the trade-offs of physical bullion versus ETFs?", "context_entity_recall": 0.44}
+  ]
+}

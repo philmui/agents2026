@@ -1,0 +1,9 @@
+# Precious Metals in a Portfolio: Risk and Diversification
+
+Investors hold precious metals mainly for **diversification**. The argument is that gold in particular has a low or sometimes negative **correlation** with stocks and bonds, so adding a modest allocation can reduce the overall ups and downs of a portfolio without necessarily reducing its long-run return very much.
+
+The diversification benefit is strongest precisely when it is most useful: during severe equity sell-offs and crises, gold has often risen or held steady while stocks fell. This is the **crisis hedge** property. It is not guaranteed, however. There are episodes, such as the most violent phase of some market crashes, when investors sell everything they can, including gold, to raise cash, so gold can drop alongside stocks for a short time before resuming its safe-haven role.
+
+A metal allocation carries its own **risks**. Prices are **volatile**, especially for silver and the platinum-group metals. Physical holdings carry **storage and theft** risk and insurance costs. Funds and unallocated accounts carry **counterparty risk**. Mining shares carry company and country risk. And metals pay **no income**: no dividend, no coupon, no rent, so during long calm bull markets in stocks, metals can lag badly and test an investor's patience.
+
+Position sizing is therefore key. Many advisors suggest a **small allocation**, often in the single-digit to low-double-digit percentage range, large enough to matter during a crisis but small enough that years of flat metal prices do not wreck overall returns. Because metals can go through long flat or falling periods, they are usually treated as **insurance and diversification** rather than as a primary growth engine. Rebalancing, meaning trimming after big rises and adding after big falls, helps capture the diversification benefit in practice.
