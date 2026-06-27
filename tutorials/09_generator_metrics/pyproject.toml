@@ -1,0 +1,23 @@
+[project]
+name = "asdrp-tutorial-module-09"
+version = "0.1.0"
+description = "ASDRP Agentic RAG Evaluation track — Module 09: Generator Metrics + LLM-as-Judge."
+requires-python = ">=3.13"
+dependencies = [
+    "langchain-ollama>=1.1.0",
+    "litellm>=1.89.2",
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.18.0",
+    "ragas>=0.4.3",
+    "nest-asyncio>=1.6.0",
+    "pandas>=3.0.3",
+    "python-dotenv>=1.2.2",
+    "jupyterlab",
+    "ipykernel",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the pinned set above.
+# No [build-system] table: this is a tutorial project, not a package to publish,
+# so uv treats it as a non-packaged workspace.
+[tool.uv]
+package = false

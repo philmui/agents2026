@@ -1,0 +1,8 @@
+{
+  "_note": "Illustrative output — set OLLAMA_API_KEY in tutorials/.env to run live.",
+  "faithfulness": 0.88,
+  "answer_relevancy": 0.82,
+  "factual_correctness": 0.69,
+  "factual_correctness_precision": 0.74,
+  "factual_correctness_recall": 0.65
+}
