@@ -1,6 +1,3 @@
-# Generated notebook (rebuild with python3 _build_notebook.py)
-*.ipynb
-
 # Python artefacts
 __pycache__/
 *.py[cod]
