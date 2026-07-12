@@ -1,0 +1,11 @@
+{
+  "_note": "Illustrative agent metric scores — run with real keys to compute live values.",
+  "topic_adherence_precision": 1.0,
+  "topic_adherence_recall": 1.0,
+  "topic_adherence_f1": 1.0,
+  "tool_call_accuracy": 1.0,
+  "tool_call_f1_clean": 1.0,
+  "tool_call_f1_noisy": 0.8,
+  "agent_goal_accuracy_with_reference": 1,
+  "agent_goal_accuracy_without_reference": 1
+}

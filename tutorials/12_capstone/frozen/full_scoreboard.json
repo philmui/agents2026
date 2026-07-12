@@ -1,0 +1,30 @@
+{
+  "_note": "Illustrative full 12-metric scoreboard (all tiers, reranked pipeline) — run with real keys to compute live values.",
+  "retriever_tier": {
+    "llm_context_precision_with_reference": 0.92,
+    "context_recall": 0.84,
+    "context_entity_recall": 0.88,
+    "noise_sensitivity": 0.11,
+    "note_noise_sensitivity": "LOWER IS BETTER for noise_sensitivity — 0.11 means ~11% of claims traceable to noisy context"
+  },
+  "generator_tier": {
+    "faithfulness": 0.89,
+    "response_relevancy": 0.91,
+    "factual_correctness": 0.74
+  },
+  "agent_tier": {
+    "topic_adherence_precision": 1.00,
+    "topic_adherence_recall": 1.00,
+    "topic_adherence_f1": 1.00,
+    "tool_call_accuracy": 1.00,
+    "tool_call_f1": 1.00,
+    "agent_goal_accuracy_with_reference": 1,
+    "agent_goal_accuracy_without_reference": 1
+  },
+  "mdd_comparison": {
+    "metric": ["llm_context_precision_with_reference", "context_recall", "faithfulness", "factual_correctness"],
+    "baseline": [0.74, 0.69, 0.83, 0.62],
+    "improved_rerank": [0.92, 0.84, 0.89, 0.74],
+    "change": [0.18, 0.15, 0.06, 0.12]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "_note": "Illustrative agent trace + agent-metric scores for the capstone — run with real keys to see live values.",
+  "agent_run": {
+    "question": "What is the current price of platinum in USD, and why is its supply risky?",
+    "messages": [
+      {"type": "HumanMessage", "content": "What is the current price of platinum in USD, and why is its supply risky?"},
+      {"type": "AIMessage", "content": "Let me fetch the live price and look up the supply context.",
+        "tool_calls": [
+          {"name": "get_metal_price", "args": {"metal": "platinum", "currency": "USD"}},
+          {"name": "search_metal_knowledge", "args": {"query": "platinum supply risk South Africa"}}
+        ]
+      },
+      {"type": "ToolMessage", "tool_name": "get_metal_price", "content": "The current spot price of platinum is 1012.50 USD per troy ounce."},
+      {"type": "ToolMessage", "tool_name": "search_metal_knowledge", "content": "[Passage 1] Platinum supply is uniquely concentrated in South Africa (~70% of global mine output) and Russia (~12%), making it acutely sensitive to labour unrest, power shortages, and geopolitical shocks."},
+      {"type": "AIMessage", "content": "Platinum is currently trading at $1,012.50 USD per troy ounce. Its supply is considered risky because it is highly concentrated — roughly 70% comes from South Africa and about 12% from Russia. This makes it vulnerable to labour strikes, power shortages, and geopolitical disruptions in those regions."}
+    ]
+  },
+  "agent_metrics": {
+    "topic_adherence_precision": 1.00,
+    "topic_adherence_recall": 1.00,
+    "topic_adherence_f1": 1.00,
+    "tool_call_accuracy": 1.00,
+    "tool_call_f1": 1.00,
+    "agent_goal_accuracy_with_reference": 1,
+    "agent_goal_accuracy_without_reference": 1
+  },
+  "tool_smoke_test": {
+    "get_metal_price_gold": "The current spot price of gold is 2998.41 USD per troy ounce.",
+    "get_metal_price_platinum": "The current spot price of platinum is 1012.50 USD per troy ounce.",
+    "convert_currency_100usd_eur": "100 USD is about 91.23 EUR.",
+    "search_metal_knowledge_snippet": "[Passage 1] Platinum supply is uniquely concentrated in South Africa (~70%) and Russia (~12%), making it acutely sensitive to labour unrest, power shortages, and geopolitical shocks."
+  }
+}

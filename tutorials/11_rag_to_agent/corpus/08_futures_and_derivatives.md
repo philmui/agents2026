@@ -1,0 +1,9 @@
+# Futures, Leverage, and the Shape of the Curve
+
+A **futures contract** is an agreement to buy or sell a set amount of a metal at a fixed price on a future date. Metal futures trade on exchanges such as **COMEX** (part of the CME group) for gold and silver and the **LME** for industrial metals. Futures are central to price discovery and to how producers and large buyers manage risk.
+
+The defining feature of futures is **leverage**. A trader posts only a fraction of the contract's value, called **margin**, perhaps a few percent. This means a small percentage move in the metal produces a large percentage move on the deposited margin, multiplying both gains and losses. If the market moves against a position, the trader receives a **margin call** and must add funds or be closed out. Because losses can exceed the initial deposit, futures are far riskier than owning the metal outright.
+
+Futures for different delivery months form a **curve**. When far-dated contracts cost more than near-dated ones, the market is in **contango**, which is the normal state for gold and reflects storage and financing costs. When near-dated contracts cost more than far-dated ones, the market is in **backwardation**, which can signal tight near-term supply. The shape of the curve affects the return of products that must "roll" from one contract to the next, a cost that can quietly erode returns in some commodity funds.
+
+**Hedging** is the original purpose of these markets. A miner can lock in a selling price for future production, and a manufacturer can lock in a buying cost, removing price uncertainty from their business. **Speculators** take the other side and provide liquidity. For most individual investors, futures are best understood, not necessarily traded: they explain how prices are set and why headline "paper" markets can move faster and larger than the physical metal alone.

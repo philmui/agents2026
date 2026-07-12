@@ -1,0 +1,20 @@
+{
+  "_note": "Illustrative output — set OLLAMA_API_KEY + COHERE_API_KEY in tutorials/.env to run live.",
+  "question": "Why does gold tend to do well when real interest rates are low?",
+  "baseline_top3": [
+    "Gold pays no interest or dividend, so when real rates are high, holding gold has a high opportunity cost and its price tends to face pressure. When real rates are low or negative, that cost shrinks and gold often does well.",
+    "Central bank purchases, inflation expectations, and geopolitical uncertainty also play important roles in gold price formation.",
+    "The US dollar and gold have historically moved in opposite directions; a weaker dollar makes gold cheaper for foreign buyers."
+  ],
+  "reranked_top3": [
+    "Gold pays no interest or dividend, so when real rates are high, holding gold has a high opportunity cost and its price tends to face pressure. When real rates are low or negative, that cost shrinks and gold often does well.",
+    "TIPS yields (Treasury Inflation-Protected Securities) are a common proxy for US real rates and are often cited in gold market commentary.",
+    "Inflation expectations embedded in breakeven rates influence the gold price because gold is widely held as an inflation hedge."
+  ],
+  "baseline_scores": [null, null, null],
+  "reranked_scores": [0.91, 0.76, 0.64],
+  "precision_before": 0.33,
+  "precision_after": 0.67,
+  "recall_before": 0.40,
+  "recall_after": 0.60
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "question": "What is a troy ounce and how does it compare to a regular ounce?",
+    "reference": "A troy ounce is the standard unit for precious metals, about 31.1 grams, which is slightly heavier than a regular (avoirdupois) ounce of about 28.35 grams.",
+    "reference_contexts": [
+      "For gold, silver, platinum, and palladium the standard unit is the troy ounce, about 31.1035 grams, slightly heavier than the ordinary ounce of 28.35 grams."
+    ],
+    "hop": "single"
+  },
+  {
+    "question": "What is the gold-silver ratio and what does a high ratio suggest?",
+    "reference": "The gold-silver ratio is the gold price divided by the silver price, showing how many ounces of silver buy one ounce of gold. A historically high ratio is sometimes read as silver being cheap relative to gold, though it is not a precise timing tool.",
+    "reference_contexts": [
+      "The gold-silver ratio is the gold price divided by the silver price. A historically high ratio is sometimes read as a sign that silver is cheap relative to gold, though the ratio can stay stretched for long periods."
+    ],
+    "hop": "single"
+  },
+  {
+    "question": "Why does gold tend to do well when real interest rates are low?",
+    "reference": "Gold pays no interest, so when real rates are low or negative the opportunity cost of holding it is small, and its price tends to be supported. When real rates are high, that cost rises and gold faces pressure.",
+    "reference_contexts": [
+      "Gold pays no interest or dividend, so when real rates are high, holding gold has a high opportunity cost and its price tends to face pressure. When real rates are low or negative, that cost shrinks and gold often does well."
+    ],
+    "hop": "single"
+  },
+  {
+    "question": "Why is platinum and palladium supply considered risky?",
+    "reference": "Their supply is highly concentrated in a few producers, chiefly South Africa and Russia, so strikes, power shortages, or sanctions can cause sharp supply shocks.",
+    "reference_contexts": [
+      "A very large share of the world's platinum and palladium comes from a small number of producers, chiefly in South Africa and Russia, so mine strikes, power shortages, or sanctions can cause sharp supply shocks."
+    ],
+    "hop": "single"
+  },
+  {
+    "question": "How do allocated and unallocated metal holdings differ in terms of risk?",
+    "reference": "Allocated metal is specific bars set aside in your name, while unallocated metal is a claim on a pool that carries counterparty risk if the institution fails.",
+    "reference_contexts": [
+      "Allocated metal is specific bars set aside in your name, while unallocated metal is a claim on a pool and carries counterparty risk if the institution fails."
+    ],
+    "hop": "single"
+  },
+  {
+    "question": "What is the difference between contango and backwardation in metal futures?",
+    "reference": "Contango is when far-dated futures cost more than near-dated ones, the normal state for gold reflecting storage and financing costs. Backwardation is when near-dated contracts cost more, which can signal tight near-term supply.",
+    "reference_contexts": [
+      "When far-dated contracts cost more than near-dated ones, the market is in contango, the normal state for gold. When near-dated contracts cost more, the market is in backwardation, which can signal tight near-term supply."
+    ],
+    "hop": "single"
+  },
+  {
+    "question": "Why might silver outperform gold in a strong economy but fall faster in a downturn?",
+    "reference": "Because silver has heavy industrial demand on top of its investment demand, a strong economy lifts industrial use and can make it outperform gold, while a downturn cuts industrial demand and can make it fall faster. Its smaller market also amplifies swings.",
+    "reference_contexts": [
+      "A large share of silver demand is industrial, so silver is partly a bet on the manufacturing economy.",
+      "Because silver is both an investment metal and an industrial input, its price is more volatile than gold's; in a strong economy it can outperform gold, in a downturn it can fall faster."
+    ],
+    "hop": "multi"
+  },
+  {
+    "question": "For diversification with low counterparty risk, what are the trade-offs of physical bullion versus ETFs?",
+    "reference": "Physical bullion has no issuer counterparty risk but costs more to buy (a premium over spot) and must be stored and insured. ETFs are convenient and liquid but can carry counterparty risk, especially unallocated products. Both add diversification because metals have low correlation with stocks.",
+    "reference_contexts": [
+      "Owning physical metal means you face no issuer credit risk, only the risk of theft or loss, but coins carry a premium over spot and you must consider storage and insurance.",
+      "Gold has a low or sometimes negative correlation with stocks and bonds, so a modest allocation can reduce a portfolio's ups and downs."
+    ],
+    "hop": "multi"
+  }
+]
