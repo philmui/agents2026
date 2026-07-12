@@ -1,0 +1,30 @@
+[project]
+name = "asdrp-tutorial-module-12"
+version = "0.1.0"
+description = "ASDRP Agentic RAG Evaluation track — Module 12 Capstone."
+requires-python = ">=3.13"
+dependencies = [
+    # Full capstone stack — all deps the pipeline and evaluation need.
+    "langchain-ollama>=1.1.0",
+    "litellm>=1.89.2",
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.18.0",
+    "langchain-text-splitters>=1.1.2",
+    "cohere>=7.0.4",
+    "langgraph>=1.2.5",
+    "requests>=2.34.2",
+    "rapidfuzz>=3.14.5",
+    "ragas>=0.4.3",
+    "nest-asyncio>=1.6.0",
+    "pandas>=3.0.3",
+    "python-dotenv>=1.2.2",
+    # Jupyter tooling so `uv run jupyter lab` works out of the box.
+    "jupyterlab",
+    "ipykernel>=7.3.0",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the pinned set above.
+# No [build-system] table: this is a tutorial project, not a package to publish,
+# so uv treats it as a non-packaged workspace.
+[tool.uv]
+package = false

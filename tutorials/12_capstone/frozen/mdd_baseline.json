@@ -1,0 +1,17 @@
+{
+  "_note": "Illustrative MDD baseline scores (use_rerank=False, top_n=3) — run with real keys to compute live values.",
+  "llm_context_precision_with_reference": 0.74,
+  "context_recall": 0.69,
+  "faithfulness": 0.83,
+  "factual_correctness": 0.62,
+  "per_question": [
+    {"question": "What is a troy ounce and how does it compare to a regular ounce?", "faithfulness": 0.90, "factual_correctness": 0.80},
+    {"question": "What is the gold-silver ratio and what does a high ratio suggest?", "faithfulness": 0.85, "factual_correctness": 0.72},
+    {"question": "Why does gold tend to do well when real interest rates are low?", "faithfulness": 0.88, "factual_correctness": 0.75},
+    {"question": "Why is platinum and palladium supply considered risky?", "faithfulness": 0.92, "factual_correctness": 0.78},
+    {"question": "How do allocated and unallocated metal holdings differ in terms of risk?", "faithfulness": 0.85, "factual_correctness": 0.65},
+    {"question": "What is the difference between contango and backwardation in metal futures?", "faithfulness": 0.80, "factual_correctness": 0.60},
+    {"question": "Why might silver outperform gold in a strong economy but fall faster in a downturn?", "faithfulness": 0.70, "factual_correctness": 0.45, "hop": "multi", "note": "multi-hop — context scatter hurts retrieval"},
+    {"question": "For diversification with low counterparty risk, what are the trade-offs of physical bullion versus ETFs?", "faithfulness": 0.68, "factual_correctness": 0.40, "hop": "multi", "note": "multi-hop — requires two corpus documents"}
+  ]
+}

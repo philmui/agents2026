@@ -1,0 +1,35 @@
+{
+  "_note": "Illustrative agent message trace — run with real keys to see a live trace.",
+  "messages": [
+    {
+      "type": "HumanMessage",
+      "content": "What are the current prices of gold and silver in US dollars?"
+    },
+    {
+      "type": "AIMessage",
+      "content": "Fetching current spot prices for you.",
+      "tool_calls": [
+        {"name": "get_metal_price", "args": {"metal": "gold", "currency": "USD"}},
+        {"name": "get_metal_price", "args": {"metal": "silver", "currency": "USD"}}
+      ]
+    },
+    {
+      "type": "ToolMessage",
+      "tool_name": "get_metal_price",
+      "content": "The current spot price of gold is 2998.41 USD per troy ounce."
+    },
+    {
+      "type": "ToolMessage",
+      "tool_name": "get_metal_price",
+      "content": "The current spot price of silver is 33.72 USD per troy ounce."
+    },
+    {
+      "type": "AIMessage",
+      "content": "Here are the current precious metal spot prices:\n- **Gold**: $2,998.41 USD per troy ounce\n- **Silver**: $33.72 USD per troy ounce"
+    }
+  ],
+  "ragas_trace_summary": {
+    "message_count": 5,
+    "types_in_order": ["HumanMessage", "AIMessage (2 tool calls)", "ToolMessage", "ToolMessage", "AIMessage"]
+  }
+}
