@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Foundations: What Audio Is and How It Travels</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette on white ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings         */
+    --body:     #334155;   /* slate-700  body text        */
+    --muted:    #64748b;   /* slate-500  captions         */
+    --indigo:   #6366f1;   /* primary accent              */
+    --pink:     #ec4899;   /* secondary accent            */
+    --teal:     #14b8a6;   /* tertiary accent             */
+    --indigo-bg:#eef2ff;   /* light indigo surface        */
+    --pink-bg:  #fdf2f8;   /* light pink surface          */
+    --teal-bg:  #f0fdfa;   /* light teal surface          */
+    --line:     #e2e8f0;   /* hairlines                   */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--indigo); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--pink); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--indigo); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--indigo); margin: 0 0 0.3em;
+  }
+  .kicker.pink { color: var(--pink); }
+  .kicker.teal { color: var(--teal); }
+
+  /* the one idea, hero */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--indigo-bg), var(--pink-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.indigo { color: var(--indigo); }
+  .equation b.pink   { color: var(--pink); }
+  .equation b.teal   { color: var(--teal); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--pink); background: var(--pink-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a wide diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx  { background: var(--indigo-bg); color: var(--indigo); }
+  .pill.pink { background: var(--pink-bg); color: var(--pink); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--indigo); border-radius:12px; padding: 14px 18px; }
+  .card.pink   { border-left-color: var(--pink); }
+  .card.teal   { border-left-color: var(--teal); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--indigo); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--indigo); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--indigo); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--indigo); border-radius: 2px; }
+
+  /* traffic-light status chips */
+  .status {
+    display: inline-block; padding: 4px 10px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 700; letter-spacing: .3px;
+  }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red   { background: #fee2e2; color: var(--red); }
+
+  /* comparison table */
+  table.compare {
+    font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0;
+  }
+  table.compare th {
+    background: var(--indigo-bg); color: var(--indigo); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--indigo);
+  }
+  table.compare td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+
+  /* simple event-exchange "sequence" rendered as two labelled lanes */
+  .seq { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.8em; }
+  .seq .row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+  .seq .lane { font-weight: 700; color: var(--ink); text-align: center; padding: 6px 8px; border-radius: 10px; background: var(--indigo-bg); }
+  .seq .lane.b { background: var(--pink-bg); color: var(--ink); }
+  .seq .msg { text-align: center; color: var(--muted); font-size: 0.82em; }
+  .seq .arrow { font-weight: 700; color: var(--indigo); }
+  .seq .arrow.back { color: var(--pink); }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 01</p>
+    <h1>Voice Foundations</h1>
+    <p class="lead" style="margin-top:-.2em;">What audio really is, and how it travels</p>
+    <div class="equation" style="margin-top:.5em; font-size:0.9em;">
+      Voice = <b class="indigo">24000</b> PCM16 numbers / sec, wrapped in <b class="teal">base64</b>
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">PCM16 · 24 kHz · mono</span>
+      <span class="pill teal">base64</span>
+      <span class="pill pink">WebSocket · WebRTC · PSTN</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE BIG IDEA ===================== -->
+  <section>
+    <p class="kicker">The one idea</p>
+    <h2>Voice is just a long list of numbers</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Sound is an <strong>analog wave</strong> in the air.</div>
+        <div class="card pink">Sampling turns it into <strong>numbers</strong>.</div>
+        <div class="card teal">base64 turns numbers into <strong>text on the wire</strong>.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.82em;">
+          Voice = <b class="indigo">24000</b> ints / sec<br>
+          &rarr; <b class="teal">base64</b> &rarr; over a live socket
+        </div>
+        <p class="small" style="margin-top:12px;">No OpenAI calls this module. We record on your own machine, look at the raw numbers, then learn which connection can carry them <em>both ways, live</em>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The map</p>
+    <h2>Eight ideas, one pipeline</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>Concept</th><th>What it is</th><th>Why it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Analog sound</strong></td><td>Smooth pressure wave in air</td><td>What the mic senses</td></tr>
+        <tr><td><strong>Sampling</strong></td><td>Measure the wave many times/sec</td><td>Wave becomes numbers</td></tr>
+        <tr><td><strong>24 kHz</strong></td><td>24000 measurements / second</td><td>The rate the API expects</td></tr>
+        <tr><td><strong>PCM16</strong></td><td>Each sample a 16-bit integer</td><td>The exact number format</td></tr>
+        <tr><td><strong>mono</strong></td><td>One channel, not stereo</td><td>Half the bytes, what API uses</td></tr>
+        <tr><td><strong>base64</strong></td><td>Bytes rewritten as safe text</td><td>JSON moves text, not binary</td></tr>
+        <tr><td><strong>transport</strong></td><td>HTTP / WebSocket / WebRTC / PSTN</td><td>Can audio flow both ways?</td></tr>
+        <tr><td><strong>latency</strong></td><td>Delay before you hear a reply</td><td>Under ~300 ms feels natural</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== ANALOG SOUND ===================== -->
+  <section>
+    <p class="kicker">Concept 1 · Analog sound</p>
+    <h2>Your voice is a pressure wave</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Vocal cords push air; the push spreads as a <strong>wave</strong>.</div>
+        <div class="card pink">A mic membrane rides that wave and makes a smooth <strong>voltage</strong>.</div>
+        <div class="card">Smooth = <em>analog</em>: a value at every instant, infinitely fine.</div>
+      </div>
+      <div class="caution"><span class="label">THE PROBLEM</span> Computers store <b>lists of numbers</b>, not "infinitely many" values. So step one is turning this smooth wave into a list. That step is <b>sampling</b>.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SAMPLING ===================== -->
+  <section>
+    <p class="kicker">Concept 2-3 · Sampling &amp; the rate</p>
+    <h2>Measure the wave 24000 times a second</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Sample</strong>: one measurement of the wave's height.</div>
+        <div class="card pink"><strong>Sample rate</strong>: samples per second, in hertz.</div>
+        <div class="card teal">This course uses <strong>24000 Hz</strong> (24 kHz).</div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Record at the <b>wrong</b> rate and 24 kHz playback sounds chipmunk-fast or slow-motion. <code>audio_config.py</code> sets <code>SAMPLE_RATE = 24000</code> in <b>one</b> place so it never drifts.</div>
+    </div>
+  </section>
+
+  <!-- ===================== PCM16 + MONO ===================== -->
+  <section>
+    <p class="kicker">Concept 4-5 · PCM16 &amp; mono</p>
+    <h2>Each sample is a 16-bit integer</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <div class="card"><strong>PCM16</strong>: whole number <code>-32768..32767</code>. 0 = silence, big = loud.</div>
+        <div class="card pink">16 bits = <strong>2 bytes</strong> per sample. This one fact drives all the math.</div>
+        <div class="card teal"><strong>mono</strong> = one channel, one list of numbers.</div>
+      </div>
+      <pre><code class="language-text">shape : (72000,)   # 3s x 24000
+dtype : int16      # PCM16
+first 10: [0, 1129, 2244, 3329,
+           4370, 5353, 6265, ...]</code></pre>
+    </div>
+  </section>
+
+  <!-- ===================== BASE64 ===================== -->
+  <section>
+    <p class="kicker">Concept 6 · base64</p>
+    <h2>Rewrite bytes as text for the wire</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Protocols carry <strong>text</strong>, not raw binary.</div>
+        <div class="card teal">base64 uses 64 safe chars: <code>A-Z a-z 0-9 + /</code></div>
+        <pre><code class="language-python">raw = chunk.tobytes()        # 2400 bytes
+b64 = base64.b64encode(raw).decode()
+# -> "AABpBMQIAQ0SEek..."  (later: JSON)</code></pre>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> base64 grows data ~<b>33%</b>. It changes the <em>encoding</em>, not the audio, and it is <b>not compression</b>. Decoding returns the identical bytes.</div>
+    </div>
+  </section>
+
+  <!-- ===================== AUDIO PIPELINE (SVG) ===================== -->
+  <section>
+    <p class="kicker">Concept 7 · The pipeline</p>
+    <h2>Analog sound becomes text on the wire</h2>
+    <div class="svg-wrap"><img src="assets/audio-pipeline.svg" alt="Analog wave sampled, quantized to PCM16, base64 encoded, sent on the wire"></div>
+    <p class="small center" style="margin-top:10px;">Play it back by running every arrow in reverse: base64 &rarr; bytes &rarr; PCM16 &rarr; speaker.</p>
+  </section>
+
+  <!-- ===================== DATA RATE ===================== -->
+  <section>
+    <p class="kicker">Concept 7 · The money math</p>
+    <h2>48 KB per second, in each direction</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="equation" style="font-size:0.8em;">
+          24000 <span class="small">samp/s</span> &times; 2 <span class="small">bytes</span><br>
+          = <b class="indigo">48000 bytes/s</b> (~46.9 KB/s)
+        </div>
+        <div class="card pink">A conversation streams this <strong>both ways at once</strong>.</div>
+      </div>
+      <div class="caution"><span class="label">WHY IT MATTERS</span> One big HTTP request cannot do this: you would finish talking, upload, wait, then hear a reply. Live voice needs a <b>persistent, two-way</b> connection streaming small chunks.</div>
+    </div>
+  </section>
+
+  <!-- ===================== TRANSPORTS (SVG) ===================== -->
+  <section>
+    <p class="kicker">Concept 8 · Transports</p>
+    <h2>Four ways the audio travels</h2>
+    <div class="svg-wrap"><img src="assets/transport-compare.svg" alt="HTTP one-shot, WebSocket server duplex, WebRTC browser real time, PSTN phone network"></div>
+    <p class="small center" style="margin-top:10px;">They differ by <em>duplex</em> (both ways at once?) and by <em>environment</em> (server, browser, phone line).</p>
+  </section>
+
+  <!-- ===================== TRANSPORT TABLE ===================== -->
+  <section>
+    <p class="kicker">Concept 8 · Which and when</p>
+    <h2>HTTP vs WebSocket vs WebRTC vs PSTN</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>Transport</th><th>Shape</th><th>Duplex?</th><th>We use for</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>HTTP</strong></td><td>Ask, one answer, hang up</td><td>No</td><td>Nothing live</td></tr>
+        <tr><td><strong>WebSocket</strong></td><td>One open door, send anytime</td><td>Yes</td><td>Modules 02-05 (Python)</td></tr>
+        <tr><td><strong>WebRTC</strong></td><td>Live media call in browser</td><td>Yes</td><td>Modules 07-08 (web app)</td></tr>
+        <tr><td><strong>PSTN</strong></td><td>A real telephone call</td><td>Yes</td><td>Context (8 kHz mu-law)</td></tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:10px;">"WebRTC for browsers, WebSocket for servers" is OpenAI's own guidance.</p>
+  </section>
+
+  <!-- ===================== WEBSOCKET EXCHANGE (sequence) ===================== -->
+  <section>
+    <p class="kicker">Concept 8 · WebSocket</p>
+    <h2>One door stays open, both sides talk</h2>
+    <div class="seq">
+      <div class="row"><div class="lane">Your program</div><div></div><div class="lane b">OpenAI Realtime</div></div>
+      <div class="row"><div class="msg">open WebSocket</div><div class="arrow">&rarr;</div><div class="msg"></div></div>
+      <div class="row"><div class="msg">audio chunk (base64)</div><div class="arrow">&rarr;</div><div class="msg"></div></div>
+      <div class="row"><div class="msg"></div><div class="arrow back">&larr;</div><div class="msg"><code>response.output_audio.delta</code></div></div>
+      <div class="row"><div class="msg"></div><div class="arrow back">&larr;</div><div class="msg"><code>response.done</code></div></div>
+    </div>
+    <div class="caution" style="margin-top:14px;"><span class="label">CAUTION</span> Assistant audio arrives as <code>response.output_audio.delta</code>, bytes in the <b>delta</b> field. It is <b>not</b> <code>response.audio.delta</code> (the common wrong guess).</div>
+  </section>
+
+  <!-- ===================== WEBRTC HANDSHAKE (sequence) ===================== -->
+  <section>
+    <p class="kicker">Concept 8 · WebRTC</p>
+    <h2>Real time, right inside the browser</h2>
+    <div class="cols narrow-left">
+      <div class="seq">
+        <div class="row"><div class="lane b">Browser</div><div></div><div class="lane">Backend / OpenAI</div></div>
+        <div class="row"><div class="msg">request token</div><div class="arrow">&rarr;</div><div class="msg">backend</div></div>
+        <div class="row"><div class="msg"><code>ek_</code> token</div><div class="arrow back">&larr;</div><div class="msg"></div></div>
+        <div class="row"><div class="msg">SDP offer</div><div class="arrow">&rarr;</div><div class="msg">OpenAI</div></div>
+        <div class="row"><div class="msg">SDP answer + audio</div><div class="arrow back">&larr;</div><div class="msg"></div></div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> The browser <b>never</b> holds your real key. The backend (module 06) mints a short-lived <code>ek_</code> token. WebRTC also does <b>NAT traversal</b>: finding a path through home routers.</div>
+    </div>
+  </section>
+
+  <!-- ===================== PSTN ===================== -->
+  <section>
+    <p class="kicker">Concept 8 · PSTN</p>
+    <h2>The old phone network still matters</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><strong>PSTN</strong> = the century-old telephone network.</div>
+        <div class="card">Phone audio is <strong>G.711 / mu-law</strong> at <strong>8 kHz</strong>, not 24 kHz PCM16.</div>
+        <div class="card pink">In the API that is <code>audio/pcmu</code> (vs <code>audio/pcm</code> for web).</div>
+      </div>
+      <div class="caution"><span class="label">CONTEXT ONLY</span> We do not build a phone bridge here. But "let people <b>call</b> my agent" is a real, separate integration, and this is <b>why</b> the API even offers a non-PCM audio format.</div>
+    </div>
+  </section>
+
+  <!-- ===================== LATENCY BUDGET ===================== -->
+  <section>
+    <p class="kicker">Concept 9 · Real time</p>
+    <h2>"Real time" means a latency budget</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Real time is not <em>zero</em> delay; it is <strong>small enough to feel natural</strong>.</div>
+        <div class="card pink">Humans notice lag past roughly <strong>250-300 ms</strong>.</div>
+      </div>
+      <div class="seq">
+        <div class="row"><div class="lane">you stop</div><div class="arrow">&rarr;</div><div class="msg">net up</div></div>
+        <div class="row"><div class="msg">model thinks</div><div class="arrow">&rarr;</div><div class="msg">net down</div></div>
+        <div class="row"><div class="lane b">you hear reply</div><div></div><div class="msg"></div></div>
+      </div>
+    </div>
+    <p class="small center" style="margin-top:12px;">Every stage adds milliseconds. Streaming, turn detection, and low-latency settings all exist to stay in budget.</p>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section>
+    <p class="kicker">Hands on</p>
+    <h2>Run it and see every number</h2>
+    <div class="cols">
+      <pre><code class="language-bash">uv sync
+uv run python src/main.py
+uv run python src/main.py --seconds 5
+uv run python src/main.py --tone   # no mic</code></pre>
+      <pre><code class="language-text">shape : (72000,)   # int16 PCM16
+bytes : 144,000    # 72000 x 2
+data rate: 48,000 bytes/sec
+one chunk = 50 ms = 2,400 bytes
+base64 length: 3200 chars
+round-trips back to int16? True</code></pre>
+    </div>
+    <p class="small center" style="margin-top:10px;"><code>--tone</code> builds the same PCM16 / 24 kHz / mono shape, so every lesson holds even with no microphone.</p>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: numbers, text, transports, latency</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Audio</strong> = 24000 PCM16 ints/sec, mono.</div>
+        <div class="card teal"><strong>base64</strong> = safe text framing (~33% bigger, loss-free, not compression).</div>
+        <div class="card pink"><strong>Transports</strong>: HTTP, WebSocket, WebRTC, PSTN.</div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> ~48 KB/s <b>each way</b> forces a persistent two-way connection. Assistant audio = <code>response.output_audio.delta</code>. The browser never sees the real key. Nearly every later choice is a <b>latency</b> choice.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA AGAIN ===================== -->
+  <section data-auto-animate>
+    <p class="kicker">The one idea to remember</p>
+    <div class="equation" style="margin-top:.2em; font-size:1.05em;">
+      Voice = <b class="indigo">24000</b> PCM16 numbers / sec &rarr; <b class="teal">base64</b> &rarr; a live socket
+    </div>
+    <div class="cols" style="margin-top:18px;">
+      <div class="card"><span class="num-badge">1</span><strong>Once you can capture audio in the right shape, the API is just "put these bytes on a socket."</strong></div>
+      <div class="card teal"><span class="num-badge" style="background:var(--teal)">2</span><strong>Pick the transport by environment and duplex.</strong> Server &rarr; WebSocket. Browser &rarr; WebRTC.</div>
+    </div>
+    <p class="center" style="margin-top:24px; font-size:.8em; color:var(--muted);">
+      Next: open a real WebSocket. &nbsp;·&nbsp; <code>Module 02 · Realtime Handshake</code>
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

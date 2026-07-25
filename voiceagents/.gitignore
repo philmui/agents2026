@@ -1,0 +1,14 @@
+# Shared secrets: never commit
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+npm-debug.log*

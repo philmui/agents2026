@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Agents · Module 07 &mdash; The Next.js Frontend (WebRTC in the browser)</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- House font: Inter (Google Fonts) with a system-sans fallback. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette (per COURSE_DESIGN) ---- */
+  :root {
+    --ink:       #0f172a;   /* slate-900  headings         */
+    --body:      #334155;   /* slate-700  body text        */
+    --muted:     #64748b;   /* slate-500  captions          */
+    --blue:      #6366f1;   /* indigo pastel, primary       */
+    --violet:    #ec4899;   /* pink pastel, accent          */
+    --teal:      #14b8a6;   /* teal, connected / success    */
+    --blue-bg:   #eef2ff;   /* light indigo surface         */
+    --violet-bg: #fdf2f8;   /* light pink surface           */
+    --teal-bg:   #f0fdfa;   /* light teal surface           */
+    --line:      #e2e8f0;   /* hairlines                    */
+    --green:     #059669;
+    --amber:     #d97706;
+    --red:       #dc2626;
+  }
+
+  .reveal {
+    font-family: Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--blue); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--violet); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--blue); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--blue); margin: 0 0 0.3em;
+  }
+  .kicker.gen { color: var(--violet); }
+
+  /* the one "equation"/hero band */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--blue-bg), var(--violet-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.blue   { color: var(--blue); }
+  .equation b.violet { color: var(--violet); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--violet); background: var(--violet-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--blue-bg); color: var(--blue); }
+  .pill.gen { background: var(--violet-bg); color: var(--violet); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--blue); border-radius:12px; padding: 14px 18px; }
+  .card.violet { border-left-color: var(--violet); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+  .card.teal   { border-left-color: var(--teal); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--blue); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--blue); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--blue); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--blue); border-radius: 2px; }
+
+  /* traffic light status chips */
+  .status {
+    display: inline-block; padding: 4px 10px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 700; letter-spacing: .3px;
+  }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red { background: #fee2e2; color: var(--red); }
+
+  /* comparison table */
+  table.compare {
+    font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0;
+  }
+  table.compare th {
+    background: var(--blue-bg); color: var(--blue); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--blue);
+  }
+  table.compare td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+
+  /* inline SVG diagram styling (handshake sequence) */
+  .diagram text { font-family: Inter, sans-serif; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 07</p>
+    <h1>The Next.js Frontend</h1>
+    <p class="lead" style="margin-top:-.2em;">Talk to <code>gpt-realtime-2.1</code> in the browser over WebRTC</p>
+    <div class="equation" style="margin-top:.5em; font-size:0.9em;">
+      Browser &rarr; <b class="blue">ek_ token</b> &rarr; <b class="violet">WebRTC</b> &rarr; voice in, voice out
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">Next.js · App Router</span>
+      <span class="pill idx">@openai/agents</span>
+      <span class="pill gen">RTCPeerConnection</span>
+      <span class="pill teal">oai-events</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE BIG IDEA ===================== -->
+  <section>
+    <p class="kicker">The big idea</p>
+    <h2>Voice in the browser, safely</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">The browser holds a <strong>one-minute</strong> <code>ek_</code> token, never the real key.</div>
+        <div class="card violet">It connects over <strong>WebRTC</strong>, the transport built for live media.</div>
+        <div class="card teal">Build it twice: the <strong>SDK</strong> first, then the <strong>raw</strong> plumbing.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.82em;">
+          <b class="blue">ek_ token</b> + <b class="violet">WebRTC</b><br>= safe browser voice
+        </div>
+        <p class="small" style="margin-top:12px;">The SDK is three objects and one <code>connect</code>. The raw path shows what those hide: a mic, a data channel, and an <em>SDP</em> swap.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The playing field</p>
+    <h2>Seven concepts, one screen</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>Concept</th><th>What it does</th><th>When it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>ek_ token</strong></td><td>One-minute browser key</td><td>Every connection starts here</td></tr>
+        <tr><td><strong>WebRTC</strong></td><td>Live audio + echo cancel + NAT</td><td>Any voice in a browser</td></tr>
+        <tr><td><strong>RealtimeAgent</strong></td><td>Name, instructions, voice</td><td>Personality + fixed voice</td></tr>
+        <tr><td><strong>RealtimeSession</strong></td><td>The live connection</td><td>Whole conversation</td></tr>
+        <tr><td><strong>oai-events</strong></td><td>JSON side-channel</td><td>Transcripts + config</td></tr>
+        <tr><td><strong>SDP offer/answer</strong></td><td>Two-message menu swap</td><td>The raw handshake</td></tr>
+        <tr><td><strong>history_updated</strong></td><td>Running transcript event</td><td>Rendering the panel</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== WHY WEBRTC NOT WEBSOCKET ===================== -->
+  <section>
+    <p class="kicker">Concept · transport</p>
+    <h2>Why WebRTC, not WebSocket</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Chat</strong> wants every message, in order (TCP). A WebSocket rides TCP.</div>
+        <div class="card violet"><strong>A call</strong> wants to stay live: skip a lost slice, do not freeze (UDP). WebRTC rides UDP.</div>
+        <div class="card teal">WebRTC also gives <strong>echo cancel</strong> + <strong>NAT traversal</strong> for free.</div>
+      </div>
+      <div class="caution"><span class="label">THE RULE</span> <b>WebRTC for browsers, WebSocket for servers.</b> A server has no mic and a public address, so it uses a WebSocket (modules 02-05). A browser needs low-latency media, so it uses WebRTC.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE HANDSHAKE (inline SVG sequence) ===================== -->
+  <section>
+    <p class="kicker">The whole handshake</p>
+    <h2>Browser &rarr; backend &rarr; OpenAI</h2>
+    <div class="svg-wrap" style="max-width:82%; margin:0 auto;">
+      <!-- Hand-drawn sequence diagram (inline SVG so it works offline). -->
+      <svg class="diagram" viewBox="0 0 900 380" role="img" aria-label="Browser fetches ek_ token from backend, then does an SDP offer/answer with OpenAI over WebRTC">
+        <!-- lifelines -->
+        <g stroke="#e2e8f0" stroke-width="2">
+          <line x1="130" y1="70" x2="130" y2="350"/>
+          <line x1="450" y1="70" x2="450" y2="350"/>
+          <line x1="770" y1="70" x2="770" y2="350"/>
+        </g>
+        <!-- actor boxes -->
+        <g font-size="20" font-weight="700" text-anchor="middle">
+          <rect x="60" y="30" width="140" height="40" rx="10" fill="#eef2ff" stroke="#6366f1"/>
+          <text x="130" y="56" fill="#6366f1">Browser</text>
+          <rect x="380" y="30" width="140" height="40" rx="10" fill="#f0fdfa" stroke="#14b8a6"/>
+          <text x="450" y="56" fill="#0f766e">Backend 06</text>
+          <rect x="700" y="30" width="140" height="40" rx="10" fill="#fdf2f8" stroke="#ec4899"/>
+          <text x="770" y="56" fill="#be185d">OpenAI</text>
+        </g>
+        <!-- arrows -->
+        <g font-size="16" fill="#334155" text-anchor="middle">
+          <!-- GET /token -->
+          <line x1="130" y1="110" x2="450" y2="110" stroke="#6366f1" stroke-width="2" marker-end="url(#ah)"/>
+          <text x="290" y="100">GET /token</text>
+          <!-- client_secrets (real key) -->
+          <line x1="450" y1="150" x2="770" y2="150" stroke="#14b8a6" stroke-width="2" marker-end="url(#ah)"/>
+          <text x="610" y="140">client_secrets (real key)</text>
+          <!-- ek_ back to backend -->
+          <line x1="770" y1="190" x2="450" y2="190" stroke="#14b8a6" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+          <text x="610" y="180">ek_ token</text>
+          <!-- ek_ back to browser -->
+          <line x1="450" y1="230" x2="130" y2="230" stroke="#6366f1" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+          <text x="290" y="220">ek_ token</text>
+          <!-- SDP offer + ek_ -->
+          <line x1="130" y1="278" x2="770" y2="278" stroke="#ec4899" stroke-width="2" marker-end="url(#ah)"/>
+          <text x="450" y="268">SDP offer + Bearer ek_  (application/sdp)</text>
+          <!-- SDP answer -->
+          <line x1="770" y1="318" x2="130" y2="318" stroke="#ec4899" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+          <text x="450" y="308">SDP answer &rarr; media + oai-events flow</text>
+        </g>
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <p class="small center" style="margin-top:8px;">Solid = request, dashed = reply. The real key never leaves the backend.</p>
+  </section>
+
+  <!-- ===================== THE SAFETY RULE ===================== -->
+  <section>
+    <p class="kicker">Concept · secrets</p>
+    <h2>The browser never sees the real key</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Real <code>sk-</code> key = your credit card. Lives only on the <strong>server</strong>.</div>
+        <div class="card violet"><code>ek_</code> token = a $5 gift card that self-destructs in a minute. Safe for the browser.</div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Anything named <code>NEXT_PUBLIC_*</code> is <b>baked into the browser bundle</b>. Put only non-secrets there (like the token URL). The <code>OPENAI_API_KEY</code> stays in module 06's server <code>.env</code>.</div>
+    </div>
+  </section>
+
+  <!-- ===================== PRIMARY PATH: THE SDK ===================== -->
+  <section>
+    <p class="kicker">Path 1 · recommended</p>
+    <h2>The SDK: three objects, one connect</h2>
+    <pre><code class="language-typescript">import { RealtimeAgent, RealtimeSession } from "@openai/agents/realtime";
+
+const ek = await fetchEphemeralToken();          // ask OUR backend
+
+const agent = new RealtimeAgent({
+  name: "Voice Tutor",
+  instructions: "Friendly tutor. Keep answers short and spoken.",
+  voice: "marin",                                // chosen ONCE
+});
+
+const session = new RealtimeSession(agent, {
+  model: "gpt-realtime-2.1",                     // GA name (not -2)
+  transport: "webrtc",
+});
+await session.connect({ apiKey: ek });           // ek_ only</code></pre>
+    <p class="small center" style="margin-top:6px;"><code>connect()</code> asks for the mic, does the WebRTC handshake, and plays the reply.</p>
+  </section>
+
+  <!-- ===================== SDK GOTCHAS ===================== -->
+  <section>
+    <p class="kicker">Path 1 · the sharp edges</p>
+    <h2>Two things the SDK will not forgive</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card amber"><span class="status amber">MODEL</span> Use <code>gpt-realtime-2.1</code>. The name <code>gpt-realtime-2</code> is the older DataCamp label.</div>
+        <div class="card amber"><span class="status amber">VOICE</span> The voice is set <strong>once</strong> on the agent and cannot change after the first audio.</div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Wire listeners <b>before</b> <code>connect()</code> so you never miss the first update. And call <code>session.close()</code> on unmount, or the mic light stays on.</div>
+    </div>
+  </section>
+
+  <!-- ===================== READING THE TRANSCRIPT ===================== -->
+  <section>
+    <p class="kicker">Path 1 · the transcript</p>
+    <h2>One event carries the whole conversation</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-typescript">session.on("history_updated", (history) => {
+  setTranscript(flatten(history));   // {role, text, done}
+});
+
+session.on("audio_interrupted", () => {
+  // you talked over it: barge-in
+});
+
+session.mute(true);   // stop sending mic</code></pre>
+      </div>
+      <div class="stack">
+        <div class="card teal"><span class="status green">SHINES</span> The SDK keeps the running history; you just render it.</div>
+        <div class="caution"><span class="label">CAUTION</span> <code>transcript</code> is <b>null</b> until recognition catches up. A line renders empty for a beat, then fills. Treat it as streaming until <code>status !== "in_progress"</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECOND PATH: RAW WEBRTC ===================== -->
+  <section>
+    <p class="kicker">Path 2 · how it really works</p>
+    <h2>Raw WebRTC: seven steps, no SDK</h2>
+    <pre><code class="language-typescript">const pc = new RTCPeerConnection();                       // 1 engine
+pc.ontrack = (e) => audioEl.srcObject = e.streams[0];     // 2 hear it
+const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+mic.getTracks().forEach((t) => pc.addTrack(t, mic));      // 3 send mic
+const dc = pc.createDataChannel("oai-events");            // 4 events
+const offer = await pc.createOffer();                     // 5 our menu
+await pc.setLocalDescription(offer);
+const res = await fetch(`${CALLS_URL}?model=gpt-realtime-2.1`, {
+  method: "POST", body: offer.sdp,                        // 6 raw SDP
+  headers: { Authorization: `Bearer ${ek}`, "Content-Type": "application/sdp" },
+});
+await pc.setRemoteDescription({ type: "answer", sdp: await res.text() }); // 7</code></pre>
+  </section>
+
+  <!-- ===================== RAW WEBRTC GOTCHAS ===================== -->
+  <section>
+    <p class="kicker">Path 2 · the sharp edges</p>
+    <h2>Three raw-path gotchas</h2>
+    <div class="stack">
+      <div class="card amber"><span class="status amber">NAME</span> The data channel must be exactly <code>"oai-events"</code>. A different name = no events.</div>
+      <div class="card amber"><span class="status amber">BODY</span> POST the <strong>raw SDP text</strong> with <code>Content-Type: application/sdp</code>. Do not JSON-stringify it.</div>
+      <div class="card amber"><span class="status amber">AUTH</span> Send <code>Authorization: Bearer ek_...</code> to <code>/v1/realtime/calls</code>. Never the real key.</div>
+    </div>
+  </section>
+
+  <!-- ===================== EVENT NAMES ===================== -->
+  <section>
+    <p class="kicker">Concept · the events</p>
+    <h2>Watch the exact event names</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><code>response.output_audio_transcript.delta</code><br><span class="small">assistant words, streaming</span></div>
+        <div class="card violet"><code>conversation.item.input_audio_transcription.completed</code><br><span class="small">your words, final</span></div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> The assistant <b>audio bytes</b> event is <code>response.output_audio.delta</code> (base64 in <code>delta</code>), <b>not</b> <code>response.audio.delta</code>. With WebRTC <code>ontrack</code> plays audio for you, so you rarely touch bytes, but the name trips everyone up.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SDK VS RAW ===================== -->
+  <section>
+    <p class="kicker">Same result, different effort</p>
+    <h2>What the SDK did for you</h2>
+    <table class="compare">
+      <thead><tr><th>Job</th><th>SDK path</th><th>Raw path</th></tr></thead>
+      <tbody>
+        <tr><td>Mic capture</td><td>automatic</td><td><code>getUserMedia</code> + <code>addTrack</code></td></tr>
+        <tr><td>Handshake</td><td>automatic</td><td><code>createOffer</code> + POST SDP + answer</td></tr>
+        <tr><td>Play audio</td><td>automatic</td><td><code>ontrack</code> &rarr; <code>&lt;audio&gt;</code></td></tr>
+        <tr><td>Events channel</td><td>automatic</td><td><code>createDataChannel("oai-events")</code></td></tr>
+        <tr><td>Transcript</td><td><code>history_updated</code></td><td>parse each <code>type</code></td></tr>
+        <tr><td>Barge-in</td><td><code>audio_interrupted</code></td><td>do it yourself</td></tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:8px;">Ship the SDK. Keep the raw file as your mental model.</p>
+  </section>
+
+  <!-- ===================== THE UI ===================== -->
+  <section>
+    <p class="kicker">The app · one screen</p>
+    <h2>Talk button, transcript, status pill</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><span class="num-badge">1</span><strong>Talk / Stop</strong> calls <code>connect()</code> / <code>disconnect()</code></div>
+        <div class="card violet"><span class="num-badge">2</span><strong>Status pill</strong> reads <code>idle / connecting / connected / error</code></div>
+        <div class="card teal"><span class="num-badge">3</span><strong>Transcript</strong> renders <code>history_updated</code> lines</div>
+      </div>
+      <div class="stack">
+        <div class="card"><strong><code>"use client"</code></strong><br><span class="small">Mic + WebRTC only exist in the browser, so the screen is a client component.</span></div>
+        <div class="card"><strong>Session in a <code>ref</code></strong><br><span class="small">A connection is not display data, so changing it should not re-render.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section>
+    <p class="kicker">Run it</p>
+    <h2>Two terminals</h2>
+    <pre><code class="language-bash"># Terminal 1: the token backend (module 06):
+cd ../06_python_backend
+uv run uvicorn src.main:app --reload --port 8000
+
+# Terminal 2: this app:
+cd app
+cp .env.local.example .env.local
+npm install
+npm run dev            # open http://localhost:3000</code></pre>
+    <div class="caution" style="margin-top:8px;"><span class="label">CAUTION</span> If Talk fails with "Could not reach the token backend," module 06 is not on <code>:8000</code>, or you are not on the <code>http://localhost:3000</code> origin that its CORS allows.</div>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: safe browser voice in two ways</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>WebRTC</strong>, not WebSocket, for live media in the browser.</div>
+        <div class="card violet"><strong>ek_ token</strong> from module 06; the real key never ships.</div>
+        <div class="card teal"><strong>SDK</strong> = agent + session + connect. <strong>Raw</strong> = SDP + <code>oai-events</code>.</div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> Model is <code>gpt-realtime-2.1</code>. Voice is set once. Data channel is <code>"oai-events"</code>. Offer body is <code>application/sdp</code>. Audio-bytes event is <code>response.output_audio.delta</code>.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE HERO LINE AGAIN ===================== -->
+  <section data-auto-animate>
+    <p class="kicker">The one idea to remember</p>
+    <div class="equation" style="margin-top:.2em; font-size:1.05em;">
+      Browser &rarr; <b class="blue">ek_ token</b> &rarr; <b class="violet">WebRTC</b> &rarr; voice in, voice out
+    </div>
+    <div class="cols" style="margin-top:18px;">
+      <div class="card"><span class="num-badge">1</span><strong>The browser is never trusted with the real key.</strong> It borrows a one-minute <code>ek_</code> from your backend.</div>
+      <div class="card teal"><span class="num-badge" style="background:var(--teal)">2</span><strong>The SDK is just tidy WebRTC.</strong> Under it: a mic, a data channel, and an SDP swap you can write by hand.</div>
+    </div>
+    <p class="center" style="margin-top:24px; font-size:.8em; color:var(--muted);">
+      Next: unify Transcribe / Translate / Assist + a tool call. &nbsp;·&nbsp; Module 08
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

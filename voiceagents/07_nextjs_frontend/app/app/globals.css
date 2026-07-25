@@ -1,0 +1,333 @@
+/* =============================================================================
+   globals.css  —  minimalist, pastel styling for the whole app.
+
+   This is plain CSS (no framework) so every rule is readable. The palette and
+   font match the course slide decks: Inter, pastel surfaces on white, indigo
+   primary, pink/teal accents. We keep it deliberately small.
+   ============================================================================= */
+
+/* ---- Design tokens (same values as the slide deck) --------------------------
+   CSS custom properties (the --names) let us name a color once and reuse it. */
+:root {
+  --ink: #0f172a;        /* headings / strongest text            */
+  --body: #334155;       /* body text                            */
+  --muted: #64748b;      /* captions, secondary text             */
+  --primary: #6366f1;    /* indigo pastel — main accent          */
+  --accent: #ec4899;     /* pink pastel — highlights             */
+  --teal: #14b8a6;       /* teal — "connected" state             */
+  --surface: #eef2ff;    /* light indigo surface                 */
+  --surface-pink: #fdf2f8;
+  --surface-teal: #f0fdfa;
+  --line: #e2e8f0;       /* hairline borders                     */
+  --ok: #059669;
+  --warn: #d97706;
+  --bad: #dc2626;
+}
+
+/* A tiny CSS reset so margins/box-sizing are predictable across browsers. */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* Inter is applied via the font class in layout.tsx; this is the fallback. */
+  font-family: Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--body);
+  /* A soft pastel wash behind everything. */
+  background:
+    radial-gradient(1100px 700px at 80% -10%, var(--surface-pink), transparent 60%),
+    radial-gradient(1000px 700px at -10% 10%, var(--surface), transparent 55%),
+    #ffffff;
+  min-height: 100vh;
+}
+
+/* ---- Page frame ------------------------------------------------------------ */
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin: 0;
+}
+
+h1 {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-size: 34px;
+  line-height: 1.1;
+  margin: 4px 0 0;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ---- Card: the white panel that holds the controls + transcript ------------ */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px -20px rgba(15, 23, 42, 0.25);
+}
+
+/* ---- Control row: the big Talk button + mute + status pill ----------------- */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* The big primary "Talk" button. */
+.talk-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 17px;
+  color: #ffffff;
+  background: var(--primary);
+  padding: 14px 26px;
+  border-radius: 999px;
+  transition: transform 0.06s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 20px -8px rgba(99, 102, 241, 0.7);
+}
+.talk-btn:hover {
+  background: #4f46e5;
+}
+.talk-btn:active {
+  transform: translateY(1px);
+}
+/* When connected, the button becomes a pink "Stop". */
+.talk-btn.stop {
+  background: var(--accent);
+  box-shadow: 0 8px 20px -8px rgba(236, 72, 153, 0.7);
+}
+.talk-btn.stop:hover {
+  background: #db2777;
+}
+/* Disabled while connecting (avoids double-clicks). */
+.talk-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* The secondary, outline "Mute" button. */
+.ghost-btn {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--body);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 12px 18px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.ghost-btn:hover {
+  background: var(--surface);
+}
+.ghost-btn.active {
+  background: var(--surface-pink);
+  border-color: #fbcfe8;
+  color: var(--accent);
+}
+
+/* ---- Status pill: idle / connecting / connected / error -------------------- */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto; /* push it to the right edge of the control row */
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.status-pill .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-pill.idle {
+  background: #f1f5f9;
+  color: var(--muted);
+}
+.status-pill.connecting {
+  background: #fef3c7;
+  color: var(--warn);
+}
+/* A gentle pulse while we connect, to signal "working". */
+.status-pill.connecting .dot {
+  animation: pulse 1s ease-in-out infinite;
+}
+.status-pill.connected {
+  background: var(--surface-teal);
+  color: var(--teal);
+}
+.status-pill.error {
+  background: #fee2e2;
+  color: var(--bad);
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ---- Transcript panel ------------------------------------------------------ */
+.transcript {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 160px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.transcript .empty {
+  color: var(--muted);
+  font-size: 15px;
+  margin: auto; /* center the placeholder in the empty panel */
+  text-align: center;
+}
+
+/* One spoken turn. User turns tint indigo, assistant turns tint pink. */
+.line {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  max-width: 88%;
+}
+.line .who {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  opacity: 0.75;
+}
+.line.user {
+  align-self: flex-end;
+  background: var(--surface);
+  color: var(--ink);
+}
+.line.user .who {
+  color: var(--primary);
+}
+.line.assistant {
+  align-self: flex-start;
+  background: var(--surface-pink);
+  color: var(--ink);
+}
+.line.assistant .who {
+  color: var(--accent);
+}
+/* A blinking caret shows a turn is still streaming in. */
+.line.streaming::after {
+  content: "▋";
+  margin-left: 2px;
+  animation: pulse 1s step-start infinite;
+  color: var(--muted);
+}
+
+/* ---- Error banner ---------------------------------------------------------- */
+.error-banner {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #7f1d1d;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.error-banner b {
+  color: var(--bad);
+}
+
+/* ---- Path toggle (SDK vs raw WebRTC) + footer notes ------------------------ */
+.path-toggle {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+.path-toggle button {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  padding: 7px 14px;
+  border-radius: 999px;
+}
+.path-toggle button.active {
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+}
+.path-toggle button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+.hint code {
+  font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: var(--surface);
+  color: var(--primary);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.footer b {
+  color: var(--primary);
+}

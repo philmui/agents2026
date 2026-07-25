@@ -1,0 +1,19 @@
+# Voice Agents · Module 07 (Next.js frontend) — ignore build + secret files.
+
+# Node dependencies (reinstall with `npm install`; huge, never committed).
+node_modules/
+
+# Next.js build output + caches.
+.next/
+out/
+*.tsbuildinfo
+
+# Local environment. The browser only needs NEXT_PUBLIC_TOKEN_ENDPOINT, but we
+# still never commit a real .env.local. Copy app/.env.local.example instead.
+.env
+.env.local
+.env*.local
+
+# Editor / OS noise.
+.DS_Store
+npm-debug.log*

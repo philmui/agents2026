@@ -1,0 +1,26 @@
+{
+  "name": "voice-agents-07-nextjs-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "//": "Node project (no pyproject here). Run `npm install` once, then `npm run dev`. This app needs module 06 (the FastAPI backend) running so it can hand the browser a short-lived ek_ token. See README.md. We pin Next.js to the stable 15.x line (< 16): the tutorial and the App Router layout are written against Next 15, and Next 16 changed its default build toolchain. Bump deliberately later with `npm install next@latest` and re-test.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@openai/agents": ">=0.13.0",
+    "next": ">=15.1.0 <16",
+    "react": ">=19.0.0 <20",
+    "react-dom": ">=19.0.0 <20"
+  },
+  "devDependencies": {
+    "@types/node": ">=20.0.0",
+    "@types/react": ">=19.0.0 <20",
+    "@types/react-dom": ">=19.0.0 <20",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.20",
+    "typescript": "5.8.2"
+  }
+}

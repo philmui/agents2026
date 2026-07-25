@@ -1,0 +1,12 @@
+# Shared secrets — never commit (the real .env lives one folder up)
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Node / Next.js (not used in this module, kept for course consistency)
+node_modules/
+.next/

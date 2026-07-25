@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6366f1"/>
+    </marker>
+    <style>
+      .title{font-size:20px;font-weight:700;fill:#0f172a;}
+      .lbl{font-size:14px;font-weight:700;fill:#0f172a;}
+      .sub{font-size:11px;fill:#64748b;}
+      .edge{font-size:11px;fill:#6366f1;font-weight:600;}
+    </style>
+  </defs>
+
+  <text x="30" y="36" class="title">Audio pipeline: analog sound becomes text on the wire</text>
+
+  <!-- 1. Analog sound wave -->
+  <rect x="30" y="90" width="150" height="90" rx="12" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+  <text x="105" y="118" text-anchor="middle" class="lbl">Analog sound</text>
+  <path d="M45 150 q 15 -26 30 0 q 15 26 30 0 q 15 -26 30 0 q 15 26 30 0"
+        fill="none" stroke="#6366f1" stroke-width="2"/>
+  <text x="105" y="172" text-anchor="middle" class="sub">a smooth wave</text>
+
+  <!-- 2. Sample @ 24 kHz -->
+  <rect x="222" y="90" width="150" height="90" rx="12" fill="#ffffff" stroke="#6366f1" stroke-width="2"/>
+  <text x="297" y="118" text-anchor="middle" class="lbl">Sample 24k/s</text>
+  <line x1="240" y1="150" x2="240" y2="132" stroke="#ec4899" stroke-width="2"/>
+  <line x1="258" y1="150" x2="258" y2="126" stroke="#ec4899" stroke-width="2"/>
+  <line x1="276" y1="150" x2="276" y2="140" stroke="#ec4899" stroke-width="2"/>
+  <line x1="294" y1="150" x2="294" y2="120" stroke="#ec4899" stroke-width="2"/>
+  <line x1="312" y1="150" x2="312" y2="134" stroke="#ec4899" stroke-width="2"/>
+  <line x1="330" y1="150" x2="330" y2="128" stroke="#ec4899" stroke-width="2"/>
+  <line x1="348" y1="150" x2="348" y2="144" stroke="#ec4899" stroke-width="2"/>
+  <line x1="236" y1="150" x2="352" y2="150" stroke="#94a3b8" stroke-width="1"/>
+  <text x="297" y="172" text-anchor="middle" class="sub">measure the height</text>
+
+  <!-- 3. PCM16 integers -->
+  <rect x="414" y="90" width="150" height="90" rx="12" fill="#fdf2f8" stroke="#ec4899" stroke-width="2"/>
+  <text x="489" y="118" text-anchor="middle" class="lbl">PCM16 ints</text>
+  <text x="489" y="145" text-anchor="middle" class="sub">[128, 4370,</text>
+  <text x="489" y="161" text-anchor="middle" class="sub">-9012, ...]</text>
+  <text x="489" y="176" text-anchor="middle" class="sub">2 bytes each</text>
+
+  <!-- 4. base64 text -->
+  <rect x="606" y="90" width="150" height="90" rx="12" fill="#f0fdfa" stroke="#14b8a6" stroke-width="2"/>
+  <text x="681" y="118" text-anchor="middle" class="lbl">base64 text</text>
+  <text x="681" y="145" text-anchor="middle" class="sub">"AABpBMQI...="</text>
+  <text x="681" y="163" text-anchor="middle" class="sub">safe ASCII,</text>
+  <text x="681" y="176" text-anchor="middle" class="sub">travels in JSON</text>
+
+  <!-- 5. wire -->
+  <rect x="798" y="90" width="72" height="90" rx="12" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+  <text x="834" y="132" text-anchor="middle" class="lbl">wire</text>
+  <text x="834" y="152" text-anchor="middle" class="sub">to</text>
+  <text x="834" y="168" text-anchor="middle" class="sub">OpenAI</text>
+
+  <!-- arrows between stages -->
+  <line x1="182" y1="135" x2="220" y2="135" stroke="#6366f1" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="201" y="125" text-anchor="middle" class="edge">sample</text>
+  <line x1="374" y1="135" x2="412" y2="135" stroke="#6366f1" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="393" y="125" text-anchor="middle" class="edge">quantize</text>
+  <line x1="566" y1="135" x2="604" y2="135" stroke="#6366f1" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="585" y="125" text-anchor="middle" class="edge">encode</text>
+  <line x1="758" y1="135" x2="796" y2="135" stroke="#6366f1" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="777" y="125" text-anchor="middle" class="edge">send</text>
+
+  <text x="30" y="250" class="sub">24000 samples/sec x 2 bytes = 48000 bytes/sec of mono audio, in each direction.</text>
+  <text x="30" y="270" class="sub">To play it back, run the pipeline in reverse: base64 -&gt; bytes -&gt; PCM16 -&gt; speaker.</text>
+</svg>

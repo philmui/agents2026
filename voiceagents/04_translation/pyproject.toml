@@ -1,0 +1,35 @@
+[project]
+name = "voice-agents-04-translation"
+version = "0.1.0"
+description = "Module 04 of the Voice Agents minicourse: a live voice translator CLI using OpenAI gpt-realtime-translate (WebSocket + mic + speakers)."
+requires-python = ">=3.11"
+dependencies = [
+    # --- Realtime transport ---
+    # "websocket-client" gives us the blocking `import websocket` API used in
+    # src/translate.py (WebSocketApp + run_forever). Do NOT confuse it with the
+    # similarly named async "websockets" package: they are different libraries.
+    "websocket-client>=1.7",
+
+    # --- Audio in/out ---
+    "sounddevice>=0.4",   # capture the microphone + play speakers (PortAudio bindings)
+    "numpy>=1.26",        # sounddevice hands audio to us as NumPy int16 buffers
+
+    # --- Secrets ---
+    "python-dotenv>=1.0", # load the shared ../.env via load_dotenv(find_dotenv())
+]
+
+# `uv sync` reads this file, creates a local .venv, and resolves everything above.
+#
+# REPRODUCIBILITY NOTE: the constraints above are lower bounds (">=") so `uv sync`
+# installs the LATEST compatible release of each package. That keeps the tutorial
+# current but is not byte-for-byte reproducible on its own.
+#
+# `uv sync` also writes a `uv.lock` capturing the EXACT versions it resolved.
+# Commit that uv.lock next to this file to pin the environment: afterwards
+# `uv sync` reinstalls the locked set verbatim, so a classmate (or future you)
+# gets an identical setup. To move forward later, run `uv lock --upgrade` and re-test.
+#
+# No [build-system] table: this is an application/tutorial, not a package to be
+# built and published, so uv treats it as a non-packaged project.
+[tool.uv]
+package = false

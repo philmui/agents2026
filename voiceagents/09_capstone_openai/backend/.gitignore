@@ -1,0 +1,61 @@
+# =============================================================================
+# backend/.gitignore — the Python (uv) backend
+# =============================================================================
+# This backend reads the ONE shared secret at topics/voice_agents/.env.
+# Never commit a local .env either. The project root also carries a .gitignore;
+# these rules are the backend-local additions (duplicates are harmless).
+
+# Secrets
+.env
+.env.*
+!.env.example
+!.env*.example
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Byte-compiled / optimized / C extensions
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Packaging / build artifacts
+build/
+dist/
+sdist/
+wheels/
+*.egg
+*.egg-info/
+.eggs/
+
+# Test / coverage / type-check / lint caches
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.cache/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# Reproducibility: DO commit the lockfile. The pinned versions are the whole
+# point of this tutorial (a classmate must get a byte-for-byte identical
+# install), so if a broader rule ever ignores lockfiles, un-ignore this one.
+!uv.lock
+
+# OS cruft
+.DS_Store
+._*
+Thumbs.db

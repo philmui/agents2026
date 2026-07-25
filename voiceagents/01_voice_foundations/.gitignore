@@ -1,0 +1,16 @@
+# Shared secrets — never commit (lives at ../.env)
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Node / Next.js (not used in this module, kept for consistency)
+node_modules/
+.next/
+out/
+
+# Audio artifacts this module can write
+*.wav

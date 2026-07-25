@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="Inter, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Full-duplex diagram: mic streams up to the WebSocket as append events while the assistant voice streams down through a playback queue to the speakers, and the transcript prints to the screen">
+  <defs>
+    <marker id="arU" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0d9488"/>
+    </marker>
+    <marker id="arD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#ec4899"/>
+    </marker>
+  </defs>
+
+  <!-- boxes -->
+  <g font-size="14" text-anchor="middle" font-weight="700">
+    <rect x="30"  y="40"  width="130" height="52" rx="12" fill="#f0fdfa" stroke="#99f6e4"/>
+    <text x="95"  y="71" fill="#0f766e">Your mic</text>
+
+    <rect x="30"  y="200" width="130" height="52" rx="12" fill="#f0fdfa" stroke="#99f6e4"/>
+    <text x="95"  y="231" fill="#0f766e">Your speakers</text>
+
+    <rect x="315" y="120" width="150" height="56" rx="12" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="390" y="146" fill="#4338ca">WebSocket</text>
+    <text x="390" y="165" fill="#6366f1" font-size="11.5" font-weight="600">to OpenAI</text>
+
+    <rect x="600" y="120" width="140" height="56" rx="12" fill="#fdf2f8" stroke="#fbcfe8"/>
+    <text x="670" y="146" fill="#be185d">gpt-realtime</text>
+    <text x="670" y="165" fill="#db2777" font-size="12" font-weight="600">-2.1</text>
+
+    <rect x="315" y="216" width="150" height="46" rx="12" fill="#fff" stroke="#e2e8f0"/>
+    <text x="390" y="244" fill="#334155" font-size="13">Playback queue</text>
+  </g>
+
+  <!-- UP path: mic -> ws -> openai -->
+  <g font-size="12.5" font-weight="700">
+    <path d="M160 62 C 230 62, 250 130, 312 138" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#arU)"/>
+    <text x="238" y="86" fill="#0f766e" text-anchor="middle">append (audio)</text>
+    <path d="M465 140 L 596 140" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#arU)"/>
+    <text x="530" y="130" fill="#0f766e" text-anchor="middle">up</text>
+  </g>
+
+  <!-- DOWN path: openai -> ws -> queue -> speakers -->
+  <g font-size="12.5" font-weight="700">
+    <path d="M596 158 L 467 158" fill="none" stroke="#ec4899" stroke-width="2.5" marker-end="url(#arD)"/>
+    <text x="530" y="182" fill="#be185d" text-anchor="middle">output_audio.delta</text>
+    <path d="M360 176 L 388 214" fill="none" stroke="#ec4899" stroke-width="2.5" marker-end="url(#arD)"/>
+    <path d="M312 239 C 250 239, 230 231, 162 231" fill="none" stroke="#ec4899" stroke-width="2.5" marker-end="url(#arD)"/>
+    <text x="238" y="255" fill="#be185d" text-anchor="middle">play</text>
+  </g>
+
+  <!-- transcript to screen -->
+  <g font-size="12" font-weight="600">
+    <path d="M390 120 L 390 100" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arD)"/>
+    <text x="390" y="30" fill="#334155" text-anchor="middle" font-weight="700">transcript.delta &#8594; screen</text>
+  </g>
+</svg>

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Python Backend: Minting Safe Browser Tokens</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback: this course leans into Inter/pastel. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette (COURSE_DESIGN) ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings          */
+    --body:     #334155;   /* slate-700  body text         */
+    --muted:    #64748b;   /* slate-500  captions          */
+    --primary:  #6366f1;   /* indigo pastel  primary accent */
+    --accent:   #ec4899;   /* pink pastel    secondary      */
+    --teal:     #14b8a6;   /* teal           tertiary       */
+    --primary-bg:#eef2ff;  /* light indigo surface          */
+    --accent-bg: #fdf2f8;  /* light pink surface            */
+    --teal-bg:   #f0fdfa;  /* light teal surface            */
+    --line:     #e2e8f0;   /* hairlines                     */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--primary); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; font-weight: 400; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--primary); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary); margin: 0 0 0.3em;
+  }
+  .kicker.accent { color: var(--accent); }
+
+  /* the one idea, hero band */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--primary-bg), var(--accent-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.primary { color: var(--primary); }
+  .equation b.accent  { color: var(--accent); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--accent); background: var(--accent-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--primary-bg); color: var(--primary); }
+  .pill.gen { background: var(--accent-bg); color: var(--accent); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--primary); border-radius:12px; padding: 14px 18px; }
+  .card.accent { border-left-color: var(--accent); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+  .card.teal   { border-left-color: var(--teal); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--primary); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--primary); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--primary); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--primary); border-radius: 2px; }
+
+  /* traffic light status chips */
+  .status {
+    display: inline-block; padding: 4px 10px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 700; letter-spacing: .3px;
+  }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red { background: #fee2e2; color: var(--red); }
+
+  /* comparison table */
+  table.compare {
+    font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0;
+  }
+  table.compare th {
+    background: var(--primary-bg); color: var(--primary); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--primary);
+  }
+  table.compare td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+
+  /* SVG helpers for the inline diagrams */
+  .svg-wrap text { font-family: "Inter", -apple-system, sans-serif; }
+  .svg-wrap .mono { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 06</p>
+    <h1>The Python Backend</h1>
+    <p class="lead" style="margin-top:-.2em;">Minting safe, short-lived browser tokens with FastAPI</p>
+    <div class="equation" style="margin-top:.5em; font-size:0.9em;">
+      real <b class="primary">sk-</b> key stays on server &nbsp;→&nbsp; browser only holds a disposable <b class="accent">ek_</b> token
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">FastAPI</span>
+      <span class="pill idx">uvicorn</span>
+      <span class="pill gen">httpx async</span>
+      <span class="pill teal">client_secrets</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE BIG IDEA ===================== -->
+  <section>
+    <p class="kicker">The one idea</p>
+    <h2>The browser can never hold the real key</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Modules 01–05 ran on <strong>your machine</strong>, so the real key was safe.</div>
+        <div class="card accent">Module 07 runs in the <strong>browser</strong>, a fully public place.</div>
+        <div class="card teal">This backend is the <strong>bridge</strong>: it trades the real key for a throwaway token.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.82em;">
+          <b class="primary">sk-</b> key &nbsp;→&nbsp; server only<br>
+          <b class="accent">ek_</b> token &nbsp;→&nbsp; browser only
+        </div>
+        <p class="small" style="margin-top:12px;">A tiny server mints a short-lived, scoped token. The browser talks to OpenAI with <em>that</em>. The master key never leaves home.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The playing field</p>
+    <h2>Seven concepts, one small server</h2>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>What it does</th>
+          <th>When it matters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Real key <span class="mono">sk-</span></strong></td><td>Long-lived master credential</td><td>Keep it server-side, never ship it</td></tr>
+        <tr><td><strong>Ephemeral <span class="mono">ek_</span></strong></td><td>~1-minute, single-purpose token</td><td>The only secret the browser holds</td></tr>
+        <tr><td><strong>FastAPI</strong></td><td>URLs mapped to Python functions</td><td>Any time you need an API</td></tr>
+        <tr><td><strong>Route</strong></td><td>A method + URL (<span class="mono">GET /health</span>)</td><td>One thing your server can do</td></tr>
+        <tr><td><strong>CORS</strong></td><td>Which origins may call the server</td><td>Frontend :3000 calls backend :8000</td></tr>
+        <tr><td><strong>httpx (async)</strong></td><td>Calls OpenAI server-to-server</td><td>The outbound token request</td></tr>
+        <tr><td><strong>client_secrets</strong></td><td>OpenAI endpoint that mints <span class="mono">ek_</span></td><td>The one call that makes it work</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== WHY BROWSER CANNOT SEE KEY ===================== -->
+  <section>
+    <p class="kicker">Concept · the whole point</p>
+    <h2>Anything the browser downloads is readable</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Open <strong>View Source</strong> or the <strong>Network tab</strong> and every string is visible.</div>
+        <div class="card accent">There is <strong>no "hide from the user"</strong> in a browser.</div>
+        <div class="card amber"><span class="status amber">LEAKED</span> A <span class="mono">sk-</span> key on the page is a leaked secret, full stop.</div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> A frontend <b>env var is NOT safe</b>. Putting the key in a Next.js <code>NEXT_PUBLIC_...</code> variable still ships it to the browser. The only safe place for <code>sk-</code> is a server the user cannot read.</div>
+    </div>
+  </section>
+
+  <!-- ===================== EPHEMERAL TOKEN ===================== -->
+  <section>
+    <p class="kicker">Concept · the disposable token</p>
+    <h2>What an ephemeral <span class="mono" style="color:var(--accent)">ek_</span> token is</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><span class="num-badge">1</span><strong>Short-lived</strong><br><span class="small">Expires in about a minute. A copy stops working almost at once.</span></div>
+        <div class="card accent"><span class="num-badge" style="background:var(--accent)">2</span><strong>Scoped</strong><br><span class="small">Born from a session template: it can only start the one session you configured.</span></div>
+      </div>
+      <div>
+        <p class="small">Analogy: the real key is your <strong>credit card</strong>. The <code>ek_</code> token is a <em>$5 gift card that self-destructs in a minute</em>. Hand out gift cards freely, never your credit card.</p>
+        <div class="caution"><span class="label">CAUTION</span> Because they expire fast, the browser fetches a <b>fresh one right before connecting</b>. Never cache an <code>ek_</code> token; it will be dead.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FASTAPI IN 60 SECONDS ===================== -->
+  <section>
+    <p class="kicker">Tool · FastAPI in 60 seconds</p>
+    <h2>Attach routes to an app object</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-python">from fastapi import FastAPI
+
+app = FastAPI()            # the application
+
+@app.get("/health")       # GET /health -> health()
+async def health():
+    return {"status": "ok"}   # dict -> JSON</code></pre>
+        <pre><code class="language-bash">uv run uvicorn src.main:app \
+    --reload --port 8000</code></pre>
+      </div>
+      <div class="stack">
+        <div class="card"><code>@app.get(...)</code> is a <strong>decorator</strong>: it registers the function as the handler for that URL.</div>
+        <div class="card teal"><strong>uvicorn</strong> is the server that listens on a port and calls into <code>app</code>. <code>--reload</code> restarts on edits.</div>
+        <div class="card accent">Free interactive docs at <strong><code>/docs</code></strong> let you click to try each route.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CORS ===================== -->
+  <section>
+    <p class="kicker">Concept · Cross-Origin Resource Sharing</p>
+    <h2>CORS lets :3000 call :8000</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Browsers enforce the <strong>same-origin policy</strong>: scheme + host + <strong>port</strong> must match.</div>
+        <div class="card accent">Frontend <code>:3000</code> ≠ backend <code>:8000</code>, so the call is blocked by default.</div>
+        <pre><code class="language-python">app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_methods=["*"],   # incl. OPTIONS
+    allow_headers=["*"],
+)</code></pre>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> This is <b>local dev only</b>. In production set <code>allow_origins</code> to your real site URL. Never pair <code>allow_origins=["*"]</code> with <code>allow_credentials=True</code>: browsers reject it, and a wildcard lets <em>any</em> site call your minter.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE CORE CALL ===================== -->
+  <section>
+    <p class="kicker">The call that makes it work</p>
+    <h2>POST client_secrets with the real key</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-python">CLIENT_SECRETS_URL = (
+  "https://api.openai.com/v1/realtime/client_secrets")
+
+headers = {
+  "Authorization": f"Bearer {OPENAI_API_KEY}",
+  "Content-Type": "application/json",
+}
+payload = {"session": {
+  "type": "realtime",
+  "model": "gpt-realtime-2.1",
+  "audio": {"output": {"voice": "marin"}},
+}}</code></pre>
+      </div>
+      <div class="stack">
+        <div class="card">The <code>session</code> block is the <strong>scope</strong>: the <code>ek_</code> token inherits exactly this and nothing more.</div>
+        <div class="card teal">Sent <strong>server-to-server</strong> over HTTPS. The real key never touches the browser.</div>
+        <div class="card accent"><code>voice: "marin"</code> is locked for the session and cannot change later.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== READING THE RESPONSE ===================== -->
+  <section>
+    <p class="kicker">Reading the reply · async httpx</p>
+    <h2>The token is at <span class="mono" style="color:var(--accent)">data.value</span></h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-python">async with httpx.AsyncClient(timeout=10.0) as client:
+    r = await client.post(
+        CLIENT_SECRETS_URL,
+        headers=headers, json=payload,
+    )
+
+data = r.json()
+ek = data.get("value")   # "ek_..."  <-- the token
+# return ONLY ek (+ model) to the browser</code></pre>
+      </div>
+      <div class="stack">
+        <div class="card"><strong>async</strong> lets the handler pause on the network without freezing the server.</div>
+        <div class="card teal"><code>async with</code> cleans up the connection even on error; <code>json=</code> sets the body.</div>
+      </div>
+    </div>
+    <div class="caution" style="margin-top:10px;"><span class="label">CAUTION</span> The field is <code>value</code>, <b>not</b> <code>client_secret</code> or <code>key</code>. And at GA there is <b>no</b> <code>OpenAI-Beta: realtime=v1</code> header. Do not send it.</div>
+  </section>
+
+  <!-- ===================== HANDLING FAILURE ===================== -->
+  <section>
+    <p class="kicker">Robustness · fail clearly, never leak</p>
+    <h2>Guard each step with a clean error</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><span class="status red">500</span> our server is misconfigured (no key loaded)</div>
+        <div class="card accent"><span class="status amber">502</span> a server we depend on failed (OpenAI down, bad key, rate limit)</div>
+        <pre><code class="language-python">if not OPENAI_API_KEY:
+    raise HTTPException(500, "OPENAI_API_KEY not set")
+
+if r.status_code != 200:
+    raise HTTPException(502, f"OpenAI: {r.text}")</code></pre>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Never echo the <b>real key</b> into an error string. Build messages from OpenAI's <em>reply</em>, not your <em>request</em>. An <code>Authorization</code> header interpolated into a returned string is a leak into the Network tab.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE HANDSHAKE (inline SVG sequence) ===================== -->
+  <section>
+    <p class="kicker">The end-to-end handshake</p>
+    <h2>Browser → backend → OpenAI → <span class="mono" style="color:var(--accent)">ek_</span> → browser</h2>
+    <div class="svg-wrap center">
+      <!-- Hand-drawn sequence diagram (inline SVG so it renders offline). -->
+      <svg viewBox="0 0 960 430" role="img" aria-label="Sequence: browser requests a token from the backend, the backend calls OpenAI client_secrets with the real key, OpenAI returns an ek_ token, the backend forwards only the ek_ token, and the browser then connects WebRTC audio directly to OpenAI using the ek_ token.">
+        <!-- lifeline headers -->
+        <g font-size="19" font-weight="700">
+          <rect x="70"  y="20" width="180" height="46" rx="10" fill="#eef2ff" stroke="#6366f1"/>
+          <text x="160" y="49" text-anchor="middle" fill="#4338ca">Browser</text>
+          <rect x="390" y="20" width="180" height="46" rx="10" fill="#f0fdfa" stroke="#14b8a6"/>
+          <text x="480" y="49" text-anchor="middle" fill="#0f766e">This backend</text>
+          <rect x="710" y="20" width="180" height="46" rx="10" fill="#fdf2f8" stroke="#ec4899"/>
+          <text x="800" y="49" text-anchor="middle" fill="#be185d">OpenAI</text>
+        </g>
+        <!-- lifelines -->
+        <g stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4 5">
+          <line x1="160" y1="66" x2="160" y2="410"/>
+          <line x1="480" y1="66" x2="480" y2="410"/>
+          <line x1="800" y1="66" x2="800" y2="410"/>
+        </g>
+        <!-- arrowhead marker -->
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#475569"/>
+          </marker>
+        </defs>
+        <g font-size="17" fill="#334155" stroke="#475569" stroke-width="2">
+          <!-- 1 request token -->
+          <line x1="160" y1="110" x2="472" y2="110" marker-end="url(#ah)"/>
+          <text x="316" y="102" text-anchor="middle" stroke="none" fill="#0f172a">POST /token</text>
+          <!-- 2 call openai -->
+          <line x1="480" y1="160" x2="792" y2="160" marker-end="url(#ah)"/>
+          <text x="640" y="152" text-anchor="middle" stroke="none" fill="#0f172a">client_secrets (real sk- key)</text>
+          <!-- 3 return ek (dashed = reply) -->
+          <line x1="800" y1="210" x2="488" y2="210" marker-end="url(#ah)" stroke-dasharray="6 5"/>
+          <text x="644" y="202" text-anchor="middle" stroke="none" fill="#be185d">ek_ token (data.value)</text>
+          <!-- 4 forward ek (dashed = reply) -->
+          <line x1="480" y1="260" x2="168" y2="260" marker-end="url(#ah)" stroke-dasharray="6 5"/>
+          <text x="322" y="252" text-anchor="middle" stroke="none" fill="#0f766e">ek_ token only</text>
+          <!-- 5 webrtc direct browser->openai -->
+          <line x1="160" y1="330" x2="792" y2="330" marker-end="url(#ah)"/>
+          <text x="470" y="322" text-anchor="middle" stroke="none" fill="#0f172a">WebRTC audio (ek_ token)</text>
+          <!-- 6 voice back -->
+          <line x1="800" y1="380" x2="168" y2="380" marker-end="url(#ah)" stroke-dasharray="6 5"/>
+          <text x="470" y="372" text-anchor="middle" stroke="none" fill="#be185d">voice + events</text>
+        </g>
+      </svg>
+    </div>
+    <p class="small center" style="margin-top:8px;">The real key never travels to the browser; the audio path (module 07) is browser ↔ OpenAI <em>directly</em>, authorized by the disposable <code>ek_</code>.</p>
+  </section>
+
+  <!-- ===================== TWO ROUTES / TRY IT ===================== -->
+  <section>
+    <p class="kicker">Run it · two routes, one curl test</p>
+    <h2>GET /health and POST /token</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><code>GET /health</code><br><span class="small">Liveness + config check. Reports <code>has_api_key</code> WITHOUT revealing the key.</span></div>
+        <div class="card accent"><code>POST /token</code><br><span class="small">Mints one <code>ek_</code> token. POST because it <em>creates</em> a credential. (A GET alias exists just for the address bar.)</span></div>
+      </div>
+      <pre><code class="language-bash"># 1) config check -> has_api_key must be true
+curl -s localhost:8000/health
+
+# 2) mint a token -> value starts with "ek_"
+curl -s -X POST localhost:8000/token
+
+# grab just the token (needs jq)
+curl -s -X POST localhost:8000/token \
+  | jq -r .value</code></pre>
+    </div>
+    <p class="small center" style="margin-top:8px;">Verified: <code>/health</code>, <code>/docs</code>, and <code>/token</code> all return 200, and <code>/token</code> mints a live <code>ek_</code>.</p>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: the safety bridge to the browser</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Real vs ephemeral</strong><br><span class="small"><code>sk-</code> stays on the server; the browser holds only a short-lived, scoped <code>ek_</code>.</span></div>
+        <div class="card accent"><strong>One FastAPI server</strong><br><span class="small"><code>GET /health</code> for config checks, <code>POST /token</code> to mint, permissive CORS for dev.</span></div>
+        <div class="card teal"><strong>One outbound call</strong><br><span class="small">async httpx POST to <code>client_secrets</code>; read the token from <code>data.value</code>.</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> Field is <code>value</code>, not <code>client_secret</code>. No <code>OpenAI-Beta</code> header at GA. Never echo the real key into an error. Fetch a fresh <code>ek_</code> right before connecting. Next stop, <b>module 07</b>: the browser fetches this token and talks.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA AGAIN ===================== -->
+  <section data-auto-animate>
+    <p class="kicker">The one idea to remember</p>
+    <div class="equation" style="margin-top:.2em; font-size:1.05em;">
+      trade the <b class="primary">sk-</b> master key for a disposable <b class="accent">ek_</b> token &nbsp;·&nbsp; hand out only the <b class="accent">ek_</b>
+    </div>
+    <div class="cols" style="margin-top:18px;">
+      <div class="card"><span class="num-badge">1</span><strong>The real key stays on a server the user cannot read.</strong> That is the entire reason this module exists.</div>
+      <div class="card teal"><span class="num-badge" style="background:var(--teal)">2</span><strong>The browser only ever holds a short-lived, scoped token.</strong> Losing it is cheap; the master key is safe.</div>
+    </div>
+    <p class="center" style="margin-top:24px; font-size:.8em; color:var(--muted);">
+      Now go run the server. 🎙️ &nbsp;·&nbsp; <code>uv run uvicorn src.main:app --reload --port 8000</code>
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

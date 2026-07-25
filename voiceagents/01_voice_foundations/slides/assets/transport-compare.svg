@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .title{font-size:20px;font-weight:700;fill:#0f172a;}
+      .name{font-size:15px;font-weight:700;fill:#0f172a;}
+      .sub{font-size:11px;fill:#64748b;}
+      .node{font-size:11px;font-weight:600;fill:#334155;}
+      .edge{font-size:10px;fill:#64748b;}
+      .tag{font-size:10.5px;font-weight:700;}
+    </style>
+  </defs>
+
+  <text x="30" y="34" class="title">Four transports: how the audio actually travels</text>
+
+  <!-- ROW 1: HTTP -->
+  <rect x="30" y="56" width="840" height="70" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="46" y="82" class="name">HTTP</text>
+  <text x="46" y="102" class="sub">request, then response.</text>
+  <text x="46" y="118" class="sub">One shot. No live stream.</text>
+  <circle cx="360" cy="91" r="6" fill="#6366f1"/><text x="360" y="112" text-anchor="middle" class="node">you</text>
+  <circle cx="560" cy="91" r="6" fill="#0f172a"/><text x="560" y="112" text-anchor="middle" class="node">server</text>
+  <line x1="368" y1="84" x2="552" y2="84" stroke="#64748b" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="78" text-anchor="middle" class="edge">ask</text>
+  <line x1="552" y1="98" x2="368" y2="98" stroke="#64748b" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="112" text-anchor="middle" class="edge">answer, then hang up</text>
+  <rect x="690" y="74" width="160" height="34" rx="8" fill="#fef3c7"/><text x="770" y="96" text-anchor="middle" class="tag" fill="#d97706">too slow for live voice</text>
+
+  <!-- ROW 2: WebSocket -->
+  <rect x="30" y="138" width="840" height="70" rx="12" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="46" y="164" class="name">WebSocket</text>
+  <text x="46" y="184" class="sub">one door stays open;</text>
+  <text x="46" y="200" class="sub">both sides send anytime.</text>
+  <circle cx="360" cy="173" r="6" fill="#6366f1"/><text x="360" y="194" text-anchor="middle" class="node">server</text>
+  <circle cx="560" cy="173" r="6" fill="#0f172a"/><text x="560" y="194" text-anchor="middle" class="node">OpenAI</text>
+  <line x1="368" y1="166" x2="552" y2="166" stroke="#6366f1" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="160" text-anchor="middle" class="edge">audio chunks</text>
+  <line x1="552" y1="180" x2="368" y2="180" stroke="#6366f1" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="194" text-anchor="middle" class="edge">events + audio</text>
+  <rect x="690" y="156" width="160" height="34" rx="8" fill="#e0e7ff"/><text x="770" y="178" text-anchor="middle" class="tag" fill="#6366f1">server-to-server duplex</text>
+
+  <!-- ROW 3: WebRTC -->
+  <rect x="30" y="220" width="840" height="70" rx="12" fill="#fdf2f8" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="46" y="246" class="name">WebRTC</text>
+  <text x="46" y="266" class="sub">built for browsers;</text>
+  <text x="46" y="282" class="sub">handles mics + firewalls.</text>
+  <circle cx="360" cy="255" r="6" fill="#ec4899"/><text x="360" y="276" text-anchor="middle" class="node">browser</text>
+  <circle cx="560" cy="255" r="6" fill="#0f172a"/><text x="560" y="276" text-anchor="middle" class="node">OpenAI</text>
+  <line x1="368" y1="248" x2="552" y2="248" stroke="#ec4899" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="242" text-anchor="middle" class="edge">mic track</text>
+  <line x1="552" y1="262" x2="368" y2="262" stroke="#ec4899" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="276" text-anchor="middle" class="edge">voice track</text>
+  <rect x="690" y="238" width="160" height="34" rx="8" fill="#fce7f3"/><text x="770" y="260" text-anchor="middle" class="tag" fill="#ec4899">real-time in the browser</text>
+
+  <!-- ROW 4: PSTN -->
+  <rect x="30" y="302" width="840" height="66" rx="12" fill="#f0fdfa" stroke="#14b8a6" stroke-width="1.5"/>
+  <text x="46" y="328" class="name">PSTN</text>
+  <text x="46" y="348" class="sub">the old phone network;</text>
+  <text x="46" y="362" class="sub">G.711 / mu-law, 8 kHz.</text>
+  <circle cx="360" cy="335" r="6" fill="#14b8a6"/><text x="360" y="356" text-anchor="middle" class="node">phone</text>
+  <circle cx="560" cy="335" r="6" fill="#0f172a"/><text x="560" y="356" text-anchor="middle" class="node">gateway</text>
+  <line x1="368" y1="335" x2="552" y2="335" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="460" y="329" text-anchor="middle" class="edge">a real phone call</text>
+  <rect x="690" y="318" width="160" height="34" rx="8" fill="#ccfbf1"/><text x="770" y="340" text-anchor="middle" class="tag" fill="#0d9488">reach any telephone</text>
+</svg>

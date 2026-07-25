@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Agents · Module 05: A Terminal Voice Assistant (gpt-realtime-2.1)</title>
+
+<!-- reveal.js core + bright base theme (CDN) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette on white (COURSE_DESIGN) ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings          */
+    --body:     #334155;   /* slate-700  body text         */
+    --muted:    #64748b;   /* slate-500  captions          */
+    --primary:  #6366f1;   /* indigo pastel  primary accent */
+    --accent:   #ec4899;   /* pink pastel    secondary      */
+    --teal:     #14b8a6;   /* teal           tertiary       */
+    --primary-bg:#eef2ff;  /* indigo surface               */
+    --accent-bg: #fdf2f8;  /* pink surface                 */
+    --teal-bg:   #f0fdfa;  /* teal surface                 */
+    --line:     #e2e8f0;   /* hairlines                    */
+    --ok:       #059669;
+    --warn:     #d97706;
+    --bad:      #dc2626;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 800; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; font-weight: 700; }
+  .reveal h3 { font-size: 1.0em; color: var(--primary); font-weight: 700; }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; font-weight: 400; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--primary); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary); margin: 0 0 0.3em;
+  }
+  .kicker.pink { color: var(--accent); }
+
+  /* hero definition band (reused for the "one idea") */
+  .equation {
+    font-size: 1.05em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--primary-bg), var(--accent-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.6em; margin: 0.4em auto;
+  }
+  .equation b.p   { color: var(--primary); }
+  .equation b.a   { color: var(--accent); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--accent); background: var(--accent-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a diagram can never
+     bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.p { background: var(--primary-bg); color: var(--primary); }
+  .pill.a { background: var(--accent-bg); color: var(--accent); }
+  .pill.t { background: var(--teal-bg); color: #0f766e; }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--primary); border-radius:12px; padding: 14px 18px; }
+  .card.pink  { border-left-color: var(--accent); }
+  .card.teal  { border-left-color: var(--teal); }
+  .card.ok    { border-left-color: var(--ok); }
+  .card.warn  { border-left-color: var(--warn); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--warn); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--primary); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--primary); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--primary); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--primary); border-radius: 2px; }
+
+  /* status chips */
+  .status { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 0.7em; font-weight: 700; letter-spacing: .3px; }
+  .status.ok   { background: #d1fae5; color: var(--ok); }
+  .status.warn { background: #fef3c7; color: var(--warn); }
+  .status.bad  { background: #fee2e2; color: var(--bad); }
+
+  /* comparison table */
+  table.compare { font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0; }
+  table.compare th {
+    background: var(--primary-bg); color: var(--primary); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--primary);
+  }
+  table.compare td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.compare tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 05</p>
+    <h1>A Terminal Voice Assistant</h1>
+    <p class="lead" style="margin-top:-.2em;">Full-duplex speech-to-speech with <code>gpt-realtime-2.1</code></p>
+    <div class="equation" style="margin-top:.5em; font-size:0.9em;">
+      <b class="p">Mic up</b> &nbsp;+&nbsp; <b class="a">voice down</b> &nbsp;at once&nbsp; = &nbsp;a conversation you can <b class="a">interrupt</b>
+    </div>
+    <div class="title-badges center">
+      <span class="pill p">WebSocket</span>
+      <span class="pill t">semantic VAD</span>
+      <span class="pill a">barge-in</span>
+      <span class="pill p">sounddevice</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA ===================== -->
+  <section>
+    <p class="kicker">The one idea</p>
+    <h2>Both directions open, at the same time</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">A walkie-talkie is <strong>half duplex</strong>: one side talks at a time.</div>
+        <div class="card pink">A phone call is <strong>full duplex</strong>: both talk at once.</div>
+        <div class="card teal">We build a phone call with an AI, so you can <em>cut it off</em> mid-sentence.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.82em;">
+          <b class="p">Speech-to-speech</b><br>audio in &#8594; audio out<br><span style="font-size:.8em;color:var(--muted)">no separate STT or TTS step</span>
+        </div>
+        <p class="small" style="margin-top:12px;">One model, <code>gpt-realtime-2.1</code>, takes your raw audio and returns its raw audio. Fewer steps means low enough latency to feel real.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The map</p>
+    <h2>Seven concepts, one assistant</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>Concept</th><th>What it does</th><th>When it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>gpt-realtime-2.1</strong></td><td>Speech-to-speech: audio in, audio out</td><td>Model + session type</td></tr>
+        <tr><td><strong>Full duplex</strong></td><td>Mic up while voice down, at once</td><td>Two audio streams together</td></tr>
+        <tr><td><strong>Semantic VAD</strong></td><td>Server decides turn end, auto-replies</td><td><code>turn_detection</code></td></tr>
+        <tr><td><strong>output_audio.delta</strong></td><td>Assistant voice, base64 in <code>delta</code></td><td>Playing the reply</td></tr>
+        <tr><td><strong>transcript.delta</strong></td><td>Text of what it is saying</td><td>Live captions</td></tr>
+        <tr><td><strong>Barge-in</strong></td><td>Stop playback when user cuts in</td><td>Natural interruption</td></tr>
+        <tr><td><strong>item.truncate</strong></td><td>Forget audio you never heard</td><td>Honest memory</td></tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:8px;">Server-side first (a Python CLI), so the assistant logic is isolated before the browser (Module 07).</p>
+  </section>
+
+  <!-- ===================== FULL-DUPLEX SVG ===================== -->
+  <section>
+    <p class="kicker">The four moving parts</p>
+    <h2>Mic up, voice down, transcript to screen</h2>
+    <div class="svg-wrap"><img src="assets/full-duplex.svg" alt="Mic streams up as append events; assistant voice streams down through a playback queue to the speakers; transcript prints to the screen"></div>
+    <p class="small center" style="margin-top:10px;">Four things run at once, each on its own thread: the <strong>WebSocket</strong>, the <strong>mic stream</strong>, the <strong>speaker stream</strong>, and the <strong>message loop</strong>.</p>
+  </section>
+
+  <!-- ===================== SPEECH-TO-SPEECH vs PIPELINE ===================== -->
+  <section>
+    <p class="kicker">Why one model</p>
+    <h2>Speech-to-speech beats a chained pipeline</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card warn"><span class="status warn">SLOW</span> STT &#8594; text LLM &#8594; TTS: three steps, three delays</div>
+        <div class="card ok"><span class="status ok">FAST</span> One model: audio in, audio out</div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> The model id is <b>gpt-realtime-2.1</b>. OpenAI GA + the official SDK use <b>-2.1</b>; DataCamp's older name was <b>gpt-realtime-2</b>. Do not invent <code>gpt-realtime-mini</code> or <code>gpt-4o-realtime-preview</code>.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SESSION.UPDATE ===================== -->
+  <section>
+    <p class="kicker">Configure once</p>
+    <h2>One <code>session.update</code> sets everything</h2>
+    <pre><code class="language-json">{ "type": "session.update",
+  "session": {
+    "type": "realtime",
+    "instructions": "You are a concise voice assistant...",
+    "reasoning": { "effort": "low" },
+    "audio": {
+      "input":  { "format": {"type":"audio/pcm","rate":24000},
+                  "turn_detection": {"type":"semantic_vad"} },
+      "output": { "format": {"type":"audio/pcm","rate":24000},
+                  "voice": "marin" } } } }</code></pre>
+    <div class="caution" style="margin-top:8px;"><span class="label">CAUTION</span> At GA the format + turn detection are <b>nested</b> under <code>session.audio.input/output</code>. The flat <code>input_audio_format: "pcm16"</code> is legacy and silently fails. <b>Voice is chosen once</b> and cannot change mid-session.</div>
+  </section>
+
+  <!-- ===================== FULL DUPLEX CODE ===================== -->
+  <section>
+    <p class="kicker">Both streams, together</p>
+    <h2>Open the mic and the speakers at once</h2>
+    <pre><code class="language-python">with sd.RawInputStream(          # the microphone
+        samplerate=24000, blocksize=1200,   # ~50 ms chunks
+        dtype="int16", channels=1,          # PCM16 mono
+        callback=mic_callback,
+), sd.RawOutputStream(           # the speakers
+        samplerate=24000, blocksize=1200,
+        dtype="int16", channels=1,
+        callback=speaker_callback,
+):
+    ws_app.run_forever()         # pump the WebSocket until Ctrl+C</code></pre>
+    <div class="caution" style="margin-top:8px;"><span class="label">USE HEADPHONES</span> Without them, your speakers leak into your mic, the assistant hears itself, and it interrupts itself in a loop. Headphones give clean barge-in.</div>
+  </section>
+
+  <!-- ===================== VAD: AUTO vs MANUAL ===================== -->
+  <section>
+    <p class="kicker">Who ends the turn?</p>
+    <h2>Semantic VAD (auto) vs manual</h2>
+    <table class="compare">
+      <thead><tr><th>Mode</th><th>Ends the turn</th><th>Asks for a reply</th></tr></thead>
+      <tbody>
+        <tr><td><strong>semantic_vad</strong></td><td>Server, when the <em>sentence</em> sounds done</td><td>Server, <strong>automatically</strong></td></tr>
+        <tr><td><strong>server_vad</strong></td><td>Server, after a short <em>silence</em></td><td>Server, automatically</td></tr>
+        <tr><td><strong>null</strong> (manual)</td><td><strong>You</strong>: <code>input_audio_buffer.commit</code></td><td><strong>You</strong>: <code>response.create</code></td></tr>
+      </tbody>
+    </table>
+    <div class="caution" style="margin-top:8px;"><span class="label">CAUTION</span> With VAD on, the server <b>auto-fires</b> <code>response.create</code>, so we never send it. Send <code>commit</code> + <code>response.create</code> yourself <b>only</b> in manual mode (<code>push_to_talk.py</code>), or you fight the detector.</div>
+  </section>
+
+  <!-- ===================== THE #1 GOTCHA: output_audio.delta ===================== -->
+  <section>
+    <p class="kicker">The #1 gotcha</p>
+    <h2>Hear + read the reply</h2>
+    <pre><code class="language-python">if etype == "response.output_audio.delta":
+    pcm = base64.b64decode(event["delta"])   # bytes in "delta"
+    enqueue_audio(pcm)                         # speaker plays it
+
+elif etype == "response.output_audio_transcript.delta":
+    sys.stdout.write(event.get("delta", ""))   # live captions
+    sys.stdout.flush()</code></pre>
+    <div class="caution" style="margin-top:8px;"><span class="label">CAUTION</span> It is <b>response.output_audio.delta</b>, <b>NOT</b> <code>response.audio.delta</code>. The wrong guess looks right, fires never, and the only symptom is <b>silence</b>. Bytes are in <code>delta</code> (the <code>audio</code> field is only for what you send up).</div>
+  </section>
+
+  <!-- ===================== BARGE-IN SVG ===================== -->
+  <section>
+    <p class="kicker">Interrupt it</p>
+    <h2>A full turn, then a barge-in</h2>
+    <div class="svg-wrap"><img src="assets/turn-bargein-sequence.svg" alt="You append audio; VAD ends the turn and the server auto-creates a response; audio and transcript stream down; then you cut in and the client sends response.cancel and conversation.item.truncate"></div>
+  </section>
+
+  <!-- ===================== BARGE-IN CODE ===================== -->
+  <section>
+    <p class="kicker">Barge-in in three moves</p>
+    <h2>Cancel, silence, truncate</h2>
+    <pre><code class="language-python">if etype == "input_audio_buffer.speech_started":
+    if assistant_speaking:
+        send_event({"type": "response.cancel"})   # (a) stop generating
+        clear_playback()                            # (b) silence now
+        send_event({                                # (c) forget the tail
+            "type": "conversation.item.truncate",
+            "item_id": current_item_id,
+            "content_index": 0,
+            "audio_end_ms": played_ms})             # what you actually heard</code></pre>
+    <div class="cols" style="margin-top:8px;">
+      <p class="small">Without <strong>(c)</strong>, the server thinks it said the whole answer. Its memory would include words you cut off, and its next reply could reference them.</p>
+      <div class="caution"><span class="label">CAUTION</span> WebSocket drops unplayed audio with <code>conversation.item.truncate</code>. Browser WebRTC (Module 07) uses <code>output_audio_buffer.clear</code>. Same idea, different transport.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SENDING THE MIC ===================== -->
+  <section>
+    <p class="kicker">On the way up</p>
+    <h2>Mic bytes go in <code>audio</code>, not <code>delta</code></h2>
+    <pre><code class="language-python">def mic_callback(indata, frames, time_info, status):
+    if ws_app is None or not session_ready:
+        return                       # do not send before session.update
+    b64 = base64.b64encode(bytes(indata)).decode("ascii")
+    send_event({"type": "input_audio_buffer.append",
+                "audio": b64})       # field is "audio" INBOUND</code></pre>
+    <div class="cols" style="margin-top:8px;">
+      <p class="small">We keep sending the mic <strong>even while the assistant talks</strong>, on purpose: that is how the server hears you begin to interrupt.</p>
+      <div class="caution"><span class="label">CAUTION</span> Inbound audio uses the <code>audio</code> field; <code>delta</code> is only for streams coming <b>down</b>. The <code>session_ready</code> gate stops the mic racing ahead of your config.</div>
+    </div>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section>
+    <p class="kicker">Run it</p>
+    <h2>Put on headphones and talk</h2>
+    <pre><code class="language-bash">cp ../.env.example ../.env      # paste your OpenAI key (paid tier)
+uv sync                          # install websocket-client, sounddevice, numpy, dotenv
+uv run python src/voice_assistant.py     # just talk; Ctrl+C to quit
+
+# bonus: manual turns (push-to-talk), ENTER sends each phrase
+uv run python src/push_to_talk.py</code></pre>
+    <div class="cols" style="margin-top:8px;">
+      <div class="card teal"><span class="status ok">TRY</span> Talk while it answers: it stops to listen (barge-in).</div>
+      <div class="card"><span class="status warn">SEE</span> Set <code>SHOW_MIC_METER = True</code> to watch audio as numbers.</div>
+    </div>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: a full-duplex assistant</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Speech-to-speech</strong><br><span class="small"><code>gpt-realtime-2.1</code>: audio in, audio out, low latency.</span></div>
+        <div class="card pink"><strong>Config once</strong><br><span class="small">Nested audio format; <code>semantic_vad</code>; voice <code>marin</code> chosen once.</span></div>
+        <div class="card teal"><strong>Reply events</strong><br><span class="small"><code>output_audio.delta</code> (voice) + <code>...transcript.delta</code> (text).</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> It is <b>response.output_audio.delta</b> (bytes in <code>delta</code>), not <code>response.audio.delta</code>. VAD <b>auto-fires</b> the reply. Barge-in = <b>cancel</b> + clear + <b>conversation.item.truncate</b>. WebRTC uses <code>output_audio_buffer.clear</code> instead.</div>
+    </div>
+  </section>
+
+  <!-- ===================== HERO / NEXT ===================== -->
+  <section data-auto-animate>
+    <p class="kicker">The one idea to remember</p>
+    <div class="equation" style="margin-top:.2em; font-size:1.05em;">
+      <b class="p">Mic up</b> + <b class="a">voice down</b>, at once &#8594; a conversation you can <b class="a">interrupt</b>
+    </div>
+    <div class="cols" style="margin-top:18px;">
+      <div class="card"><span class="num-badge">1</span><strong>VAD ends your turn and auto-replies.</strong> You never send <code>response.create</code> unless you turn VAD off.</div>
+      <div class="card teal"><span class="num-badge" style="background:var(--teal)">2</span><strong>Barge-in keeps memory honest.</strong> Cancel, silence, and <code>truncate</code> to what you actually heard.</div>
+    </div>
+    <p class="center" style="margin-top:22px; font-size:.8em; color:var(--muted);">
+      Next: <strong>Module 06</strong> mints <code>ek_</code> tokens so a browser can use this safely. &nbsp;&#127908;
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>
