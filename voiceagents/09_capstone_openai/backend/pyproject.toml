@@ -1,5 +1,5 @@
 [project]
-name = "voice-agents-capstone-openai-backend"
+name = "voiceagents"
 version = "0.1.0"
 description = "Voice Agents backend: a FastAPI server that mints ephemeral (ek_) OpenAI Realtime tokens, runs an OpenAI Agents SDK web-search agent for Assist, and proxies the live-translation WebSocket, with full Langfuse telemetry, so all three capabilities run in one web app without ever exposing the real API key to the browser."
 

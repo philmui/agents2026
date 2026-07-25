@@ -1380,7 +1380,7 @@ wheels = [
 ]
 
 [[package]]
-name = "voice-agents-capstone-openai-backend"
+name = "voiceagents"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
