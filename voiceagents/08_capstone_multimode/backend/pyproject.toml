@@ -1,0 +1,55 @@
+[project]
+name = "voice-agents-08-capstone-backend"
+version = "0.1.0"
+description = "Voice Agents Module 08 capstone backend: a FastAPI server that mints ephemeral (ek_) OpenAI Realtime tokens AND proxies the live-translation WebSocket, so all three capabilities run in one web app without ever exposing the real API key to the browser."
+requires-python = ">=3.11"
+dependencies = [
+    # --- The web server ---
+    "fastapi",                 # the web framework: routes, JSON validation, auto /docs, and
+    #                            native WebSocket support (used by our /translate proxy).
+    "uvicorn[standard]",       # the ASGI server that runs FastAPI. The [standard] extra pulls in
+    #                            uvloop, httptools, watchfiles (for --reload) AND the "websockets"
+    #                            library, which uvicorn needs to accept BROWSER WebSocket clients.
+
+    # --- Talking to OpenAI, server-to-server ---
+    "httpx",                   # async HTTP client used to call OpenAI's /client_secrets endpoint
+    #                            (server -> server) when we mint an ephemeral ek_ token.
+    "websockets",              # async WebSocket CLIENT. Our /translate route uses it to open the
+    #                            authenticated OpenAI translation and transcription sockets (which need
+    #                            an Authorization header a browser cannot set) and relay both ways.
+
+    # --- Secrets ---
+    "python-dotenv",           # load the ONE shared ../../.env via load_dotenv(find_dotenv()).
+    #                            This is how the real OPENAI_API_KEY reaches the server WITHOUT being
+    #                            typed into code or shipped to the browser.
+]
+
+[dependency-groups]
+dev = [
+    "httpx2",                 # current Starlette TestClient transport (separate from app httpx).
+    "pytest",                  # runs the backend route and translation proxy regression tests.
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]             # let tests import the local `src` namespace on every Python version.
+
+# ---------------------------------------------------------------------------
+# HOW TO USE THIS FILE
+#
+#   cd topics/voice_agents/08_capstone_multimode/backend
+#   uv sync                                           # create .venv/ and install the deps above
+#   uv run uvicorn src.main:app --reload --port 8000  # start the backend on http://localhost:8000
+#
+# `uv sync` reads this file, creates a local .venv/, resolves the packages, and
+# writes a uv.lock capturing the EXACT versions. Commit uv.lock next to this file
+# so a classmate (or future you) gets a byte-for-byte identical install. To move
+# forward deliberately later, run `uv lock --upgrade` and re-test the server.
+#
+# WHY unpinned deps? The ">=x.y" bounds are omitted so `uv sync` installs the
+# LATEST compatible release and the tutorial stays current; uv.lock is what pins.
+#
+# No [build-system] table: this is a runnable application, not a library to be
+# built and published, so uv treats it as a non-packaged project.
+# ---------------------------------------------------------------------------
+[tool.uv]
+package = false

@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Agents · Module 03 · Live Transcription (gpt-realtime-whisper)</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback: the course's Inter/pastel aesthetic. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette (per COURSE_DESIGN) ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings              */
+    --body:     #334155;   /* slate-700  body text             */
+    --muted:    #64748b;   /* slate-500  captions              */
+    --blue:     #6366f1;   /* indigo pastel   primary accent   */
+    --violet:   #ec4899;   /* pink pastel     secondary accent */
+    --teal:     #14b8a6;   /* teal            tertiary accent  */
+    --blue-bg:  #eef2ff;   /* light indigo surface             */
+    --violet-bg:#fdf2f8;   /* light pink surface               */
+    --teal-bg:  #f0fdfa;   /* light teal surface               */
+    --line:     #e2e8f0;   /* hairlines                        */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--blue); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--violet); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--blue); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--blue); margin: 0 0 0.3em;
+  }
+  .kicker.gen { color: var(--violet); }
+
+  /* the one idea, hero band */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--blue-bg), var(--violet-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.blue   { color: var(--blue); }
+  .equation b.violet { color: var(--violet); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--violet); background: var(--violet-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--blue-bg); color: var(--blue); }
+  .pill.gen { background: var(--violet-bg); color: var(--violet); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--blue); border-radius:12px; padding: 14px 18px; }
+  .card.violet { border-left-color: var(--violet); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+  .card.teal   { border-left-color: var(--teal); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--blue); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--blue); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--blue); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--blue); border-radius: 2px; }
+
+  /* traffic light status chips */
+  .status {
+    display: inline-block; padding: 4px 10px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 700; letter-spacing: .3px;
+  }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red { background: #fee2e2; color: var(--red); }
+
+  /* comparison table */
+  table.compare {
+    font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0;
+  }
+  table.compare th {
+    background: var(--blue-bg); color: var(--blue); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--blue);
+  }
+  table.compare td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+
+  /* inline SVG sequence-diagram styling (self-contained, offline-safe) */
+  .seq { font-family: "Inter", sans-serif; }
+  .seq .lifeline { stroke: var(--line); stroke-width: 2; }
+  .seq .actor { fill: var(--blue-bg); stroke: var(--blue); stroke-width: 1.5; }
+  .seq .actor.srv { fill: var(--violet-bg); stroke: var(--violet); }
+  .seq .actorText { fill: var(--ink); font-weight: 700; font-size: 15px; }
+  .seq .msg { stroke: var(--blue); stroke-width: 2; marker-end: url(#arrow); }
+  .seq .msg.back { stroke: var(--violet); marker-end: url(#arrowV); }
+  .seq .msgText { fill: var(--body); font-size: 13px; }
+  .seq .msgText.back { fill: var(--violet); }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 03</p>
+    <h1>Live Transcription</h1>
+    <p class="lead" style="margin-top:-.2em;">Speech to text, as you talk, with <code>gpt-realtime-whisper</code></p>
+    <div class="equation" style="margin-top:.5em; font-size:0.9em;">
+      <b class="blue">mic</b> &rarr; PCM16 chunks &rarr; <b class="violet">WebSocket</b> &rarr; text
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">Realtime API</span>
+      <span class="pill idx">WebSocket</span>
+      <span class="pill gen">PCM16 · 24 kHz</span>
+      <span class="pill teal">Python CLI</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA ===================== -->
+  <section>
+    <p class="kicker">The one idea</p>
+    <h2>Keep the line open, push audio, read text</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">You do <strong>not</strong> upload a finished recording.</div>
+        <div class="card violet">You keep an <strong>open line</strong> and push audio the whole time.</div>
+        <div class="card green">Words come back the <strong>moment</strong> the server hears them.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.9em;">
+          <b class="blue">mic</b> &rarr; append &rarr;<br>
+          <b class="violet">transcription.completed</b>
+        </div>
+        <p class="small" style="margin-top:12px;">This is the simplest of the three capabilities: audio in, text out, <em>no</em> spoken reply. Learn it first, then add a voice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The playing field</p>
+    <h2>Six concepts, one CLI</h2>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>What it does</th>
+          <th>When it matters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Transcription session</strong></td>
+          <td><code>session.type: "transcription"</code></td>
+          <td>Text only, no spoken reply</td>
+        </tr>
+        <tr>
+          <td><strong>gpt-realtime-whisper</strong></td>
+          <td>Realtime STT, billed per minute</td>
+          <td>Not the file-based whisper-1</td>
+        </tr>
+        <tr>
+          <td><strong>PCM16 @ 24 kHz</strong></td>
+          <td>The exact audio format</td>
+          <td>Recording + declaring format</td>
+        </tr>
+        <tr>
+          <td><strong>append</strong></td>
+          <td>Carries mic bytes in <code>audio</code></td>
+          <td>Every ~50 ms while you talk</td>
+        </tr>
+        <tr>
+          <td><strong>Turn detection</strong></td>
+          <td>Decides when a phrase ends</td>
+          <td>server_vad / semantic_vad / manual</td>
+        </tr>
+        <tr>
+          <td><strong>completed</strong></td>
+          <td>Final text of your turn</td>
+          <td>Printing the transcript</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:10px;">Audio goes <em>in</em> as <code>append</code>; text comes <em>back</em> as <code>...transcription.completed</code>.</p>
+  </section>
+
+  <!-- ===================== TRANSCRIPTION SESSION ===================== -->
+  <section>
+    <p class="kicker">Concept 1 · One API, several modes</p>
+    <h2>A transcription session is a one-way street</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Set <code>session.type</code> to pick a mode.</div>
+        <div class="card violet"><code>"transcription"</code>: it listens, returns text, <strong>never talks back</strong>.</div>
+        <div class="card green">No <code>response.create</code>, no voice, no assistant turn.</div>
+      </div>
+      <pre><code class="language-python">SESSION_CONFIG = {
+  "type": "session.update",
+  "session": {
+    "type": "transcription",   # listen-only
+    "audio": {"input": {
+      "format": {"type": "audio/pcm",
+                 "rate": 24000},
+      "transcription": {
+        "model": "gpt-realtime-whisper"},
+      "turn_detection": {"type": "server_vad"},
+    }},
+  },
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ===================== WHY WEBSOCKET ===================== -->
+  <section>
+    <p class="kicker">Concept · The transport</p>
+    <h2>Why a WebSocket, and why server-side</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>HTTP</strong>: ask once, one answer, line closes.</div>
+        <div class="card violet"><strong>WebSocket</strong>: one line stays open, both sides send anytime.</div>
+        <div class="card teal">Speech is a <strong>stream</strong>, so the shape must be a stream.</div>
+      </div>
+      <div>
+        <p class="small">We run this on <em>your laptop as a server</em> because it holds your real API key in the <code>Authorization</code> header.</p>
+        <div class="caution"><span class="label">RULE</span> Browsers <b>never</b> see the real key. Later modules hand the browser a short-lived <code>ek_</code> token instead.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WHAT VOICE AUDIO IS ===================== -->
+  <section>
+    <p class="kicker">Concept 3 · What "voice audio" is</p>
+    <h2>PCM16 @ 24 kHz mono, then base64</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Sample</strong>: measure the sound wave many times/sec.</div>
+        <div class="card violet"><strong>24 kHz</strong>: 24000 samples every second.</div>
+        <div class="card teal"><strong>PCM16</strong>: each sample an int16 (&minus;32768..32767).</div>
+        <div class="card green"><strong>base64</strong>: bytes wrapped as ASCII for JSON.</div>
+      </div>
+      <div>
+        <pre><code class="language-python">samples = np.array(
+    [0, 15000, -15000],
+    dtype="int16")          # PCM16
+raw = samples.tobytes()     # bytes on wire
+b64 = base64.b64encode(raw)\
+        .decode("ascii")    # goes in "audio"</code></pre>
+        <p class="small" style="margin-top:8px;">A stream of int16 numbers, 24000/sec, one channel. That is all "PCM16 @ 24 kHz mono" means.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MODEL CHOICE ===================== -->
+  <section>
+    <p class="kicker">Concept 4 · Pick the right model</p>
+    <h2>gpt-realtime-whisper, not whisper-1</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card amber"><strong>whisper-1</strong><br><span class="small">File-based. Upload a finished clip, get one transcript. Not live.</span></div>
+        <div class="card green"><strong>gpt-realtime-whisper</strong><br><span class="small">Realtime. Stream as you talk, text flows back. Billed by the audio minute.</span></div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Realtime transcription is <b>billed by audio minute</b>, even during silence if the mic is open. Close the stream (<code>Ctrl-C</code>) when done. It is like a taxi meter.</div>
+    </div>
+  </section>
+
+  <!-- ===================== MIC CAPTURE ===================== -->
+  <section>
+    <p class="kicker">Concept 5 · Capturing the mic</p>
+    <h2>~50 ms chunks via a callback + queue</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-python">SAMPLE_RATE = 24000
+FRAMES_PER_CHUNK = 1200  # ~50 ms
+
+def mic_callback(indata, frames, t, status):
+    # copy fast, send later
+    audio_q.put(indata.copy().tobytes())
+
+sd.InputStream(
+    samplerate=SAMPLE_RATE, channels=1,
+    dtype="int16",              # = PCM16
+    blocksize=FRAMES_PER_CHUNK,
+    callback=mic_callback)</code></pre>
+      </div>
+      <div class="stack">
+        <div class="equation" style="font-size:0.72em;">24000 &times; 0.050 = <b class="blue">1200</b> samples</div>
+        <div class="card"><span class="small">The audio thread must return fast, so it only <strong>copies</strong> samples into a queue. A sender thread does the slow base64 + send.</span></div>
+        <div class="card teal"><span class="small">~50 ms: small enough to feel live, big enough to avoid spamming the socket.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== APPEND ===================== -->
+  <section>
+    <p class="kicker">Concept · Sending audio</p>
+    <h2>input_audio_buffer.append</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">The server keeps a growing <strong>input audio buffer</strong>.</div>
+        <div class="card violet">Each mic chunk is one <code>append</code> event.</div>
+        <pre><code class="language-python">event = {
+  "type": "input_audio_buffer.append",
+  "audio": base64.b64encode(chunk)
+             .decode("ascii"),  # field: audio
+}
+ws.send(json.dumps(event))</code></pre>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> On the way <b>in</b>, bytes go in the <code>audio</code> field, <b>not</b> <code>delta</code>. <code>delta</code> is what the server streams <b>back</b> (partials now; assistant audio in <code>response.output_audio.delta</code> later). Sending <code>"delta"</code> here is wrong.</div>
+    </div>
+  </section>
+
+  <!-- ===================== TURN DETECTION ===================== -->
+  <section>
+    <p class="kicker">Concept 6 · Turn detection (VAD)</p>
+    <h2>Three ways to end a turn, pick one</h2>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Mode</th>
+          <th>Config value</th>
+          <th>Ends a turn when</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Server VAD</strong></td>
+          <td><code>{"type": "server_vad"}</code></td>
+          <td>you go quiet (~200 ms)</td>
+        </tr>
+        <tr>
+          <td><strong>Semantic VAD</strong></td>
+          <td><code>{"type": "semantic_vad", "eagerness": "medium"}</code></td>
+          <td>your <em>sentence</em> sounds finished</td>
+        </tr>
+        <tr>
+          <td><strong>Manual</strong></td>
+          <td><code>null</code> (Python <code>None</code>)</td>
+          <td><em>you</em> send <code>...buffer.commit</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="caution" style="margin-top:12px;"><span class="label">CAUTION</span> Only send <code>input_audio_buffer.commit</code> in <b>manual</b> mode. With server/semantic VAD on, manual commits fight the automatic detector.</div>
+  </section>
+
+  <!-- ===================== READING THE TRANSCRIPT ===================== -->
+  <section>
+    <p class="kicker">Concept · Reading the transcript</p>
+    <h2>completed (final) + delta (partial)</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card violet"><code>...transcription.delta</code><br><span class="small">Partial words as recognized. New text in <code>delta</code>. Print in place.</span></div>
+        <div class="card green"><code>...transcription.completed</code><br><span class="small">Final text of the turn, in <code>transcript</code>.</span></div>
+      </div>
+      <pre><code class="language-python">if etype.endswith("transcription.delta"):
+    sys.stdout.write(event["delta"])
+    sys.stdout.flush()
+
+elif etype.endswith(
+        "transcription.completed"):
+    print("YOU SAID:",
+          event["transcript"].strip())</code></pre>
+    </div>
+    <div class="caution" style="margin-top:10px;"><span class="label">CAUTION</span> These are <code>input_audio_transcription.*</code> (the <b>user</b>). Do not confuse them with <code>response.output_audio_transcript.*</code> (the assistant), which does not exist in a transcription session.</div>
+  </section>
+
+  <!-- ===================== THE SEQUENCE (inline SVG) ===================== -->
+  <section>
+    <p class="kicker">The whole exchange</p>
+    <h2>Read it like a conversation</h2>
+    <div class="svg-wrap center">
+      <svg class="seq" viewBox="0 0 760 360" width="760" height="360" role="img" aria-label="Sequence diagram: mic appends audio; server replies with speech_started, transcription.delta, speech_stopped, and transcription.completed">
+        <defs>
+          <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#6366f1"></path>
+          </marker>
+          <marker id="arrowV" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#ec4899"></path>
+          </marker>
+        </defs>
+
+        <!-- actor heads -->
+        <rect class="actor" x="120" y="16" width="130" height="40" rx="9"></rect>
+        <text class="actorText" x="185" y="41" text-anchor="middle">Your mic</text>
+        <rect class="actor srv" x="510" y="16" width="150" height="40" rx="9"></rect>
+        <text class="actorText" x="585" y="41" text-anchor="middle">OpenAI server</text>
+
+        <!-- lifelines -->
+        <line class="lifeline" x1="185" y1="56" x2="185" y2="344"></line>
+        <line class="lifeline" x1="585" y1="56" x2="585" y2="344"></line>
+
+        <!-- messages -->
+        <line class="msg" x1="185" y1="92" x2="585" y2="92"></line>
+        <text class="msgText" x="200" y="84">append (audio, ~50 ms)</text>
+
+        <line class="msg back" x1="585" y1="140" x2="185" y2="140"></line>
+        <text class="msgText back" x="570" y="132" text-anchor="end">speech_started</text>
+
+        <line class="msg" x1="185" y1="188" x2="585" y2="188"></line>
+        <text class="msgText" x="200" y="180">append (more audio)</text>
+
+        <line class="msg back" x1="585" y1="236" x2="185" y2="236"></line>
+        <text class="msgText back" x="570" y="228" text-anchor="end">transcription.delta</text>
+
+        <line class="msg back" x1="585" y1="284" x2="185" y2="284"></line>
+        <text class="msgText back" x="570" y="276" text-anchor="end">speech_stopped</text>
+
+        <line class="msg back" x1="585" y1="332" x2="185" y2="332"></line>
+        <text class="msgText back" x="570" y="324" text-anchor="end">transcription.completed</text>
+      </svg>
+    </div>
+    <p class="small center" style="margin-top:8px;">In manual mode, your <code>commit</code> triggers <code>completed</code> instead of the automatic <code>speech_stopped</code>.</p>
+  </section>
+
+  <!-- ===================== NO BETA HEADER ===================== -->
+  <section>
+    <p class="kicker">The GA gotcha</p>
+    <h2>No beta header at general availability</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card amber"><span class="status amber">OLD</span> previews wanted <code>OpenAI-Beta: realtime=v1</code></div>
+        <div class="card green"><span class="status green">GA</span> that header is <strong>gone</strong>; sending it can error</div>
+        <pre><code class="language-python">headers = [
+  f"Authorization: Bearer {API_KEY}",
+]  # that is the ONLY header you need
+ws = websocket.create_connection(
+    WS_URL, header=headers)</code></pre>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> The format you <b>declare</b> must match the bytes you <b>send</b>. Open the mic at 24000 Hz <code>int16</code> and declare <code>{"type":"audio/pcm","rate":24000}</code>. A mismatch garbles the transcript.</div>
+    </div>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section>
+    <p class="kicker">Step 10 · Run it</p>
+    <h2>Talk, and watch your words appear</h2>
+    <pre><code class="language-bash">cp ../.env.example ../.env    # once: paste your OpenAI key
+uv sync                       # create .venv, install deps
+uv run python src/live_transcribe.py   # talk; Ctrl-C to stop</code></pre>
+    <div class="cols" style="margin-top:12px;">
+      <div class="card teal"><span class="small">Change one line to feel <code>semantic_vad</code>: it waits for a finished thought instead of any pause.</span></div>
+      <div class="card violet"><span class="small">Then run <code>src/manual_commit.py</code> to control every phrase boundary yourself with ENTER.</span></div>
+    </div>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: audio in, text out</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Transcription session</strong><br><span class="small"><code>session.type: "transcription"</code> listens and returns text, never talks back.</span></div>
+        <div class="card violet"><strong>gpt-realtime-whisper</strong><br><span class="small">Realtime, billed by audio minute. Not file-based whisper-1.</span></div>
+        <div class="card teal"><strong>PCM16 @ 24 kHz mono</strong><br><span class="small">base64, ~50 ms <code>append</code> chunks, bytes in the <code>audio</code> field.</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> Bytes go <b>in</b> as <code>audio</code>; text comes <b>back</b> as <code>...transcription.completed</code> (+ streaming <code>.delta</code>). Turn detection is <code>server_vad</code>, <code>semantic_vad</code>, or manual <code>commit</code>. No beta header at GA.</div>
+    </div>
+    <p class="center" style="margin-top:18px; font-size:.8em; color:var(--muted);">
+      Next: <b>Module 04 · Translation</b> 🌍 &nbsp;·&nbsp; speech into another language, text <em>and</em> audio.
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

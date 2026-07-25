@@ -1,0 +1,16 @@
+# Shared secrets — never commit (the real .env lives one level up at ../.env)
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# uv
+# (keep uv.lock committed to pin versions; it is NOT ignored)
+
+# Node / Next.js (not used in this module, kept for consistency across the course)
+node_modules/
+.next/
+out/

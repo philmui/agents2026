@@ -1,0 +1,42 @@
+[project]
+name = "voice-agents-03-transcription"
+version = "0.1.0"
+description = "Voice Agents Module 03: live speech-to-text CLI with the OpenAI Realtime API (gpt-realtime-whisper) over a raw WebSocket."
+requires-python = ">=3.11"
+dependencies = [
+    # --- The Realtime transport ---
+    "websocket-client>=1.7",   # a simple, blocking WebSocket client; `import websocket`.
+                               # (Do NOT confuse it with the async "websockets" package.)
+
+    # --- Microphone capture + audio numbers ---
+    "sounddevice>=0.4",        # cross-platform mic recording; delivers PCM16 blocks via a callback.
+    "numpy>=1.26",             # audio samples are just int16 numbers; numpy holds/flattens them fast.
+
+    # --- Secrets ---
+    "python-dotenv>=1.0",      # load_dotenv(find_dotenv()) finds the shared ../.env one level up.
+]
+
+# ---------------------------------------------------------------------------
+# HOW THIS FILE IS USED
+#
+#   uv sync                          # reads this file, creates .venv, installs the deps above
+#   uv run python src/live_transcribe.py   # run the live transcriber (server_vad turn-taking)
+#   uv run python src/manual_commit.py     # bonus: manual turn-taking (turn_detection = null)
+#
+# REPRODUCIBILITY NOTE: the constraints above are lower bounds (">=") so `uv sync` installs
+# the latest compatible release of each package and the tutorial stays current. That is NOT
+# byte-for-byte reproducible on its own.
+#
+# `uv sync` writes a `uv.lock` capturing the EXACT versions it resolved. Commit that uv.lock
+# next to this file to pin the environment: afterwards `uv sync` reinstalls the locked set
+# verbatim, so a classmate (or future you) gets an identical environment. To move forward on
+# purpose later, run `uv lock --upgrade` and re-test.
+#
+# PLATFORM NOTE: `sounddevice` needs the PortAudio C library. macOS ships it; on Debian/Ubuntu
+# run `sudo apt-get install libportaudio2` first. Grant microphone permission on first run.
+#
+# No [build-system] table: this is a runnable tutorial, not a package to publish, so uv
+# treats it as a non-packaged project.
+# ---------------------------------------------------------------------------
+[tool.uv]
+package = false

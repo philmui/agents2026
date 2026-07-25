@@ -1,0 +1,32 @@
+[project]
+name = "voice-agents-08-capstone-multimode"
+version = "0.1.0"
+description = "Voice Agents Module 08 (capstone): ONE Next.js app unifying Transcribe / Translate / Assist plus a tool-calling voice agent over the OpenAI Realtime API."
+requires-python = ">=3.11"
+
+# ---------------------------------------------------------------------------
+# READ ME FIRST — this module has TWO runnable pieces, in two subfolders:
+#
+#   backend/  -> the FastAPI server (Python). Mints ek_ tokens AND proxies the
+#                translation WebSocket. It is its OWN uv project:
+#                    cd backend && uv sync && uv run uvicorn src.main:app --port 8000
+#
+#   app/      -> the Next.js UI (Node). Install and run with npm:
+#                    cd app && cp .env.local.example .env.local && npm install && npm run dev
+#
+# So why is there a pyproject.toml at THIS (parent) level too? HOUSE STYLE: every
+# module folder in this course carries a pyproject.toml so the layout is uniform
+# and tools that scan the repo behave predictably. The actual Python dependencies
+# live in backend/pyproject.toml; you run `uv sync` in backend/, not here.
+#
+# There are therefore NO Python dependencies to install at THIS level. The line
+# below is intentionally empty. See backend/pyproject.toml for the real deps.
+# ---------------------------------------------------------------------------
+dependencies = []
+
+# `uv sync` would create an empty .venv here; you normally will not run it in
+# this parent folder (run it in backend/ instead). Kept for parity with the other
+# modules. `package = false` tells uv this is an application/tutorial workspace,
+# not a library to build/publish.
+[tool.uv]
+package = false

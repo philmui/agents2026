@@ -1,0 +1,12 @@
+# This backend reads the ONE shared secret at topics/voice_agents/.env.
+# Never commit a local .env either.
+.env
+.env.local
+
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

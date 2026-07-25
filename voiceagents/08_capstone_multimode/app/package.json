@@ -1,0 +1,33 @@
+{
+  "name": "capstone-multimode-app",
+  "version": "0.1.0",
+  "private": true,
+  "//": [
+    "Module 08 capstone: ONE Next.js app with three modes (Transcribe | Translate | Assist).",
+    "This is a Node project (not a Python uv project). Install with `npm install`, run with `npm run dev`.",
+    "Version pins use ^ (caret) lower bounds so `npm install` fetches the latest compatible release,",
+    "then package-lock.json (written by npm install) locks the exact tree for reproducible installs.",
+    "Commit package-lock.json so a classmate gets the identical dependency tree."
+  ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@openai/agents": "^0.13.5",
+    "next": "^16.2.11",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.2.11",
+    "typescript": "^5.6.0"
+  }
+}

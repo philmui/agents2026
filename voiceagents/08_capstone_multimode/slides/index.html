@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Agents · Module 08 · Capstone: One App, Three Modes, One Tool</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: the course pastel palette (COURSE_DESIGN) ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings         */
+    --body:     #334155;   /* slate-700  body text        */
+    --muted:    #64748b;   /* slate-500  captions          */
+    --primary:  #6366f1;   /* indigo pastel (primary)     */
+    --accent:   #ec4899;   /* pink pastel (accent)        */
+    --teal:     #14b8a6;   /* teal pastel                 */
+    --primary-bg:#eef2ff;  /* indigo surface              */
+    --pink-bg:  #fdf2f8;   /* pink surface                */
+    --teal-bg:  #f0fdfa;   /* teal surface                */
+    --line:     #e2e8f0;   /* hairlines                   */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--primary); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--primary); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary); margin: 0 0 0.3em;
+  }
+  .kicker.pink { color: var(--accent); }
+  .kicker.teal { color: var(--teal); }
+
+  /* hero highlight strip (used sparingly, never as a title underline) */
+  .equation {
+    font-size: 1.1em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--primary-bg), var(--pink-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.primary { color: var(--primary); }
+  .equation b.accent  { color: var(--accent); }
+  .equation b.teal    { color: var(--teal); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--primary); background: var(--primary-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .cols.three { grid-template-columns: 1fr 1fr 1fr; gap: 18px; align-items: stretch; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx  { background: var(--primary-bg); color: var(--primary); }
+  .pill.pink { background: var(--pink-bg); color: var(--accent); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--primary); border-radius:12px; padding: 14px 18px; }
+  .card.pink  { border-left-color: var(--accent); }
+  .card.teal  { border-left-color: var(--teal); }
+  .card.green { border-left-color: var(--green); }
+  .card.amber { border-left-color: var(--amber); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--primary); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+  .num-badge.pink { background: var(--accent); }
+  .num-badge.teal { background: var(--teal); }
+  .num-badge.green{ background: var(--green); }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--primary); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--primary); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--primary); border-radius: 2px; }
+
+  /* status chips */
+  .status { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 0.7em; font-weight: 700; letter-spacing: .3px; }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red   { background: #fee2e2; color: var(--red); }
+
+  /* comparison table */
+  table.compare { font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0; }
+  table.compare th {
+    background: var(--primary-bg); color: var(--primary); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--primary);
+  }
+  table.compare td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.compare tr:last-child td { border-bottom: none; }
+
+  /* inline SVG diagram text uses Inter too */
+  .diagram text { font-family: Inter, -apple-system, sans-serif; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 08</p>
+    <h1>Capstone: one app, three voices</h1>
+    <p class="lead" style="margin-top:-.1em;">Transcribe · Translate · Assist &mdash; plus a tool-using agent</p>
+    <div class="equation" style="margin-top:.5em; font-size:0.92em;">
+      <b class="teal">Transcribe</b> + <b class="accent">Translate</b> + <b class="primary">Assist</b> = one Realtime app
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">gpt-realtime-2.1</span>
+      <span class="pill teal">gpt-realtime-whisper</span>
+      <span class="pill pink">gpt-realtime-translate</span>
+      <span class="pill idx">@openai/agents</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high-school students</span></div>
+  </section>
+
+  <!-- ===================== THE BIG IDEA ===================== -->
+  <section>
+    <p class="kicker">The big idea</p>
+    <h2>One backbone, three behaviors</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal">Every capability is a Realtime <strong>session of events</strong>.</div>
+        <div class="card pink">So all three fit behind <strong>one mode switch</strong>.</div>
+        <div class="card">The last new idea: teach the assistant a <strong>tool</strong>.</div>
+      </div>
+      <div>
+        <p class="small">Modules 01&ndash;05 built each capability alone. Modules 06&ndash;07 made a browser safe and gave it a UI. Module 08 <em>composes</em> them and adds tool calling.</p>
+        <div class="caution"><span class="label">GOAL</span> One Next.js app. Click a mode, allow the mic, and it transcribes, translates, or talks back and <b>acts</b> via a tool.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ARCHITECTURE (inline SVG) ===================== -->
+  <section>
+    <p class="kicker">The whole system in one picture</p>
+    <h2>UI, one FastAPI backend, OpenAI</h2>
+    <div class="svg-wrap">
+      <svg class="diagram" viewBox="0 0 1180 430" role="img" aria-label="Architecture: browser modes fetch a token from the FastAPI backend, which uses the real key with OpenAI; Transcribe and Assist connect with ek_ over WebRTC; Translate streams mic audio to the backend, which relays it to OpenAI's translation WebSocket with the real key.">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+          </marker>
+        </defs>
+        <!-- Browser cluster -->
+        <rect x="20" y="40" width="360" height="360" rx="16" fill="#eef2ff" stroke="#c7d2fe"/>
+        <text x="40" y="72" font-size="20" font-weight="800" fill="#3730a3">Browser (one UI)</text>
+        <rect x="48" y="86" width="304" height="46" rx="10" fill="#ffffff" stroke="#c7d2fe"/>
+        <text x="64" y="115" font-size="18" font-weight="700" fill="#0f172a">Mode switch UI</text>
+        <rect x="48" y="146" width="304" height="58" rx="10" fill="#ffffff" stroke="#99f6e4"/>
+        <text x="64" y="172" font-size="17" font-weight="700" fill="#0f172a">Transcribe</text>
+        <text x="64" y="194" font-size="13" fill="#64748b">WebRTC · whisper</text>
+        <rect x="48" y="216" width="304" height="58" rx="10" fill="#ffffff" stroke="#c7d2fe"/>
+        <text x="64" y="242" font-size="17" font-weight="700" fill="#0f172a">Assist</text>
+        <text x="64" y="264" font-size="13" fill="#64748b">WebRTC · tool call</text>
+        <rect x="48" y="286" width="304" height="58" rx="10" fill="#ffffff" stroke="#fbcfe8"/>
+        <text x="64" y="312" font-size="17" font-weight="700" fill="#0f172a">Translate</text>
+        <text x="64" y="334" font-size="13" fill="#64748b">mic over WS</text>
+
+        <!-- FastAPI backend -->
+        <rect x="470" y="150" width="250" height="130" rx="14" fill="#ffffff" stroke="#c7d2fe"/>
+        <text x="490" y="190" font-size="18" font-weight="800" fill="#0f172a">FastAPI backend</text>
+        <text x="490" y="216" font-size="13" fill="#64748b">/token · WS /translate</text>
+        <text x="490" y="240" font-size="13" fill="#dc2626">holds the real key</text>
+        <text x="490" y="262" font-size="13" fill="#64748b">python-dotenv</text>
+
+        <!-- OpenAI -->
+        <rect x="900" y="150" width="250" height="130" rx="16" fill="#f0fdfa" stroke="#99f6e4"/>
+        <text x="924" y="200" font-size="20" font-weight="800" fill="#0f766e">OpenAI</text>
+        <text x="924" y="230" font-size="16" fill="#334155">Realtime API</text>
+        <text x="924" y="256" font-size="13" fill="#64748b">calls · translations</text>
+
+        <!-- Edges -->
+        <line x1="352" y1="200" x2="470" y2="205" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="356" y="192" font-size="13" fill="#64748b">GET /token</text>
+        <line x1="352" y1="315" x2="470" y2="245" stroke="#ec4899" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="356" y="300" font-size="13" fill="#9d174d">WS /translate</text>
+        <line x1="720" y1="215" x2="900" y2="215" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="744" y="206" font-size="13" fill="#dc2626">real key</text>
+        <line x1="352" y1="175" x2="900" y2="195" stroke="#6366f1" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="560" y="150" font-size="13" fill="#6366f1">ek_ over WebRTC</text>
+      </svg>
+    </div>
+    <p class="small center" style="margin-top:8px;">Browser never holds the real key &mdash; Transcribe/Assist hold an <code>ek_</code> token; Translate holds nothing secret.</p>
+  </section>
+
+  <!-- ===================== THE MODE MAP ===================== -->
+  <section>
+    <p class="kicker">The playing field</p>
+    <h2>Three modes, one app</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>Mode</th><th>Does</th><th>Transport &amp; model</th><th>Builds on</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Transcribe</strong></td>
+          <td>Speech &rarr; text, no reply</td>
+          <td>Browser WebRTC · <code>gpt-realtime-whisper</code></td>
+          <td>Mod 03 + 07</td>
+        </tr>
+        <tr>
+          <td><strong>Translate</strong></td>
+          <td>Speak one lang, hear another</td>
+          <td>Backend WS proxy · <code>gpt-realtime-translate</code></td>
+          <td>Mod 04</td>
+        </tr>
+        <tr>
+          <td><strong>Assist</strong></td>
+          <td>Talk to a tool-using agent</td>
+          <td>Browser WebRTC · <code>gpt-realtime-2.1</code></td>
+          <td>Mod 05 + 07</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:10px;">One live session at a time. Switching modes remounts the panel, so the old mic always stops.</p>
+  </section>
+
+  <!-- ===================== THE MODE SWITCH ===================== -->
+  <section>
+    <p class="kicker">Concept · one mode at a time</p>
+    <h2>The switch is one piece of state</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-tsx">type Mode = "transcribe" | "translate" | "assist";
+const [mode, setMode] = useState&lt;Mode&gt;("assist");
+
+{mode === "transcribe" &amp;&amp; &lt;TranscribePanel key="transcribe" /&gt;}
+{mode === "translate"  &amp;&amp; &lt;TranslatePanel  key="translate"  /&gt;}
+{mode === "assist"     &amp;&amp; &lt;AssistPanel     key="assist"     /&gt;}</code></pre>
+        <div class="card"><strong>String union</strong> = typos are compile errors.</div>
+      </div>
+      <div class="caution"><span class="label">WHY THE key PROP</span> The <code>key</code> makes React <b>unmount</b> the old panel and <b>mount</b> the new one on switch. Unmount runs cleanup, which <b>stops the mic and closes the session</b>. You can never leave two mics fighting.</div>
+    </div>
+  </section>
+
+  <!-- ===================== TOKEN BACKEND ===================== -->
+  <section>
+    <p class="kicker">Concept · keep the key secret</p>
+    <h2>One FastAPI backend, for every mode</h2>
+    <div class="cols">
+      <div class="stack">
+        <pre><code class="language-python">load_dotenv(find_dotenv())          # shared .env
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+@app.post("/token")                 # for Transcribe + Assist
+async def mint_token():
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
+    payload = {"session": {"type": "realtime",
+        "model": "gpt-realtime-2.1",
+        "audio": {"output": {"voice": "marin"}}}}
+    async with httpx.AsyncClient() as c:
+        r = await c.post(CLIENT_SECRETS_URL,
+                         headers=headers, json=payload)
+    return {"value": r.json()["value"]}   # the ek_ token</code></pre>
+      </div>
+      <div class="stack">
+        <div class="card">The <strong>Module 06</strong> server, grown a <code>WS /translate</code> route. Key loaded from the shared <code>.env</code> via <strong>python-dotenv</strong>.</div>
+        <div class="caution"><span class="label">CAUTION</span> The key is read only on the <b>server</b>. Never read a secret in a <code>"use client"</code> file. And <b>no</b> <code>OpenAI-Beta</code> header at GA.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TRANSCRIBE MODE ===================== -->
+  <section>
+    <p class="kicker">Mode 1 · listen and write</p>
+    <h2>Transcribe: WebRTC, text only</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-ts">dc.send(JSON.stringify({
+  type: "session.update",
+  session: {
+    type: "transcription",         // no voice back
+    audio: { input: {
+      format: { type: "audio/pcm", rate: 24000 },
+      turn_detection: { type: "server_vad" },
+      transcription: { model: "gpt-realtime-whisper" },
+    } },
+  },
+}));</code></pre>
+        <div class="card teal"><span class="status green">EVENT</span> <code>...input_audio_transcription.completed</code></div>
+      </div>
+      <div class="caution"><span class="label">DO NOT CONFUSE</span> This is the <b>user's</b> transcript. The <em>assistant's</em> words are <code>response.output_audio_transcript.*</code> &mdash; but in transcription mode there is no assistant, so those never fire. Audio format nests under <code>session.audio.input</code> at GA.</div>
+    </div>
+  </section>
+
+  <!-- ===================== TRANSLATE MODE (WHY A PROXY) ===================== -->
+  <section>
+    <p class="kicker">Mode 2 · an honest constraint</p>
+    <h2>Translate goes through the backend proxy</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><span class="num-badge">1</span>Translation is a <strong>WebSocket</strong> endpoint.</div>
+        <div class="card pink"><span class="num-badge pink">2</span>It needs an <strong>Authorization header</strong> &mdash; browsers cannot set one on a WebSocket.</div>
+        <div class="card amber"><span class="num-badge" style="background:var(--amber)">3</span>Our <code>ek_</code> token is scoped to a <strong>realtime</strong> session, not translation.</div>
+      </div>
+      <div class="stack">
+        <pre><code class="language-text">[browser] --WS /translate--> [FastAPI]
+          [FastAPI] --auth WS + real key--> [OpenAI]</code></pre>
+        <div class="caution"><span class="label">THE FIX</span> The browser opens a plain socket to <b>our</b> backend (no header needed on that leg). The backend holds the key, opens the authenticated OpenAI socket, and relays audio + transcripts both ways.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TRANSLATE EVENTS ===================== -->
+  <section>
+    <p class="kicker">Mode 2 · the wire</p>
+    <h2>Two sessions, three outputs</h2>
+    <div class="cols">
+      <div class="stack">
+        <pre><code class="language-text">conversation.item.input_audio_transcription.delta
+                                 # source sidecar (you)
+session.output_transcript.delta  # target translation
+session.output_audio.delta       # translated audio</code></pre>
+        <div class="card pink">The same mic PCM16 feeds translation plus a <code>gpt-realtime-whisper</code> sidecar. Source language is <strong>auto-detected</strong>.</div>
+      </div>
+      <div class="caution"><span class="label">LIVE API GOTCHA</span> The translation docs list a source-transcript event, but the live socket did not emit it in verification. The transcription sidecar keeps “You said” reliable. Translated audio bytes arrive in <code>event["delta"]</code>, not <code>event["audio"]</code>.</div>
+    </div>
+  </section>
+
+  <!-- ===================== ASSIST: THE TOOL ===================== -->
+  <section>
+    <p class="kicker">Mode 3 · the headline</p>
+    <h2>Assist: give the agent tools</h2>
+    <div class="cols w-svg">
+      <div class="stack">
+        <pre><code class="language-ts">export const getTimeTool = tool({
+  name: "get_time",
+  description: "Get the current time, optionally " +
+    "for an IANA zone. Use when asked the time.",
+  parameters: z.object({
+    timeZone: z.string().nullable()   // strict!
+      .describe("e.g. 'Asia/Tokyo'. Null = local."),
+  }),
+  execute: async ({ timeZone }) =&gt; {
+    const zone = timeZone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const now = new Date().toLocaleTimeString("en-US",
+      { timeZone: zone, hour: "2-digit", minute: "2-digit" });
+    return `The time in ${zone} is ${now}.`; // observation
+  },
+});</code></pre>
+      </div>
+      <div class="stack">
+        <div class="card"><strong>description</strong> tells the model <em>when</em> to call it.</div>
+        <div class="card teal"><strong>execute</strong> is your code; its return is the <em>observation</em>.</div>
+        <div class="card pink"><strong>web_search</strong> calls <code>POST /web-search</code>; the backend runs Responses hosted search without exposing the key.</div>
+        <div class="caution"><span class="label">STRICT SCHEMA</span> Use <code>.nullable()</code>, not <code>.optional()</code>. Realtime tool params must be strict or the call is rejected.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ASSIST: AGENT + SESSION ===================== -->
+  <section>
+    <p class="kicker">Mode 3 · wire it up</p>
+    <h2>Attach the tools, open the session</h2>
+    <div class="cols">
+      <pre><code class="language-ts">const agent = new RealtimeAgent({
+  name: "Capstone Assistant",
+  instructions: "Concise voice assistant. When asked " +
+    "the time, call get_time and say the result. " +
+    "Use web_search for current or changing facts.",
+  tools: [getTimeTool, webSearchTool],
+});
+
+const session = new RealtimeSession(agent, {
+  model: "gpt-realtime-2.1",
+  config: {
+    outputModalities: ["audio"],
+    reasoning: { effort: "low" }, // snappy voice
+  },
+});
+await session.connect({ apiKey: ephemeralKey });</code></pre>
+      <div class="stack">
+        <div class="card">Adding function tools to a <strong>voice</strong> agent is identical to a text agent.</div>
+        <div class="caution"><span class="label">CAUTION</span> The <b>voice</b> is chosen once (in the token route) and <b>cannot change</b> mid-session. <code>effort:"low"</code> keeps latency down (API_FACTS §7).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== THE ReAct LOOP (sequence, inline SVG) ===================== -->
+  <section>
+    <p class="kicker">The one new concept</p>
+    <h2>The ReAct loop: reason &rarr; act &rarr; observe &rarr; respond</h2>
+    <div class="svg-wrap">
+      <svg class="diagram" viewBox="0 0 1120 360" role="img" aria-label="Sequence: you ask the agent; it reasons it needs the clock; acts by calling get_time; the tool returns the time as an observation; the agent responds by speaking it.">
+        <defs>
+          <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+          </marker>
+          <marker id="arr2b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#14b8a6"/>
+          </marker>
+        </defs>
+        <!-- lifelines -->
+        <text x="120" y="44" font-size="18" font-weight="800" fill="#0f172a" text-anchor="middle">You</text>
+        <text x="560" y="44" font-size="18" font-weight="800" fill="#6366f1" text-anchor="middle">Agent (gpt-realtime-2.1)</text>
+        <text x="1000" y="44" font-size="18" font-weight="800" fill="#0f766e" text-anchor="middle">get_time()</text>
+        <line x1="120" y1="58" x2="120" y2="330" stroke="#e2e8f0" stroke-width="2"/>
+        <line x1="560" y1="58" x2="560" y2="330" stroke="#e2e8f0" stroke-width="2"/>
+        <line x1="1000" y1="58" x2="1000" y2="330" stroke="#e2e8f0" stroke-width="2"/>
+        <!-- 1 ask -->
+        <line x1="120" y1="96" x2="560" y2="96" stroke="#334155" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="140" y="88" font-size="15" fill="#334155">"What time is it in Tokyo?"</text>
+        <!-- reason note -->
+        <rect x="430" y="118" width="260" height="34" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+        <text x="560" y="140" font-size="14" fill="#3730a3" text-anchor="middle">reason: I need the clock</text>
+        <!-- 2 act -->
+        <line x1="560" y1="182" x2="1000" y2="182" stroke="#334155" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="580" y="174" font-size="15" fill="#334155">act: get_time({ timeZone: "Asia/Tokyo" })</text>
+        <!-- 3 observe -->
+        <line x1="1000" y1="230" x2="560" y2="230" stroke="#14b8a6" stroke-width="2" marker-end="url(#arr2b)"/>
+        <text x="600" y="222" font-size="15" fill="#0f766e">observe: "...is 09:14 PM."</text>
+        <!-- 4 respond -->
+        <line x1="560" y1="290" x2="120" y2="290" stroke="#334155" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="150" y="282" font-size="15" fill="#334155">respond (spoken): "It's 9:14 PM in Tokyo."</text>
+      </svg>
+    </div>
+    <p class="small center" style="margin-top:6px;">The model cannot know the time on its own. The tool is its senses.</p>
+  </section>
+
+  <!-- ===================== SEEING THE LOOP IN THE UI ===================== -->
+  <section>
+    <p class="kicker">Make it visible</p>
+    <h2>Watch the loop in the app</h2>
+    <div class="cols">
+      <pre><code class="language-ts">session.on("history_updated", (history) =&gt; {
+  const { lines, tools } = flattenHistory(history);
+  setTranscript(lines);   // the conversation
+  setToolEvents(tools);   // ACT / OBSERVE log
+});
+
+// ONE function_call item holds both:
+//   name + arguments -> "ACT"
+//   output (once set) -> "OBSERVE"</code></pre>
+      <div class="stack">
+        <div class="card pink">The <code>AssistPanel</code> renders an <strong>ACT / OBSERVE</strong> log beside the transcript.</div>
+        <div class="caution"><span class="label">CAUTION</span> <code>history_updated</code> fires on <b>every partial word</b>. Keep the handler cheap: transform and <code>setState</code>, nothing heavy.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RUN + DEPLOY ===================== -->
+  <section>
+    <p class="kicker">Ship it</p>
+    <h2>Run and deploy</h2>
+    <div class="cols">
+      <div class="stack">
+        <pre><code class="language-bash"># terminal 1: the backend (Python)
+cd .../08_capstone_multimode/backend
+uv sync
+uv run uvicorn src.main:app --port 8000
+
+# terminal 2: the UI (Node)
+cd ../app && cp .env.local.example .env.local
+npm install &amp;&amp; npm run dev   # localhost:3000</code></pre>
+        <div class="card"><strong>Say:</strong> "What time is it in Tokyo?" and watch the ReAct log.</div>
+      </div>
+      <div class="stack">
+        <div class="card teal"><strong>Key:</strong> <code>OPENAI_API_KEY</code> in the shared <code>.env</code>, read only by the backend.</div>
+        <div class="card"><strong>Backend must run</strong> for all three modes (tokens + <code>WS /translate</code>).</div>
+        <div class="caution"><span class="label">TWO LIMITS</span> Mic needs <b>HTTPS</b> (or localhost). Sessions end at <b>~60 min</b> &mdash; reconnect (API_FACTS §7).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== GOTCHA RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: three modes, two tools, the gotchas</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><strong>Compose</strong><br><span class="small">One app, one live session, a key-remounted mode switch.</span></div>
+        <div class="card"><strong>Secure</strong><br><span class="small">One FastAPI backend (tokens + web search + translate proxy); the browser never holds the real key.</span></div>
+        <div class="card pink"><strong>Act</strong><br><span class="small">Tools + the ReAct loop turn a talker into a doer.</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> No <code>OpenAI-Beta</code> at GA. Assistant audio = <code>response.output_audio.delta</code>. Source captions = <code>...input_audio_transcription.*</code>. Translation target/audio = <code>session.*</code>, with audio in <code>delta</code>. Tool params <b>strict</b> (<code>nullable</code>). Voice locks once. Secrets in server code only.</div>
+    </div>
+  </section>
+
+  <!-- ===================== WHERE TO GO NEXT ===================== -->
+  <section data-auto-animate>
+    <p class="kicker pink">The end of the course</p>
+    <h2>Where to go next</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><span class="num-badge">1</span><strong>Real tools</strong><br><span class="small"><code>get_time</code> runs locally; <code>web_search</code> delegates securely to hosted search.</span></div>
+        <div class="card teal"><span class="num-badge teal">2</span><strong>Handoffs</strong><br><span class="small">Route between multiple agents (a router + specialists).</span></div>
+        <div class="card pink"><span class="num-badge pink">3</span><strong>Guardrails</strong><br><span class="small">Add input/output checks to the <code>RealtimeAgent</code>.</span></div>
+      </div>
+      <div class="stack">
+        <div class="card amber"><span class="num-badge" style="background:var(--amber)">4</span><strong>Broadcast translate</strong><br><span class="small">Fan the translation proxy out to a room of listeners.</span></div>
+        <div class="card green"><span class="num-badge green">5</span><strong>Deploy for real</strong><br><span class="small">HTTPS host, server env var, reconnect at ~55 min.</span></div>
+        <p class="small" style="margin-top:6px;">You now have every piece: audio, sessions, events, transports, a safe backend, a UI, and tools.</p>
+      </div>
+    </div>
+    <p class="center" style="margin-top:16px; font-size:.8em; color:var(--muted);">
+      Now run the app and ask it what time it is. 🎙️ &nbsp;·&nbsp; <code>08_capstone_multimode/app</code>
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

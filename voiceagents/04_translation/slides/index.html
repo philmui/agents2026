@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Translation with gpt-realtime-translate · Voice Agents · Module 04</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback: the course house font. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette (COURSE_DESIGN) ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings          */
+    --body:     #334155;   /* slate-700  body text         */
+    --muted:    #64748b;   /* slate-500  captions          */
+    --primary:  #6366f1;   /* indigo pastel  (primary)     */
+    --accent:   #ec4899;   /* pink pastel    (accent)      */
+    --teal:     #14b8a6;   /* teal           (source side) */
+    --primary-bg:#eef2ff;  /* indigo surface               */
+    --accent-bg: #fdf2f8;  /* pink surface                 */
+    --teal-bg:   #f0fdfa;  /* teal surface                 */
+    --line:     #e2e8f0;   /* hairlines                    */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 800; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; font-weight: 700; }
+  .reveal h3 { font-size: 1.0em; color: var(--primary); font-weight: 700; }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; font-weight: 400; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--primary); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary); margin: 0 0 0.3em;
+  }
+  .kicker.acc { color: var(--accent); }
+
+  /* the one idea, hero band */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--primary-bg), var(--accent-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto; font-weight: 600;
+  }
+  .equation b.primary { color: var(--primary); }
+  .equation b.accent  { color: var(--accent); }
+  .equation b.teal    { color: var(--teal); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--accent); background: var(--accent-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--primary-bg); color: var(--primary); }
+  .pill.acc { background: var(--accent-bg); color: var(--accent); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--primary); border-radius:12px; padding: 14px 18px; }
+  .card.accent { border-left-color: var(--accent); }
+  .card.teal   { border-left-color: var(--teal); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--primary); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--primary); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--primary); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--primary); border-radius: 2px; }
+
+  /* traffic light status chips */
+  .status {
+    display: inline-block; padding: 4px 10px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 700; letter-spacing: .3px;
+  }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red { background: #fee2e2; color: var(--red); }
+
+  /* comparison table */
+  table.compare {
+    font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0;
+  }
+  table.compare th {
+    background: var(--primary-bg); color: var(--primary); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--primary);
+  }
+  table.compare td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+  table.compare code { font-size: 0.92em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 04</p>
+    <h1>Live Translation</h1>
+    <p class="lead" style="margin-top:-.2em;">Speak one language, hear another, in real time</p>
+    <div class="equation" style="margin-top:.5em; font-size:0.9em;">
+      your voice &rarr; <b class="teal">source text</b> + <b class="accent">target text</b> + <b class="primary">translated speech</b>
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">gpt-realtime-translate</span>
+      <span class="pill teal">source auto-detected</span>
+      <span class="pill acc">session.* events</span>
+      <span class="pill idx">WebSocket + mic</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA ===================== -->
+  <section>
+    <p class="kicker">The one idea</p>
+    <h2>Set one language, then just talk</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal">Connect to the <strong>translation endpoint</strong>.</div>
+        <div class="card">Set <strong>one</strong> thing: the language to translate <em>into</em>.</div>
+        <div class="card accent">Stream your mic. Source is <strong>auto-detected</strong>.</div>
+        <div class="card green">Text and speech stream back. No reply step.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.8em;">
+          config = <b class="accent">output.language</b><br>everything else = automatic
+        </div>
+        <p class="small" style="margin-top:12px;">A dedicated session does the whole job: detect, translate, speak. You never ask it for a turn, and every event name wears a <code>session.</code> prefix.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The playing field</p>
+    <h2>Six things to know</h2>
+    <table class="compare">
+      <thead>
+        <tr><th>Concept</th><th>What it does</th><th>When it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Translation endpoint</strong></td><td><code>/realtime/translations</code></td><td>The very first line</td></tr>
+        <tr><td><strong>output.language</strong></td><td>The one setting: target</td><td>In your session.update</td></tr>
+        <tr><td><strong>Auto source</strong></td><td>Detects what you speak</td><td>You set no input language</td></tr>
+        <tr><td><strong>session. prefix</strong></td><td>Every event name</td><td>Send and receive</td></tr>
+        <tr><td><strong>delta carries audio</strong></td><td>Bytes in <code>event["delta"]</code></td><td>Decode and play</td></tr>
+        <tr><td><strong>No response.create</strong></td><td>Streams on its own</td><td>Unlike the assistant</td></tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:10px;">Each row is a place the API bites if you assume it works like Module 03. The <em>Caution</em> slides mark every one.</p>
+  </section>
+
+  <!-- ===================== CONCEPT 1: ENDPOINT ===================== -->
+  <section>
+    <p class="kicker">Concept 1 · A dedicated endpoint</p>
+    <h2>Connect here, not to the general URL</h2>
+    <pre><code class="language-python">TRANSLATE_URL = (
+    "wss://api.openai.com/v1/realtime/translations"
+    "?model=gpt-realtime-translate"
+)
+# wss://           secure WebSocket (a two-way phone call)
+# /translations    THIS path makes it a translation session
+# ?model=...       70+ input languages, 13 output languages</code></pre>
+    <div class="caution" style="margin-top:12px;"><span class="label">CAUTION</span> Module 03 uses <code>/realtime?...</code> plus <code>session.type</code>. Translation is a <b>different endpoint</b>: <code>/realtime/translations</code>. Reuse the old URL and the <code>session.</code> events below never arrive.</div>
+  </section>
+
+  <!-- ===================== CONNECT: WEBSOCKETAPP ===================== -->
+  <section>
+    <p class="kicker">Concept 1 · Opening the call</p>
+    <h2>WebSocketApp + run_forever</h2>
+    <div class="cols w-svg">
+      <pre><code class="language-python">import websocket   # the "websocket-client" package
+
+headers = [f"Authorization: Bearer {api_key}"]
+
+ws = websocket.WebSocketApp(
+    TRANSLATE_URL,
+    header=headers,
+    on_open=self._on_open,       # once, on connect
+    on_message=self._on_message, # every server event
+    on_close=self._on_close,
+)
+ws.run_forever()  # blocks; delivers to callbacks</code></pre>
+      <div class="stack">
+        <div class="card">Callbacks fire on connect, on each message, on close.</div>
+        <div class="caution"><span class="label">CAUTION</span> No <code>OpenAI-Beta</code> header at GA. Send only <code>Authorization</code>.</div>
+        <div class="card teal"><code>run_forever()</code> blocks, so the mic runs on its <strong>own thread</strong>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT 2: CONFIGURE ===================== -->
+  <section>
+    <p class="kicker">Concept 2 · Configure the session</p>
+    <h2>Set only the target language</h2>
+    <div class="cols w-svg">
+      <pre><code class="language-python">session_update = {
+    "type": "session.update",
+    "session": {
+        "audio": {
+            "input": {
+                "format": {"type": "audio/pcm",
+                           "rate": 24000},
+            },
+            "output": {
+                "format": {"type": "audio/pcm",
+                           "rate": 24000},
+                "language": "es",  # THE one knob
+            },
+        },
+    },
+}</code></pre>
+      <div class="stack">
+        <div class="card accent"><code>output.language</code> is the <strong>entire</strong> difference that turns your voice into translated voice.</div>
+        <div class="caution"><span class="label">CAUTION</span> Set only the <b>output</b> language. Do <b>not</b> set an input language: the source is auto-detected.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 13 OUTPUT LANGUAGES ===================== -->
+  <section>
+    <p class="kicker">Concept 2 · The numbers</p>
+    <h2>From 70+, into 13</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><strong>Input:</strong> 70+ languages, auto-detected. You never declare it.</div>
+        <div class="card accent"><strong>Output:</strong> 13 languages. Pick one via <code>output.language</code>.</div>
+        <pre><code class="language-python">LANGUAGE_CODES = {
+    "spanish": "es", "french": "fr",
+    "japanese": "ja", "arabic": "ar",
+    # ...13 total. "es" or "Spanish" both work.
+}</code></pre>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Ask for a target the model does not support and the server sends an <code>error</code> event. Common targets include Spanish, French, Japanese, and Arabic; the <code>LANGUAGE_CODES</code> map wires up friendly names. Trust the server, not a memorized list.</div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT 3: APPEND ===================== -->
+  <section>
+    <p class="kicker">Concept 3 · Stream the mic</p>
+    <h2>session.input_audio_buffer.append</h2>
+    <div class="cols w-svg">
+      <pre><code class="language-python">b64 = base64.b64encode(chunk).decode("ascii")
+
+event = {
+    "type": "session.input_audio_buffer.append",
+    "audio": b64,   # OUTGOING bytes go in "audio"
+}
+ws.send(json.dumps(event))
+# ~50 ms per chunk: 24000 * 0.05 = 1200 samples</code></pre>
+      <div class="stack">
+        <div class="card">Capture PCM16 @ 24 kHz mono. Base64 so it rides inside JSON text.</div>
+        <div class="caution"><span class="label">CAUTION</span> The <code>session.</code> prefix is easy to miss. Send the <b>unprefixed</b> name and the server ignores your audio: no error, just silence.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT 4: TWO THREADS ===================== -->
+  <section>
+    <p class="kicker">Concept 4 · Two threads</p>
+    <h2>Mic and socket at the same time</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><strong>Mic thread</strong><br><span class="small">sounddevice callback drops audio into a queue and returns fast.</span></div>
+        <div class="card"><strong>Sender thread</strong><br><span class="small">Drains the queue, base64-encodes, ws.send.</span></div>
+        <div class="card accent"><strong>Main thread</strong><br><span class="small">Sits in run_forever, receives and plays replies.</span></div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.8em;">
+          mic &rarr; <b class="primary">Queue</b> &rarr; socket
+        </div>
+        <p class="small" style="margin-top:12px;">A thread-safe <code>queue.Queue</code> is the hand-off. Producer/consumer: audio callbacks must be fast, so no network work happens on the mic thread. The same shape powers Module 05.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT 5: DELTA CARRIES ALL ===================== -->
+  <section>
+    <p class="kicker">Concept 5 · Read the replies</p>
+    <h2>Three deltas come back down</h2>
+    <pre><code class="language-python">def _on_message(self, ws, message):
+    event = json.loads(message)
+    etype = event.get("type", "")
+
+    if etype == "session.input_transcript.delta":     # source text
+        self._print_delta("source", "YOU (source):", event.get("delta", ""))
+    elif etype == "session.output_transcript.delta":  # target text
+        self._print_delta("target", "TRANSLATION:", event.get("delta", ""))
+    elif etype == "session.output_audio.delta":       # translated speech
+        pcm = base64.b64decode(event["delta"])        # bytes in "delta"!
+        self.speaker_stream.write(pcm)                # play immediately</code></pre>
+    <p class="small center" style="margin-top:8px;">Source text, target text, and translated audio all arrive as <code>session.*</code> <code>delta</code> events.</p>
+  </section>
+
+  <!-- ===================== THE ASYMMETRY (headline caution) ===================== -->
+  <section>
+    <p class="kicker">The gotcha to memorize</p>
+    <h2>Audio is in <code>delta</code>, not <code>audio</code></h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><span class="status green">UP</span> &nbsp; You <strong>send</strong> mic bytes in <code>event["audio"]</code></div>
+        <div class="card accent"><span class="status amber">DOWN</span> &nbsp; You <strong>receive</strong> audio in <code>event["delta"]</code></div>
+        <pre><code class="language-python"># WRONG on the incoming event:
+event["audio"]   # KeyError / silence
+# RIGHT:
+base64.b64decode(event["delta"])</code></pre>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> It is <code>session.output_audio.delta</code>. A frequent wrong guess is <code>response.audio.delta</code> (does not exist) or <code>session.audio.delta</code>. Hearing nothing? Print <code>etype</code> for every message and confirm the exact string.</div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT 6: PLAYBACK ===================== -->
+  <section>
+    <p class="kicker">Concept 6 · Playing audio back</p>
+    <h2>Open speakers once, write bytes</h2>
+    <div class="cols w-svg">
+      <pre><code class="language-python">self.speaker_stream = sd.RawOutputStream(
+    samplerate=24000, channels=1, dtype="int16"
+)
+self.speaker_stream.start()
+
+# ...per audio delta:
+self.speaker_stream.write(audio_bytes)</code></pre>
+      <div class="stack">
+        <div class="card">A <code>RawOutputStream</code> takes raw PCM16 bytes, exactly what <code>b64decode</code> returns.</div>
+        <div class="card teal">Deltas arrive in order, so writing them as they come plays smoothly.</div>
+        <div class="card amber"><code>Ctrl+C</code>: stop and close both streams in <code>finally:</code> to free the hardware.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT 7: NO RESPONSE.CREATE ===================== -->
+  <section>
+    <p class="kicker">Concept 7 · The missing loop</p>
+    <h2>No <code>response.create</code>: it just streams</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><strong>Assistant (Module 05)</strong><br><span class="small">You send response.create (or VAD fires it); audio returns as response.output_audio.delta.</span></div>
+        <div class="card accent"><strong>Translation (here)</strong><br><span class="small">Configure once, then it continuously turns input into output. You never request a turn.</span></div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Do <b>not</b> send <code>response.create</code> on a translation socket. There is no request/response turn to trigger. Assistant-style events here just produce errors.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SEQUENCE DIAGRAM ===================== -->
+  <section>
+    <p class="kicker">The whole exchange</p>
+    <h2>One connect, then a loop of deltas</h2>
+    <div class="svg-wrap"><img src="assets/translate-sequence.svg" alt="Sequence: app connects to translations, sets output language, then loops mic append up and three session deltas down"></div>
+    <p class="small center" style="margin-top:10px;">Audio goes <strong>up</strong> in <code>audio</code>, and comes back <strong>down</strong> in <code>delta</code>. That asymmetry is the detail to memorize.</p>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section>
+    <p class="kicker">Try it</p>
+    <h2>Run the translator</h2>
+    <pre><code class="language-bash">cd topics/voice_agents/04_translation
+uv sync                                       # build the .venv
+uv run python src/translate.py --to Spanish   # speak; hear Spanish
+
+# no --to? it asks you.  names OR codes work: Japanese / ja
+# wrong device? uv run python src/translate.py --list-devices
+# Ctrl+C stops cleanly and frees the audio hardware</code></pre>
+    <p class="small center" style="margin-top:8px;">Your words appear (source), the translation appears right after (target), and you hear the translated speech, all within a fraction of a second.</p>
+  </section>
+
+  <!-- ===================== MODULE 03 vs 04 CONTRAST ===================== -->
+  <section>
+    <p class="kicker">Transcription vs Translation</p>
+    <h2>What actually changed from Module 03</h2>
+    <table class="compare" style="font-size:0.72em;">
+      <thead>
+        <tr><th></th><th>Module 03 · Transcription</th><th>Module 04 · Translation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Endpoint</strong></td><td><code>/realtime</code> + session.type</td><td><code>/realtime/translations</code></td></tr>
+        <tr><td><strong>Event names</strong></td><td>plain</td><td><code>session.</code>-prefixed</td></tr>
+        <tr><td><strong>Send audio</strong></td><td><code>input_audio_buffer.append</code></td><td><code>session.input_audio_buffer.append</code></td></tr>
+        <tr><td><strong>Get audio back</strong></td><td>no (text only)</td><td><code>session.output_audio.delta</code></td></tr>
+        <tr><td><strong>Audio field in</strong></td><td>n/a</td><td><code>event["delta"]</code> (not "audio")</td></tr>
+        <tr><td><strong>You configure</strong></td><td>transcription model</td><td><code>output.language</code></td></tr>
+      </tbody>
+    </table>
+    <p class="small center" style="margin-top:10px;">Same mic, same PCM16 @ 24 kHz, same two-thread shape. The <em>protocol</em> is what shifts.</p>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: one knob, session events, delta audio</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card teal"><strong>Dedicated endpoint</strong><br><span class="small">/realtime/translations?model=gpt-realtime-translate</span></div>
+        <div class="card"><strong>One knob</strong><br><span class="small">session.audio.output.language; source auto-detected</span></div>
+        <div class="card accent"><strong>session. events</strong><br><span class="small">append (send); input/output transcript + output_audio (receive)</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> Audio is <b>asymmetric</b>: send it in <code>event["audio"]</code>, receive it in <code>event["delta"]</code>. There is <b>no</b> <code>response.create</code> loop. Miss the <code>session.</code> prefix and you get silence, not an error.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA AGAIN ===================== -->
+  <section data-auto-animate>
+    <p class="kicker">The one idea to remember</p>
+    <div class="equation" style="margin-top:.2em; font-size:1.05em;">
+      set <b class="accent">output.language</b> &nbsp;&rarr;&nbsp; stream mic &nbsp;&rarr;&nbsp; read three <b class="primary">session.*</b> deltas
+    </div>
+    <div class="cols" style="margin-top:18px;">
+      <div class="card"><span class="num-badge">1</span><strong>Configure once, then just talk.</strong> The session detects your language, translates, and speaks, with no turn to request.</div>
+      <div class="card teal"><span class="num-badge" style="background:var(--teal)">2</span><strong>Prefix and field are the whole trick.</strong> <code>session.</code> on every event; incoming audio in <code>delta</code>, not <code>audio</code>.</div>
+    </div>
+    <p class="center" style="margin-top:24px; font-size:.8em; color:var(--muted);">
+      Next: Module 05, a full speech-to-speech assistant. &nbsp;·&nbsp; <code>src/translate.py</code>
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

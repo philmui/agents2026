@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Realtime Handshake: Sessions, Events, and the Event Loop</title>
+
+<!-- reveal.js core + bright base theme (CDN, self-contained otherwise) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+
+<!-- Inter (Google Fonts) with a system-sans fallback, per course house style -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+<style>
+  /* ---- Design tokens: Voice Agents pastel palette (COURSE_DESIGN) ---- */
+  :root {
+    --ink:      #0f172a;   /* slate-900  headings              */
+    --body:     #334155;   /* slate-700  body text             */
+    --muted:    #64748b;   /* slate-500  captions              */
+    --primary:  #6366f1;   /* indigo pastel  primary accent    */
+    --accent:   #ec4899;   /* pink pastel    secondary accent  */
+    --teal:     #14b8a6;   /* teal pastel    tertiary accent   */
+    --primary-bg:#eef2ff;  /* indigo surface                   */
+    --accent-bg: #fdf2f8;  /* pink surface                     */
+    --teal-bg:   #f0fdfa;  /* teal surface                     */
+    --line:     #e2e8f0;   /* hairlines                        */
+    --green:    #059669;
+    --amber:    #d97706;
+    --red:      #dc2626;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: var(--body);
+  }
+  .reveal .slides { text-align: left; }
+  /* Top-align all slide content; reserve room for the footer at the bottom.
+     An auto-fit script (see bottom of file) shrinks any slide that still
+     overflows, so content is ALWAYS pinned to the top and never clipped. */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    top: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    padding: 20px 8px 52px !important;
+  }
+  /* Tighter vertical rhythm so dense slides fit 720px before any zoom. */
+  .reveal h2 { margin-bottom: 0.3em; }
+  .kicker { margin: 0 0 0.25em; }
+  .reveal pre { margin: 0.25em 0; }
+  .svg-wrap { padding: 12px; }
+  .stack > * + * { margin-top: 12px; }
+  .card { padding: 12px 16px; }
+
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--ink); font-weight: 700; letter-spacing: -0.5px; text-transform: none; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; font-weight: 800; }
+  .reveal h2 { font-size: 1.35em; margin-bottom: 0.4em; }
+  .reveal h3 { font-size: 1.0em; color: var(--primary); }
+  .reveal p, .reveal li { color: var(--body); line-height: 1.35; }
+  .reveal strong { color: var(--ink); }
+  .reveal em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .reveal a { color: var(--primary); text-decoration: none; }
+
+  /* kicker / section eyebrow */
+  .kicker {
+    font-size: 0.5em; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--primary); margin: 0 0 0.3em;
+  }
+  .kicker.gen { color: var(--accent); }
+
+  /* the one idea, hero band */
+  .equation {
+    font-size: 1.15em; text-align: center; color: var(--ink);
+    background: linear-gradient(120deg, var(--primary-bg), var(--accent-bg));
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 0.7em 0.5em; margin: 0.4em auto;
+  }
+  .equation b.p   { color: var(--primary); }
+  .equation b.a   { color: var(--accent); }
+
+  /* code blocks */
+  .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; margin: 0.3em 0; }
+  .reveal pre code {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px 18px; max-height: none; background: #fbfcfe;
+  }
+  .reveal code { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .reveal :not(pre) > code { color: var(--accent); background: var(--accent-bg); padding: 1px 7px; border-radius: 6px; font-size: 0.85em; }
+
+  /* layout helpers */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+  .cols.w-svg { grid-template-columns: 1.05fr 0.95fr; }
+  .cols.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+  .center { text-align: center; }
+  .svg-wrap { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .svg-wrap img, .svg-wrap svg { width: 100%; height: auto; display: block; }
+  /* Full-width (non-column) SVG slides: cap height so a near-square diagram
+     can never bleed past the footer, independent of img-load timing. */
+  section > .svg-wrap img, section > .svg-wrap svg,
+  section > .autofit > .svg-wrap img, section > .autofit > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+  section > .center > .svg-wrap img, section > .center > .svg-wrap svg,
+  section > .autofit > .center > .svg-wrap img, section > .autofit > .center > .svg-wrap svg { max-height: 540px; width: auto; max-width: 100%; margin: 0 auto; }
+
+  /* pills / cards */
+  .pill { display:inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.62em; font-weight: 700; letter-spacing: .4px; }
+  .pill.idx { background: var(--primary-bg); color: var(--primary); }
+  .pill.gen { background: var(--accent-bg); color: var(--accent); }
+  .pill.teal { background: var(--teal-bg); color: var(--teal); }
+
+  .card { background:#fff; border:1px solid var(--line); border-left: 4px solid var(--primary); border-radius:12px; padding: 14px 18px; }
+  .card.accent { border-left-color: var(--accent); }
+  .card.teal   { border-left-color: var(--teal); }
+  .card.green  { border-left-color: var(--green); }
+  .card.amber  { border-left-color: var(--amber); }
+
+  .stack > * + * { margin-top: 16px; }
+
+  /* caution box */
+  .caution {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+    padding: 12px 18px; font-size: 0.78em; color: #78350f;
+  }
+  .caution b { color: #92400e; }
+  .caution .label { color: var(--amber); font-weight: 800; letter-spacing: .5px; }
+
+  /* number-led steps */
+  .num-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 1.7em; height: 1.7em; border-radius: 50%;
+    background: var(--primary); color:#fff; font-weight:700; font-size:0.7em; margin-right:.4em;
+  }
+
+  ul.tight { margin: 0; }
+  ul.tight li { margin: 0.18em 0; font-size: 0.92em; }
+  .small { font-size: 0.72em; color: var(--muted); }
+  .lead  { font-size: 1.05em; color: var(--body); }
+
+  /* footer attribution on every slide */
+  .reveal .footer {
+    position: fixed; bottom: 14px; left: 26px;
+    font-size: 13px; color: var(--muted); letter-spacing: .3px; z-index: 30;
+  }
+  .reveal .footer b { color: var(--primary); font-weight: 700; }
+  .reveal .slide-number { color: var(--muted) !important; font-size: 13px; }
+
+  /* title slide */
+  #title .equation { font-size: 1.0em; }
+  .title-badges { margin-top: 18px; }
+  .title-badges .pill { margin-right: 8px; }
+
+  /* title-slide attribution */
+  .attribution {
+    margin-top: 22px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.62em; color: var(--muted); letter-spacing: .3px;
+  }
+  .attribution .by { font-weight: 700; color: var(--ink); letter-spacing: .2px; }
+  .attribution .by b { color: var(--primary); }
+  .attribution .rule { flex: 0 0 38px; height: 2px; background: var(--primary); border-radius: 2px; }
+
+  /* status chips */
+  .status {
+    display: inline-block; padding: 4px 10px; border-radius: 8px;
+    font-size: 0.7em; font-weight: 700; letter-spacing: .3px;
+  }
+  .status.green { background: #d1fae5; color: var(--green); }
+  .status.amber { background: #fef3c7; color: var(--amber); }
+  .status.red { background: #fee2e2; color: var(--red); }
+
+  /* concept-map table */
+  table.compare {
+    font-size: 0.68em; border-collapse: collapse; width: 100%; margin: 0.5em 0;
+  }
+  table.compare th {
+    background: var(--primary-bg); color: var(--primary); font-weight: 700;
+    padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--primary);
+  }
+  table.compare td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.compare tr:last-child td { border-bottom: none; }
+
+  /* two-direction event badges */
+  .evt { display:flex; align-items:center; gap:10px; }
+  .evt .dir {
+    flex: 0 0 auto; font-size: 0.62em; font-weight: 800; letter-spacing:.4px;
+    padding: 3px 9px; border-radius: 8px;
+  }
+  .evt .dir.out { background: var(--primary-bg); color: var(--primary); }  /* client -> server */
+  .evt .dir.in  { background: var(--teal-bg);   color: var(--teal); }      /* server -> client */
+  .evt code { font-size: 0.82em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+  <div class="footer">&copy; <b>mui-group</b></div>
+  <div class="slides">
+
+  <!-- ===================== TITLE ===================== -->
+  <section id="title" data-auto-animate>
+    <p class="kicker">Voice Agents · Module 02</p>
+    <h1>The Realtime Handshake</h1>
+    <p class="lead" style="margin-top:-.2em;">Sessions, events, and the event loop (no audio yet)</p>
+    <div class="equation" style="margin-top:.5em; font-size:0.92em;">
+      one <b class="p">session</b> &nbsp;+&nbsp; many <b class="a">events</b> &nbsp;=&nbsp; the Realtime API
+    </div>
+    <div class="title-badges center">
+      <span class="pill idx">WebSocket</span>
+      <span class="pill idx">websocket-client</span>
+      <span class="pill gen">session.update</span>
+      <span class="pill teal">gpt-realtime-2.1</span>
+    </div>
+    <div class="attribution"><span class="rule"></span><span class="by">Built by <b>mui-group</b></span><span>· Advanced high school students</span></div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA ===================== -->
+  <section>
+    <p class="kicker">The one idea</p>
+    <h2>It is a conversation between two computers</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card">Open <strong>one</strong> long-lived connection: a <em>session</em>.</div>
+        <div class="card accent">Trade small JSON messages: <em>events</em>.</div>
+        <div class="card teal">Send any time, receive any time: an <em>event loop</em>.</div>
+      </div>
+      <div>
+        <div class="equation" style="font-size:0.9em;">
+          <b class="p">session</b><br>+ <b class="a">events</b><br>= Realtime API
+        </div>
+        <p class="small" style="margin-top:12px;">No audio in this module. We connect, configure once, and learn to <em>read the event stream</em>. Reading events is how you debug everything later.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPT MAP ===================== -->
+  <section>
+    <p class="kicker">The vocabulary</p>
+    <h2>Seven words, one protocol</h2>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>What it does</th>
+          <th>When it matters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Session</strong></td><td>One WebSocket that stays open</td><td>Holds settings + history</td></tr>
+        <tr><td><strong>WebSocket</strong></td><td>Two-way pipe, either side pushes</td><td>Low-latency back-and-forth</td></tr>
+        <tr><td><strong>Event</strong></td><td>One JSON object with a <code>type</code></td><td>The only thing on the wire</td></tr>
+        <tr><td><strong>Client event</strong></td><td>A message you send</td><td>You configure or drive</td></tr>
+        <tr><td><strong>Server event</strong></td><td>A message the API sends you</td><td>Your window into the API</td></tr>
+        <tr><td><strong>Event loop</strong></td><td>Send-any-time, receive-any-time</td><td>No fixed request order</td></tr>
+        <tr><td><code>session.update</code></td><td>Configures the session</td><td>Right after connecting</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== HTTP vs WEBSOCKET ===================== -->
+  <section>
+    <p class="kicker">Why a WebSocket</p>
+    <h2>Letters vs a phone call</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card amber"><strong>HTTP</strong>: one request, one reply, done.<br><span class="small">Like mailing a letter. Fine for a page, clumsy for a live chat.</span></div>
+        <div class="card teal"><strong>WebSocket</strong>: line stays open, both talk.<br><span class="small">Like a phone call. One open <em>session</em> either side can push to.</span></div>
+      </div>
+      <div class="caution"><span class="label">CAUTION</span> Use <code>wss://</code>, not <code>ws://</code>. The extra <b>s</b> is TLS encryption, exactly like <code>https</code> vs <code>http</code>. Your API key rides this connection, so it must be the secure form.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE HANDSHAKE (SEQUENCE) ===================== -->
+  <section>
+    <p class="kicker">The handshake · read top to bottom</p>
+    <h2>Connect, then trade four messages</h2>
+    <div class="cols narrow-left">
+      <pre><code class="language-text">Your code            Realtime API
+   |                       |
+   |==== WS connect =====> |   Authorization: Bearer
+   |                       |
+   | <=== session.created =|   id + defaults
+   |                       |
+   |==== session.update ==>|   instructions
+   |                       |
+   | <=== session.updated =|   config accepted
+   |                       |
+   |   ( session stays open )
+</code></pre>
+      <div class="stack">
+        <div class="evt"><span class="dir out">CLIENT→</span> <span>Connect the WebSocket</span></div>
+        <div class="evt"><span class="dir in">←SERVER</span> <code>session.created</code></div>
+        <div class="evt"><span class="dir out">CLIENT→</span> <code>session.update</code></div>
+        <div class="evt"><span class="dir in">←SERVER</span> <code>session.updated</code></div>
+        <p class="small" style="margin-top:6px;">Four beats. In a real app the session keeps trading events; our demo stops here.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EVENTS: TWO DIRECTIONS ===================== -->
+  <section>
+    <p class="kicker">Everything is a typed message</p>
+    <h2>Events flow in two directions</h2>
+    <div class="cols">
+      <div class="stack">
+        <h3>You send (client)</h3>
+        <div class="evt"><span class="dir out">OUT</span> <code>session.update</code></div>
+        <div class="evt"><span class="dir out">OUT</span> <code>input_audio_buffer.append</code></div>
+        <div class="evt"><span class="dir out">OUT</span> <code>response.create</code></div>
+      </div>
+      <div class="stack">
+        <h3>You receive (server)</h3>
+        <div class="evt"><span class="dir in">IN</span> <code>session.created</code></div>
+        <div class="evt"><span class="dir in">IN</span> <code>session.updated</code></div>
+        <div class="evt"><span class="dir in">IN</span> <code>error</code></div>
+      </div>
+    </div>
+    <p class="small center" style="margin-top:12px;">Read <code>event["type"]</code> first, always. Later modules add audio events on this same loop.</p>
+  </section>
+
+  <!-- ===================== LOAD THE KEY SAFELY ===================== -->
+  <section>
+    <p class="kicker">Secrets · one shared .env</p>
+    <h2>Load the key, never hard-code it</h2>
+    <pre><code class="language-python">from dotenv import find_dotenv, load_dotenv
+
+# find_dotenv() walks UP the folders until it finds ".env".
+# The whole course shares ONE .env at topics/voice_agents/.
+load_dotenv(find_dotenv())
+
+import os
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")  # None if missing</code></pre>
+    <div class="caution"><span class="label">CAUTION</span> A raw <code>Authorization: Bearer &lt;key&gt;</code> is safe <b>only server-side</b> (your machine). Never ship the real key to a browser. Modules 06-07 mint a short-lived <code>ek_...</code> token for the browser instead.</div>
+  </section>
+
+  <!-- ===================== WEBSOCKETAPP + CALLBACKS ===================== -->
+  <section>
+    <p class="kicker">The library · websocket-client</p>
+    <h2>Four callbacks are the whole program</h2>
+    <div class="cols">
+      <pre><code class="language-python">import websocket  # the "websocket-client" package
+
+def on_open(ws):        # ONCE, when connected
+    ...                 #   -> send session.update
+def on_message(ws, m):  # EVERY server event
+    ...                 #   -> parse + print (the loop)
+def on_error(ws, e):  ...
+def on_close(ws, c, r): ...
+
+ws = websocket.WebSocketApp(
+    WS_URL,
+    header=[f"Authorization: Bearer {KEY}"],
+    on_open=on_open, on_message=on_message,
+    on_error=on_error, on_close=on_close,
+)
+ws.run_forever()   # connect, then loop</code></pre>
+      <div class="stack">
+        <div class="card"><code>header=</code> is <strong>singular</strong> and takes a <strong>list</strong> of <code>"Name: value"</code> strings, not a dict.</div>
+        <div class="card teal"><code>run_forever()</code> connects, then <strong>blocks</strong>, calling <code>on_message</code> for each event until close.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SENDING session.update ===================== -->
+  <section>
+    <p class="kicker">The one client event we send</p>
+    <h2>session.update: configure, then stop</h2>
+    <div class="cols">
+      <pre><code class="language-python">import json
+
+SESSION_UPDATE = {
+    "type": "session.update",
+    "session": {
+        "type": "realtime",   # normal session
+        "instructions": "Friendly class helper.",
+        "output_modalities": ["text"],  # no audio
+    },
+}
+
+def on_open(ws):
+    # dict -> JSON text -> onto the socket
+    ws.send(json.dumps(SESSION_UPDATE))</code></pre>
+      <div class="caution"><span class="label">CAUTION</span> The <code>session</code> object carries its own <code>"type"</code>. For speech/text it is <code>"realtime"</code>; transcription uses <code>"transcription"</code> (Module 03). Omitting or mis-typing it triggers an <code>error</code> event.</div>
+    </div>
+  </section>
+
+  <!-- ===================== READING EVENTS = DEBUGGING ===================== -->
+  <section>
+    <p class="kicker">The superpower of the whole course</p>
+    <h2>on_message: print, then react</h2>
+    <div class="cols">
+      <pre><code class="language-python">def on_message(ws, message):
+    event = json.loads(message)          # text -> dict
+    etype = event.get("type", "<none>")  # read type
+    print(etype)                          # your window
+
+    if etype == "error":                  # API rejected
+        print(event["error"])             # what + why
+
+    if etype == "session.updated":        # accepted
+        ws.close()                        # demo done</code></pre>
+      <div class="stack">
+        <div class="card green"><span class="status green">HABIT</span> When audio or tools misbehave later, <strong>print the event stream first</strong>.</div>
+        <div class="card"><code>error</code> events carry <code>code</code> + <code>message</code>. A <code>401</code> means a bad key or free tier.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TWO GA GOTCHAS ===================== -->
+  <section>
+    <p class="kicker">Two facts that bite</p>
+    <h2>GA changed two things</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card accent"><strong>Model is <code>gpt-realtime-2.1</code></strong><br><span class="small">Chosen in the URL: <code>?model=gpt-realtime-2.1</code>. Old DataCamp name was <code>gpt-realtime-2</code>.</span></div>
+        <div class="card"><strong>No <code>OpenAI-Beta</code> header</strong><br><span class="small">The beta needed <code>OpenAI-Beta: realtime=v1</code>. At GA it is gone. Send only <code>Authorization</code>.</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> The only required header is <code>Authorization: Bearer &lt;key&gt;</code>. Optionally add <code>OpenAI-Safety-Identifier</code> (a hashed user id) for production abuse tracking.</div>
+    </div>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section>
+    <p class="kicker">Run the demo</p>
+    <h2>Two commands, one clean handshake</h2>
+    <pre><code class="language-bash">uv sync                             # create .venv, install 2 deps
+uv run python src/handshake_ws.py   # connect, print the events</code></pre>
+    <pre><code class="language-text">[connect] wss://api.openai.com/v1/realtime?model=gpt-realtime-2.1
+[open] WebSocket connected. Sending session.update ...
+session.created      server opened session id=sess_...
+session.updated      server accepted our session.update
+[done] Handshake complete. Closing.</code></pre>
+    <p class="small center" style="margin-top:8px;">You just held a two-computer conversation, and you can read every word of it.</p>
+  </section>
+
+  <!-- ===================== RECAP ===================== -->
+  <section>
+    <p class="kicker">What you learned</p>
+    <h2>Recap: sessions, events, the loop</h2>
+    <div class="cols">
+      <div class="stack">
+        <div class="card"><strong>Session</strong><br><span class="small">One long-lived <code>wss://</code> WebSocket that holds your settings and history.</span></div>
+        <div class="card accent"><strong>Events</strong><br><span class="small">Typed JSON: client events you send, server events you receive.</span></div>
+        <div class="card teal"><strong>The loop</strong><br><span class="small"><code>WebSocketApp</code> + <code>on_open</code> + <code>on_message</code>; <code>run_forever()</code> drives it.</span></div>
+      </div>
+      <div class="caution"><span class="label">REMEMBER</span> Handshake = <b>connect → session.created → session.update → session.updated</b>. Model is <code>gpt-realtime-2.1</code>; <b>no</b> <code>OpenAI-Beta</code> header. Reading the event stream is how you debug every later module.</div>
+    </div>
+  </section>
+
+  <!-- ===================== THE ONE IDEA AGAIN ===================== -->
+  <section data-auto-animate>
+    <p class="kicker">The one idea to remember</p>
+    <div class="equation" style="margin-top:.2em; font-size:1.05em;">
+      one <b class="p">session</b> &nbsp;+&nbsp; many <b class="a">events</b> &nbsp;=&nbsp; the Realtime API
+    </div>
+    <div class="cols" style="margin-top:18px;">
+      <div class="card"><span class="num-badge">1</span><strong>Open once, then trade typed JSON events in a loop.</strong> There is no fixed request/response order.</div>
+      <div class="card teal"><span class="num-badge" style="background:var(--teal)">2</span><strong>Print every server event.</strong> That habit is your debugger for transcription, translation, and the voice assistant to come.</div>
+    </div>
+    <p class="center" style="margin-top:24px; font-size:.8em; color:var(--muted);">
+      Next: Module 03 adds a microphone. 🎙️ &nbsp;·&nbsp; <code>src/handshake_ws.py</code>
+    </p>
+  </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    transition: 'slide',
+    plugins: [RevealHighlight, RevealNotes],
+  });
+
+  /* ---- Auto-fit: content pinned to TOP, never clipped ----
+     reveal.js gives each slide a fixed 720px-tall box. We wrap every slide's
+     content in a .autofit div, measure ITS natural height (independent of the
+     box), and if it exceeds the available height we scale it down with `zoom`.
+     Result: content always starts at the top and the bottom never spills past
+     the footer. Re-runs after SVGs/fonts settle and on every slide change. */
+  (function () {
+    const SLIDE_H = 720, PAD_TOP = 20, PAD_BOTTOM = 52, MIN_ZOOM = 0.5;
+    const AVAIL = SLIDE_H - PAD_TOP - PAD_BOTTOM;   // usable content height
+    function wrap(section) {
+      if (section.querySelector(':scope > .autofit')) return section.querySelector(':scope > .autofit');
+      const w = document.createElement('div');
+      w.className = 'autofit';
+      w.style.cssText = 'width:100%;transform-origin:top center;';
+      while (section.firstChild) w.appendChild(section.firstChild);
+      section.appendChild(w);
+      return w;
+    }
+    function fit(section) {
+      if (!section) return;
+      const w = wrap(section);
+      w.style.zoom = '';
+      const h = w.scrollHeight;
+      w.style.zoom = h > AVAIL + 1 ? Math.max(MIN_ZOOM, AVAIL / h).toFixed(4) : '';
+    }
+    function fitAll() { document.querySelectorAll('.reveal .slides > section').forEach(fit); }
+    Reveal.on('ready', () => { fitAll(); requestAnimationFrame(fitAll); setTimeout(fitAll, 350); });
+    Reveal.on('slidechanged', (e) => { fit(e.currentSlide); requestAnimationFrame(() => fit(e.currentSlide)); });
+    window.addEventListener('resize', fitAll);
+    window.addEventListener('load', () => setTimeout(fitAll, 200));
+    document.querySelectorAll('.reveal .slides img').forEach((img) => {
+      img.addEventListener('load', () => fit(img.closest('section')));
+    });
+  })();
+</script>
+</body>
+</html>

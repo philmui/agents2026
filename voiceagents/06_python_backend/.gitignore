@@ -1,0 +1,11 @@
+# Shared secrets live in ../.env — never commit them.
+.env
+
+# Python virtual environment + caches
+.venv/
+__pycache__/
+*.pyc
+
+# Node / Next.js (harmless here; kept for parity across modules)
+node_modules/
+.next/

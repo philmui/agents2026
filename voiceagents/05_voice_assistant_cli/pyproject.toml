@@ -1,0 +1,52 @@
+[project]
+name = "voice-assistant-cli"
+version = "0.1.0"
+description = "Voice Agents Module 05: a full-duplex terminal voice assistant over the OpenAI Realtime API (gpt-realtime-2.1) with semantic VAD and barge-in."
+requires-python = ">=3.11"
+dependencies = [
+    # --- The Realtime transport ---------------------------------------------
+    # We talk to OpenAI over a WebSocket. `websocket-client` is the simplest,
+    # most beginner-friendly WebSocket library for Python: it gives us a plain
+    # object with .send(), .recv(), and callbacks. (The async `websockets`
+    # library also works, but callbacks read more clearly for a first assistant.)
+    "websocket-client>=1.7",
+
+    # --- Microphone in, speakers out ----------------------------------------
+    # `sounddevice` is a thin, friendly wrapper over the PortAudio library. It
+    # lets us open an input stream (the mic) and an output stream (the speakers)
+    # and move raw audio samples in and out as NumPy arrays.
+    "sounddevice>=0.4.6",
+
+    # --- Fast number crunching for audio ------------------------------------
+    # Audio is just a long list of numbers. NumPy lets us hold those numbers in
+    # a compact array and convert them to raw bytes (and back) in one fast call.
+    "numpy>=1.26",
+
+    # --- Load the shared .env one folder up ----------------------------------
+    # `python-dotenv` reads the shared secrets file at topics/voice_agents/.env
+    # so your OPENAI_API_KEY never has to live inside this module.
+    "python-dotenv>=1.0",
+]
+
+# ---------------------------------------------------------------------------
+# HOW TO USE THIS FILE
+#
+#   uv sync            reads this file, creates a .venv in this folder, and
+#                      installs the four dependencies above.
+#   uv run python src/voice_assistant.py    runs the assistant inside that .venv.
+#
+# REPRODUCIBILITY NOTE: the versions above are lower bounds (">="), so `uv sync`
+# installs the LATEST compatible release of each package. That keeps the tutorial
+# current, but it is not byte-for-byte reproducible on its own.
+#
+# `uv sync` also writes a `uv.lock` capturing the EXACT versions it resolved.
+# Commit that uv.lock next to this file to pin the environment: from then on
+# `uv sync` reinstalls the locked set verbatim, so a classmate (or future you)
+# gets an identical setup. To move forward deliberately, run `uv lock --upgrade`
+# and re-test the assistant.
+#
+# No [build-system] table: this is a runnable tutorial, not a package to publish,
+# so uv treats it as a non-packaged project (see [tool.uv] below).
+# ---------------------------------------------------------------------------
+[tool.uv]
+package = false

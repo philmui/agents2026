@@ -1,0 +1,239 @@
+/* ---------------------------------------------------------------------------
+   Global styles for the capstone app. We reuse the course's pastel-on-white
+   palette (the same tokens as the slide decks) so the app and slides match.
+   Beginners: these are plain CSS variables and classes. React components below
+   just attach these class names.
+--------------------------------------------------------------------------- */
+
+:root {
+  --ink: #0f172a; /* headings           */
+  --body: #334155; /* body text          */
+  --muted: #64748b; /* captions           */
+  --primary: #6366f1; /* indigo pastel      */
+  --accent: #ec4899; /* pink pastel        */
+  --teal: #14b8a6; /* teal pastel        */
+  --surface-indigo: #eef2ff;
+  --surface-pink: #fdf2f8;
+  --surface-teal: #f0fdfa;
+  --line: #e2e8f0; /* hairlines          */
+  --ok: #059669;
+  --warn: #d97706;
+  --bad: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: var(--body);
+  /* next/font sets the Inter class on <body>; this is the system fallback. */
+  font-family: Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  line-height: 1.45;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  font-weight: 700;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin: 0 0 0.35em;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 1.05rem;
+  margin-top: 0;
+}
+
+/* --- Mode switch (Transcribe | Translate | Assist) --- */
+.mode-switch {
+  display: inline-flex;
+  gap: 6px;
+  background: var(--surface-indigo);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px;
+  margin: 20px 0 28px;
+}
+
+.mode-switch button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mode-switch button:hover {
+  color: var(--ink);
+}
+
+.mode-switch button.active {
+  background: #ffffff;
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+/* --- Cards / panels --- */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--primary);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin: 16px 0;
+}
+
+.card.teal {
+  border-left-color: var(--teal);
+}
+.card.pink {
+  border-left-color: var(--accent);
+}
+
+/* --- Buttons --- */
+.btn {
+  border: none;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn.danger {
+  background: var(--bad);
+  color: #fff;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+
+/* --- Status pill --- */
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--surface-indigo);
+  color: var(--primary);
+}
+.status.live {
+  background: #d1fae5;
+  color: var(--ok);
+}
+.status.error {
+  background: #fee2e2;
+  color: var(--bad);
+}
+
+/* --- Transcript / output area --- */
+.transcript {
+  background: #fbfcfe;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-height: 140px;
+  white-space: pre-wrap;
+  font-size: 0.98rem;
+  color: var(--body);
+}
+.transcript .partial {
+  color: var(--muted);
+}
+.transcript .turn {
+  margin: 0 0 10px;
+}
+.transcript .turn b {
+  color: var(--primary);
+}
+
+/* --- Caution callout (matches the slide/tutorial style) --- */
+.caution {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 0.9rem;
+  color: #78350f;
+  margin: 16px 0;
+}
+.caution b {
+  color: #92400e;
+}
+
+/* --- Inline code + code blocks --- */
+code {
+  font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+:not(pre) > code {
+  color: var(--primary);
+  background: var(--surface-indigo);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.footer b {
+  color: var(--primary);
+}

@@ -1,0 +1,18 @@
+# Node / Next.js build + deps
+node_modules/
+.next/
+out/
+build/
+next-env.d.ts.timestamp
+*.tsbuildinfo
+
+# Local env files (never commit secrets). The shared key lives in
+# ../../.env (topics/voice_agents/.env); a Next-local override would go here.
+.env
+.env.local
+.env*.local
+
+# Logs + OS cruft
+npm-debug.log*
+yarn-error.log*
+.DS_Store

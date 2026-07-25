@@ -1,0 +1,19 @@
+# Shared secret — never commit. The one key lives at topics/voice_agents/.env
+.env
+.env.local
+.env*.local
+
+# Node / Next.js (the app lives in app/)
+node_modules/
+.next/
+out/
+build/
+
+# Python (only if you run the optional standalone backend / uv here)
+.venv/
+__pycache__/
+*.pyc
+
+# OS + logs
+.DS_Store
+npm-debug.log*

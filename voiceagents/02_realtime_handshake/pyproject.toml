@@ -1,0 +1,35 @@
+[project]
+name = "realtime-handshake"
+version = "0.1.0"
+description = "Voice Agents Module 02: open a Realtime API WebSocket session and read the server event stream (no audio yet)."
+requires-python = ">=3.11"
+dependencies = [
+    # --- The two dependencies this module needs, and nothing more ---
+
+    # websocket-client gives us the `websocket` module, including WebSocketApp:
+    # a small, callback-based WebSocket client. Every server-side Python module
+    # in this course (02-05) uses it, so we learn it once here.
+    "websocket-client>=1.7",
+
+    # python-dotenv reads the shared ../../.env so our OpenAI key never gets
+    # hard-coded into the source. We call load_dotenv(find_dotenv()).
+    "python-dotenv>=1.0",
+]
+
+# `uv sync` reads this file, creates a .venv next to it, and installs the
+# dependencies above. Then `uv run python src/handshake_ws.py` runs the demo
+# inside that environment (no manual `activate` needed).
+#
+# REPRODUCIBILITY NOTE: the versions above are lower bounds (">=") so `uv sync`
+# installs the LATEST compatible release. That keeps the tutorial current, but
+# it is not byte-for-byte reproducible on its own.
+#
+# `uv sync` also writes a `uv.lock` capturing the EXACT versions it resolved.
+# Commit that uv.lock next to this file to pin the environment: from then on
+# `uv sync` reinstalls the locked set verbatim, so a classmate (or future you)
+# gets an identical setup. To move forward later, run `uv lock --upgrade`.
+#
+# No [build-system] table: this is a runnable tutorial, not a library to be
+# built and published, so uv treats it as a non-packaged project.
+[tool.uv]
+package = false

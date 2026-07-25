@@ -1,0 +1,40 @@
+[project]
+name = "voice-agents-06-python-backend"
+version = "0.1.0"
+description = "Voice Agents Module 06: a FastAPI backend that mints short-lived ephemeral (ek_) OpenAI Realtime tokens so the browser never sees the real API key."
+requires-python = ">=3.11"
+dependencies = [
+    # --- The web server ---
+    "fastapi",                 # the web framework: routes, JSON validation, auto /docs
+    "uvicorn[standard]",       # the ASGI server that runs FastAPI. [standard] pulls in
+    #                            fast extras (uvloop, httptools, websockets, watchfiles)
+    #                            so `--reload` and performance work out of the box.
+
+    # --- Talking to OpenAI, server-to-server ---
+    "httpx",                   # async HTTP client used to call OpenAI's client_secrets endpoint
+
+    # --- Secrets ---
+    "python-dotenv",           # load the ONE shared ../.env via load_dotenv(find_dotenv())
+]
+
+# ---------------------------------------------------------------------------
+# HOW TO USE THIS FILE
+#
+#   uv sync                                   # create .venv and install the deps above
+#   uv run uvicorn src.main:app --reload --port 8000
+#
+# `uv sync` reads this file, creates a local .venv/, and resolves the packages.
+#
+# REPRODUCIBILITY NOTE: the versions above are unpinned (no ">=x.y"), so `uv sync`
+# installs the LATEST compatible release of each. That keeps the tutorial current,
+# but it is NOT byte-for-byte reproducible on its own: a future resolve could pick
+# a newer release whose API differs. `uv sync` writes a `uv.lock` capturing the
+# EXACT versions it resolved — commit that uv.lock next to this file to pin the
+# environment so a classmate (or future you) gets an identical install. To move
+# forward deliberately later, run `uv lock --upgrade` and re-test the server.
+#
+# No [build-system] table: this is an application (a runnable server), not a
+# library to be built and published, so uv treats it as a non-packaged project.
+# ---------------------------------------------------------------------------
+[tool.uv]
+package = false

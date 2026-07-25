@@ -1,0 +1,33 @@
+[project]
+name = "voice-agents-09-capstone-openai"
+version = "0.1.0"
+description = "Voice Agents: a web app with three OpenAI Realtime modes (Transcribe / Translate / Assist), using the OpenAI Agents SDK for Assist web search and full Langfuse telemetry."
+requires-python = ">=3.11,<3.15"
+
+# ---------------------------------------------------------------------------
+# READ ME FIRST — this module has TWO runnable pieces, in two subfolders:
+#
+#   backend/  -> the FastAPI server (Python). Mints ek_ tokens, runs the OpenAI
+#                Agents SDK web-search agent, AND proxies the translation
+#                WebSocket. It is its OWN uv project:
+#                    cd backend && uv sync && uv run uvicorn src.main:app --port 8000
+#
+#   app/      -> the Next.js UI (Node). Install and run:
+#                    cd app && cp .env.local.example .env.local && npm install && npm run dev
+#
+# So why is there a pyproject.toml at THIS (parent) level too? HOUSE STYLE: every
+# module folder in this course carries a pyproject.toml so the layout is uniform
+# and tools that scan the repo behave predictably. The actual Python dependencies
+# live in backend/pyproject.toml; you run `uv sync` in backend/, not here.
+#
+# The Python range is capped at <3.15 to match backend/ (the
+# openinference-instrumentation-openai-agents package requires < 3.15).
+# ---------------------------------------------------------------------------
+dependencies = []
+
+# `uv sync` would create an empty .venv here; you normally will not run it in
+# this parent folder (run it in backend/ instead). Kept for parity with the other
+# modules. `package = false` tells uv this is an application/tutorial workspace,
+# not a library to build/publish.
+[tool.uv]
+package = false

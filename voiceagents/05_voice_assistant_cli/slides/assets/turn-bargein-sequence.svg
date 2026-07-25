@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" font-family="Inter, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Sequence diagram: you append mic audio, VAD ends the turn and auto-creates a response, audio and transcript stream down, then you barge in and the client cancels and truncates">
+  <defs>
+    <marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- actor headers -->
+  <g text-anchor="middle" font-weight="700" font-size="15">
+    <rect x="55"  y="16" width="150" height="40" rx="10" fill="#f0fdfa" stroke="#99f6e4"/>
+    <text x="130" y="41" fill="#0f766e">You (mic + ears)</text>
+    <rect x="560" y="16" width="160" height="40" rx="10" fill="#fdf2f8" stroke="#fbcfe8"/>
+    <text x="640" y="41" fill="#be185d">gpt-realtime-2.1</text>
+  </g>
+
+  <!-- lifelines -->
+  <g stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 5">
+    <line x1="130" y1="56" x2="130" y2="452"/>
+    <line x1="640" y1="56" x2="640" y2="452"/>
+  </g>
+
+  <g font-size="13" text-anchor="middle">
+    <!-- append up -->
+    <line x1="130" y1="90" x2="636" y2="90" stroke="#0d9488" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="383" y="82" fill="#0f766e" font-weight="700">input_audio_buffer.append &#183; audio</text>
+
+    <!-- speech_stopped (VAD) -->
+    <line x1="640" y1="128" x2="134" y2="128" stroke="#475569" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="387" y="120" fill="#334155">speech_stopped &#183; VAD ends your turn</text>
+
+    <!-- note: server auto-creates a response -->
+    <rect x="470" y="142" width="250" height="26" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="595" y="159" font-size="12" fill="#4338ca">server auto-fires response.create</text>
+
+    <!-- output_audio.delta down -->
+    <line x1="640" y1="200" x2="134" y2="200" stroke="#ec4899" stroke-width="2.5" marker-end="url(#ar5)"/>
+    <text x="387" y="192" fill="#be185d" font-weight="700">response.output_audio.delta &#183; delta (play)</text>
+
+    <!-- output transcript down -->
+    <line x1="640" y1="238" x2="134" y2="238" stroke="#475569" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="387" y="230" fill="#334155">response.output_audio_transcript.delta &#183; text</text>
+  </g>
+
+  <!-- barge-in box -->
+  <rect x="70" y="262" width="640" height="180" rx="10" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+  <path d="M70 262 h96 v20 l-14 12 h-82 z" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="82" y="279" font-size="12" font-weight="700" fill="#92400e">barge-in</text>
+  <text x="176" y="279" font-size="12" fill="#b45309">you start talking again</text>
+
+  <g font-size="13" text-anchor="middle">
+    <!-- speech_started up (from server, but shown as client-observed cut-in) -->
+    <line x1="640" y1="316" x2="134" y2="316" stroke="#d97706" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="387" y="308" fill="#b45309" font-weight="700">input_audio_buffer.speech_started</text>
+
+    <!-- response.cancel -->
+    <line x1="130" y1="356" x2="636" y2="356" stroke="#dc2626" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="383" y="348" fill="#b91c1c" font-weight="700">response.cancel  (stop generating)</text>
+
+    <!-- truncate -->
+    <line x1="130" y1="396" x2="636" y2="396" stroke="#dc2626" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="383" y="388" fill="#b91c1c" font-weight="700">conversation.item.truncate &#183; audio_end_ms</text>
+
+    <!-- local clear note -->
+    <rect x="40" y="410" width="200" height="24" rx="6" fill="#fee2e2" stroke="#fecaca"/>
+    <text x="140" y="426" font-size="11.5" fill="#b91c1c">+ clear local playback queue</text>
+  </g>
+</svg>

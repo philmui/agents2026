@@ -1,0 +1,40 @@
+[project]
+name = "voice-foundations"
+version = "0.1.0"
+description = "Voice Agents · Module 01: what voice audio IS (analog -> sampling -> PCM16 -> 24kHz -> mono -> base64) and the transport landscape (HTTP vs WebSocket vs WebRTC vs PSTN). Records the mic, prints raw samples, and plays it back. No OpenAI API calls."
+requires-python = ">=3.11"
+dependencies = [
+    # --- Audio in/out ---
+    # sounddevice binds to PortAudio so we can record from the microphone and
+    # play back through the speakers with tiny, readable Python.
+    "sounddevice>=0.4",
+
+    # --- Numerics ---
+    # Recorded audio arrives as a NumPy array of int16 samples. NumPy lets us
+    # inspect its shape/dtype, read raw sample values, and count the bytes.
+    "numpy>=1.26",
+
+    # --- Secrets (unused in THIS module, kept for a consistent pattern) ---
+    # Later modules load the ONE shared ../.env with load_dotenv(find_dotenv()).
+    # We depend on it here too so every module's setup looks identical, even
+    # though module 01 never calls the OpenAI API.
+    "python-dotenv>=1.0",
+]
+
+# `uv sync` reads this file, creates a .venv, and installs the dependencies above.
+#
+# REPRODUCIBILITY NOTE: the versions above are lower bounds (">=") so `uv sync`
+# installs the LATEST compatible release of each package. That keeps the tutorial
+# current, but on its own it is NOT byte-for-byte reproducible: a future resolve
+# could pick a newer release with a slightly different API.
+#
+# `uv sync` also writes a `uv.lock` file capturing the EXACT versions it resolved.
+# Commit that uv.lock next to this file to pin the environment: from then on
+# `uv sync` reinstalls the locked set verbatim, so a classmate (or future you)
+# gets an identical environment. To move forward deliberately later, run
+# `uv lock --upgrade` and re-test.
+#
+# No [build-system] table: this is a runnable tutorial, not a library to publish,
+# so uv treats it as a non-packaged project (package = false below).
+[tool.uv]
+package = false
