@@ -10,7 +10,8 @@
     "Commit package-lock.json so a classmate gets the identical dependency tree."
   ],
   "scripts": {
-    "dev": "next dev",
+    "//dev": "The --require preload works around a DEV-ONLY Next/React crash ('RangeError: Map maximum size exceeded' from React's async-debug hook). See scripts/disable-react-async-debug.cjs. cross-env makes the env var work on Windows too. Production (build/start) is unaffected and does not use it.",
+    "dev": "cross-env NODE_OPTIONS=\"--require ./scripts/disable-react-async-debug.cjs\" next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
@@ -26,6 +27,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.2.11",
     "typescript": "^5.6.0"
