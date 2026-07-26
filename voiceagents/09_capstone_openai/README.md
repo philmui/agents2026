@@ -176,6 +176,26 @@ can reach it, its paid routes could be abused. The backend has three guards
   `localhost`). A real deploy must be HTTPS, which also makes the translation socket
   `wss://`.
 
+## Troubleshooting
+
+- **The Next.js dev server crashes after a while with `RangeError: Map maximum
+  size exceeded` (stack mentions `AsyncHook.init` / `hot-reloader-turbopack`).**
+  This is a **development-only** bug in React 19 + Next.js's dev server, *not* in
+  this app's code. React's dev "async debug" feature installs a Node async hook
+  that records every promise into a plain `Map`; on a long-running `next dev`
+  session the Turbopack hot-reload loop churns promises faster than they are
+  cleaned up, and the `Map` eventually hits V8's hard size ceiling and throws,
+  killing the dev server. Production (`npm run build && npm start`) is unaffected.
+
+  This repo already works around it: `npm run dev` preloads
+  [`app/scripts/disable-react-async-debug.cjs`](./app/scripts/disable-react-async-debug.cjs)
+  (wired through `cross-env` in `app/package.json`), which disables just that one
+  leaking dev hook before Next starts. You do not need to do anything — just run
+  `npm run dev` as usual. If you ever still hit it (e.g. you run `next dev`
+  directly, bypassing the script), either use `npm run dev` or simply restart the
+  dev server. The only thing the workaround removes is React's dev async-stack
+  debug info, which this app does not use.
+
 ## Where the details live
 
 - [`capstone_openai_tutorial.md`](./capstone_openai_tutorial.md) - the full,
