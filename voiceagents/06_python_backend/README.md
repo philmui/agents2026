@@ -59,7 +59,7 @@ sequenceDiagram
 ```
 
 See `python_backend_tutorial.md` for a full, line-by-line explanation and
-`slides/index.html` for the deck. API details: `../_shared/API_FACTS.md`.
+`slides/index.html` for the deck. API details: `../docs/API_FACTS.md`.
 
 ---
 

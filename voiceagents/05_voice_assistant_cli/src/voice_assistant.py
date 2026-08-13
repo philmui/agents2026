@@ -51,7 +51,7 @@ from dotenv import load_dotenv, find_dotenv   # find and load the shared ../.env
 
 
 # =============================================================================
-# 1. CONFIGURATION: every value here is verified in _shared/API_FACTS.md
+# 1. CONFIGURATION: every value here is verified in docs/API_FACTS.md
 # =============================================================================
 
 # The model that does speech-to-speech. OpenAI's GA docs use "-2.1".

@@ -162,7 +162,7 @@ OPENAI_SAFETY_IDENTIFIER = os.environ.get("OPENAI_SAFETY_IDENTIFIER")
 
 # ---------------------------------------------------------------------------
 # CONSTANTS - exact OpenAI endpoints/models/events. These MUST match
-#             _shared/API_FACTS.md. Do NOT guess these strings.
+#             docs/API_FACTS.md. Do NOT guess these strings.
 # ---------------------------------------------------------------------------
 
 # Mints ephemeral browser tokens. We POST to it with the REAL key; it returns an

@@ -19,7 +19,7 @@ with a **raw `RTCPeerConnection`** so you can see exactly what the SDK automates
 | SDP offer / answer | The two-message "menu swap" that starts WebRTC | The raw handshake (SDK hides this) |
 | `history_updated` | SDK event carrying the running transcript | Rendering the live transcript panel |
 
-Everything here obeys `../_shared/API_FACTS.md`. Where the API has a sharp edge,
+Everything here obeys `../docs/API_FACTS.md`. Where the API has a sharp edge,
 you will see a **Caution** box.
 
 ---

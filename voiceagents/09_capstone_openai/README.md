@@ -203,7 +203,7 @@ can reach it, its paid routes could be abused. The backend has three guards
 - [`backend/README.md`](./backend/README.md) - the server, the Agents SDK web
   search, the Langfuse wiring, and the access guards.
 - [`slides/index.html`](./slides/index.html) - a slide deck of the whole app.
-- [`../_shared/API_FACTS.md`](../_shared/API_FACTS.md) - the exact OpenAI Realtime
+- [`../docs/API_FACTS.md`](../docs/API_FACTS.md) - the exact OpenAI Realtime
   model ids, endpoints, and event names this project relies on.
 
 ---

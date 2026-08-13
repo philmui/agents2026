@@ -79,7 +79,7 @@ OPENAI_SAFETY_IDENTIFIER = os.environ.get("OPENAI_SAFETY_IDENTIFIER")
 
 # ---------------------------------------------------------------------------
 # CONSTANTS  — the exact OpenAI endpoint and session settings we ask for.
-#             These MUST match _shared/API_FACTS.md. Do not guess these strings.
+#             These MUST match docs/API_FACTS.md. Do not guess these strings.
 # ---------------------------------------------------------------------------
 
 # The one OpenAI endpoint that mints ephemeral browser tokens. We POST to it

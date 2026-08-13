@@ -7,7 +7,7 @@
 // speaks back. The connection logic lives in lib/transcribeClient.ts (a small
 // class); this component just wires its callbacks to React state and renders.
 //
-// The exact events we rely on (verified in _shared/API_FACTS.md section 4):
+// The exact events we rely on (verified in docs/API_FACTS.md section 4):
 //   conversation.item.input_audio_transcription.delta      -> partial words
 //   conversation.item.input_audio_transcription.completed   -> a finished segment
 // =============================================================================

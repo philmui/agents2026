@@ -81,7 +81,7 @@ bounds pinned to the **Next.js 15** line; bump deliberately later with
   microphone, then reload.
 
 See `nextjs_frontend_tutorial.md` for a line-by-line explanation and
-`slides/index.html` for the deck. API details: `../_shared/API_FACTS.md`.
+`slides/index.html` for the deck. API details: `../docs/API_FACTS.md`.
 
 ---
 

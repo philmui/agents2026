@@ -21,7 +21,7 @@
 //   5) reports the source + target transcripts to the UI. The backend obtains
 //      reliable source captions from a parallel Realtime transcription sidecar.
 //
-// AUDIO, PLAINLY (the required teaching point, see _shared/API_FACTS.md §8)
+// AUDIO, PLAINLY (the required teaching point, see docs/API_FACTS.md §8)
 // ------------------------------------------------------------------------
 // A microphone turns sound into a stream of numbers ("samples"). "PCM16 @ 24 kHz
 // mono" means: 24000 samples per second, one channel, each sample a 16-bit signed
