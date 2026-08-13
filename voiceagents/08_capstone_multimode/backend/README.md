@@ -99,4 +99,4 @@ writes `uv.lock`. Commit `uv.lock` so classmates get an identical install.
 Module 06 built a token-only version of this server (no `/translate` proxy). It can
 still mint tokens for Transcribe/Assist, but Translate mode needs the `/translate`
 route, which only exists here. For the full three-mode capstone, run **this**
-backend. See `../capstone_multimode_tutorial.md` and `../../_shared/API_FACTS.md`.
+backend. See `../capstone_multimode_tutorial.md` and `../../docs/API_FACTS.md`.

@@ -52,8 +52,8 @@ flowchart LR
 ```
 
 The backend holds the real API key; the browser only ever gets a short-lived
-`ek_` token. See `_shared/API_FACTS.md` for the verified API details and
-`_shared/COURSE_DESIGN.md` for the full course blueprint.
+`ek_` token. See `docs/API_FACTS.md` for the verified API details and
+`docs/COURSE_DESIGN.md` for the full course blueprint.
 
 ---
 

@@ -22,7 +22,7 @@ import { RealtimeAgent, RealtimeSession, tool } from "@openai/agents/realtime";
 import { z } from "zod";
 import { BACKEND_URL } from "@/lib/backend";
 
-// The canonical voice-assistant model id (see _shared/API_FACTS.md §1).
+// The canonical voice-assistant model id (see docs/API_FACTS.md §1).
 const MODEL = "gpt-realtime-2.1";
 
 // --- The tool ------------------------------------------------------------

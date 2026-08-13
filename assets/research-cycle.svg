@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Evidence-centered research cycle</title>
+  <desc id="desc">A simple five-step research cycle: frame, ground, build, evaluate, and share. A feedback arrow returns from share to frame to show that each cycle improves the next question.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+    <style>
+      .heading { font: 700 28px Inter, Arial, sans-serif; fill: #0f172a; }
+      .sub { font: 400 16px Inter, Arial, sans-serif; fill: #475569; }
+      .step { font: 700 17px Inter, Arial, sans-serif; fill: #0f172a; }
+      .copy { font: 400 13px Inter, Arial, sans-serif; fill: #475569; }
+      .num { font: 700 14px Inter, Arial, sans-serif; fill: #ffffff; }
+      .note { font: 600 14px Inter, Arial, sans-serif; fill: #475569; }
+    </style>
+  </defs>
+  <rect width="960" height="560" rx="24" fill="#f8fafc"/>
+  <text x="480" y="58" class="heading" text-anchor="middle">An evidence-centered research cycle</text>
+  <text x="480" y="88" class="sub" text-anchor="middle">Move from a focused question to a documented learning loop.</text>
+
+  <path d="M204 258H222 M382 258H400 M560 258H578 M738 258H756" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+  <g transform="translate(44 190)">
+    <rect width="160" height="136" rx="16" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+    <circle cx="26" cy="28" r="15" fill="#6366f1"/><text x="26" y="33" class="num" text-anchor="middle">1</text>
+    <text x="52" y="34" class="step">Frame</text><text x="22" y="72" class="copy">Ask a focused,</text><text x="22" y="92" class="copy">testable question.</text>
+  </g>
+  <g transform="translate(222 190)">
+    <rect width="160" height="136" rx="16" fill="#ecfdf5" stroke="#14b8a6" stroke-width="2"/>
+    <circle cx="26" cy="28" r="15" fill="#14b8a6"/><text x="26" y="33" class="num" text-anchor="middle">2</text>
+    <text x="52" y="34" class="step">Ground</text><text x="22" y="72" class="copy">Inspect sources, data,</text><text x="22" y="92" class="copy">and a baseline.</text>
+  </g>
+  <g transform="translate(400 190)">
+    <rect width="160" height="136" rx="16" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="26" cy="28" r="15" fill="#f59e0b"/><text x="26" y="33" class="num" text-anchor="middle">3</text>
+    <text x="52" y="34" class="step">Build</text><text x="22" y="72" class="copy">Test the smallest</text><text x="22" y="92" class="copy">useful system.</text>
+  </g>
+  <g transform="translate(578 190)">
+    <rect width="160" height="136" rx="16" fill="#fff1f2" stroke="#f43f5e" stroke-width="2"/>
+    <circle cx="26" cy="28" r="15" fill="#f43f5e"/><text x="26" y="33" class="num" text-anchor="middle">4</text>
+    <text x="52" y="34" class="step">Evaluate</text><text x="22" y="72" class="copy">Measure results and</text><text x="22" y="92" class="copy">inspect failures.</text>
+  </g>
+  <g transform="translate(756 190)">
+    <rect width="160" height="136" rx="16" fill="#faf5ff" stroke="#a855f7" stroke-width="2"/>
+    <circle cx="26" cy="28" r="15" fill="#a855f7"/><text x="26" y="33" class="num" text-anchor="middle">5</text>
+    <text x="52" y="34" class="step">Share</text><text x="22" y="72" class="copy">Document evidence,</text><text x="22" y="92" class="copy">limits, and next steps.</text>
+  </g>
+  <path d="M836 326V404H124V326" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6 6" marker-end="url(#arrow)"/>
+  <text x="480" y="388" class="note" text-anchor="middle">Use what you learn to improve the next question</text>
+</svg>

@@ -44,7 +44,7 @@ find_dotenv() walks UP the folder tree until it finds a ".env" file, and
 load_dotenv() reads it into the process environment. In this course that ONE
 shared file lives at  topics/voice_agents/.env  (copied from .env.example). Every
 Python module in the course loads it the same way, so you set your key exactly
-once. See _shared/API_FACTS.md and topics/voice_agents/.env.example.
+once. See docs/API_FACTS.md and topics/voice_agents/.env.example.
 """
 
 # ---------------------------------------------------------------------------
@@ -114,7 +114,7 @@ OPENAI_SAFETY_IDENTIFIER = os.environ.get("OPENAI_SAFETY_IDENTIFIER")
 
 # ---------------------------------------------------------------------------
 # CONSTANTS - exact OpenAI endpoints/models/events. These MUST match
-#             _shared/API_FACTS.md. Do NOT guess these strings.
+#             docs/API_FACTS.md. Do NOT guess these strings.
 # ---------------------------------------------------------------------------
 
 # Mints ephemeral browser tokens. We POST to it with the REAL key; it returns an

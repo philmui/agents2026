@@ -43,7 +43,7 @@ from dotenv import find_dotenv, load_dotenv   # locate + load the shared .env fi
 
 
 # ----------------------------------------------------------------------------
-# Constants that come straight from _shared/API_FACTS.md. Do not guess these.
+# Constants that come straight from docs/API_FACTS.md. Do not guess these.
 # ----------------------------------------------------------------------------
 
 # The dedicated translation endpoint. Note the path is ".../translations"

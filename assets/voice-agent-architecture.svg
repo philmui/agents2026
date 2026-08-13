@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Secure real-time voice-agent architecture</title>
+  <desc id="desc">The browser asks a backend for a short-lived token, then connects to realtime voice services. The backend retains the real API key and performs privileged tasks server-side.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+    <style>
+      .heading { font: 700 28px Inter, Arial, sans-serif; fill: #0f172a; }
+      .sub { font: 400 16px Inter, Arial, sans-serif; fill: #475569; }
+      .label { font: 700 19px Inter, Arial, sans-serif; fill: #0f172a; }
+      .copy { font: 400 14px Inter, Arial, sans-serif; fill: #475569; }
+      .tiny { font: 600 12px Inter, Arial, sans-serif; fill: #475569; }
+      .note { font: 600 15px Inter, Arial, sans-serif; fill: #0f172a; }
+    </style>
+  </defs>
+  <rect width="960" height="560" rx="24" fill="#f8fafc"/>
+  <text x="480" y="58" class="heading" text-anchor="middle">Keep the real API key on the server</text>
+  <text x="480" y="88" class="sub" text-anchor="middle">The browser only receives a short-lived token.</text>
+  <g transform="translate(58 204)"><rect width="214" height="128" rx="16" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/><text x="107" y="50" class="label" text-anchor="middle">Browser voice app</text><text x="107" y="80" class="copy" text-anchor="middle">microphone and speaker</text></g>
+  <g transform="translate(373 204)"><rect width="214" height="128" rx="16" fill="#f0fdfa" stroke="#14b8a6" stroke-width="2"/><text x="107" y="50" class="label" text-anchor="middle">Backend</text><text x="107" y="80" class="copy" text-anchor="middle">mints tokens; holds real key</text></g>
+  <g transform="translate(688 204)"><rect width="214" height="128" rx="16" fill="#faf5ff" stroke="#a855f7" stroke-width="2"/><text x="107" y="50" class="label" text-anchor="middle">OpenAI services</text><text x="107" y="80" class="copy" text-anchor="middle">realtime voice and tools</text></g>
+  <path d="M272 246H373 M373 290H272" fill="none" stroke="#14b8a6" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="322" y="232" class="tiny" text-anchor="middle">request token</text><text x="322" y="310" class="tiny" text-anchor="middle">short-lived token</text>
+  <path d="M587 268H688" fill="none" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="638" y="252" class="tiny" text-anchor="middle">server-side tasks</text>
+  <path d="M166 204C292 132 668 132 794 204" fill="none" stroke="#6366f1" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
+  <text x="480" y="144" class="tiny" text-anchor="middle">WebRTC voice with the short-lived token</text>
+  <rect x="185" y="412" width="590" height="58" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="480" y="447" class="note" text-anchor="middle">Security boundary: the browser never receives the long-lived secret.</text>
+</svg>

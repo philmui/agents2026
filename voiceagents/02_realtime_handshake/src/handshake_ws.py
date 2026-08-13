@@ -42,7 +42,7 @@ from dotenv import find_dotenv, load_dotenv
 
 
 # ---------------------------------------------------------------------------
-# Constants: the exact model + endpoint, quoted from _shared/API_FACTS.md
+# Constants: the exact model + endpoint, quoted from docs/API_FACTS.md
 # ---------------------------------------------------------------------------
 # The canonical speech-to-speech model id at GA. (An older DataCamp tutorial
 # calls it "gpt-realtime-2"; the current name is "gpt-realtime-2.1".)

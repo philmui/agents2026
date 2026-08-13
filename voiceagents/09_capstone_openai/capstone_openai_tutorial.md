@@ -12,7 +12,7 @@ JavaScript/React, and explains every concept and every important line from
 scratch. The runnable app lives in [`app/`](./app) (the browser UI) and
 [`backend/`](./backend) (the Python server). The exact OpenAI model ids, endpoints,
 and event names it relies on are collected in
-[`../_shared/API_FACTS.md`](../_shared/API_FACTS.md), the project's API reference.
+[`../docs/API_FACTS.md`](../docs/API_FACTS.md), the project's API reference.
 
 > Audience note: written for advanced high-school students. No prior project is
 > required; if a term is new, it is defined where it first appears.

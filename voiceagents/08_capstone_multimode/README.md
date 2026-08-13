@@ -103,7 +103,7 @@ flowchart LR
 
 See `capstone_multimode_tutorial.md` for the full, line-by-line walkthrough,
 `backend/README.md` for the server, and `slides/index.html` for the deck. API
-details live in `../_shared/API_FACTS.md`.
+details live in `../docs/API_FACTS.md`.
 
 ---
 

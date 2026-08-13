@@ -13,7 +13,7 @@ in the browser. Assist mode is a voice agent that calls `get_time` and
 &rarr; respond loop on screen.
 
 > The runnable app lives in [`app/`](./app) (the UI) and [`backend/`](./backend)
-> (the FastAPI server). API facts come from [`../_shared/API_FACTS.md`](../_shared/API_FACTS.md),
+> (the FastAPI server). API facts come from [`../docs/API_FACTS.md`](../docs/API_FACTS.md),
 > the single source of truth.
 
 ---
@@ -597,7 +597,7 @@ You composed the whole course into one app and added the last new idea, tools:
 > use that same transcription event family, while target/audio translation events
 > are `session.`-prefixed with audio in `delta`. Tool schemas must be strict
 > (`nullable`, not `optional`). Voice locks once per session. Secrets live in
-> server code only. All of these are in `../_shared/API_FACTS.md`.
+> server code only. All of these are in `../docs/API_FACTS.md`.
 
 Where to go next: give the agent a real tool (a weather or wiki lookup), add
 `handoffs` to route between multiple agents, add `guardrails`, or extend the

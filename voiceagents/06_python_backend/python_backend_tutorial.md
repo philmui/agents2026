@@ -149,7 +149,7 @@ Here is the whole point of the server. When the browser asks for a token, we cal
 OpenAI's `client_secrets` endpoint **with the real key**, ask for the session we
 want, and return only the `ek_` token from the reply.
 
-The endpoint and body come straight from `../_shared/API_FACTS.md`:
+The endpoint and body come straight from `../docs/API_FACTS.md`:
 
 ```python
 CLIENT_SECRETS_URL = "https://api.openai.com/v1/realtime/client_secrets"

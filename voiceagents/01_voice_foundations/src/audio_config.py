@@ -4,7 +4,7 @@ Every later module (transcription, translation, the voice assistant) sends
 audio to OpenAI's Realtime API in EXACTLY one format. We define that format
 here, once, so the numbers never drift between modules.
 
-The format (verified in _shared/API_FACTS.md):
+The format (verified in docs/API_FACTS.md):
     PCM16, 24000 Hz, mono, base64-encoded on the wire.
 
 Read the tutorial (voice_foundations_tutorial.md) for what each word means.

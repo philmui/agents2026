@@ -22,7 +22,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// The canonical voice-assistant model from _shared/API_FACTS.md.
+// The canonical voice-assistant model from docs/API_FACTS.md.
 // (DataCamp's older name was "gpt-realtime-2"; "-2.1" is the GA canonical id.)
 const MODEL = "gpt-realtime-2.1";
 const TRANSCRIBE_MODEL = "gpt-realtime-whisper";
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
         };
 
   // Ask OpenAI to mint an ephemeral client secret scoped to the requested mode.
-  // Endpoint + body shape are verified in _shared/API_FACTS.md section 5.
+  // Endpoint + body shape are verified in docs/API_FACTS.md section 5.
   const resp = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
     headers: {

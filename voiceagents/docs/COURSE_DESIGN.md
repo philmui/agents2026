@@ -10,7 +10,7 @@ demonstrates 3 OpenAI Realtime capabilities: transcription, translation, voice a
 3. Transcription + translation are **server-side Python WebSocket CLIs**; the assistant + capstone run in
    the **browser over WebRTC**. (Matches OpenAI's "WebRTC for browsers, WebSocket for servers" guidance.)
 
-All API specifics come from `_shared/API_FACTS.md` — the single source of truth. Do not contradict it.
+All API specifics come from `docs/API_FACTS.md` — the single source of truth. Do not contradict it.
 
 ---
 
