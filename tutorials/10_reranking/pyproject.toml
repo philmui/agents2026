@@ -19,6 +19,7 @@ dependencies = [
     # Jupyter tooling so `uv run jupyter lab` works out of the box.
     "jupyterlab",
     "ipykernel",
+    "langchain-text-splitters>=1.1.2",
 ]
 
 # `uv sync` reads this file, creates a .venv, and installs the pinned set above.
