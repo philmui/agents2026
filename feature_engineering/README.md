@@ -1,4 +1,4 @@
-# Topic 19: Feature Stores from First Principles with Chronon
+# Feature Engineering & Storage from First Principles with Chronon
 
 Build point-in-time-correct customer features from a real retail transaction log,
 author genuine Chronon `GroupBy` and `Join` definitions, run an optional local
@@ -8,7 +8,7 @@ serving, parity, freshness, ownership, and monitoring contracts.
 ## Start here
 
 ```bash
-cd topics/19_feature_store
+cd feature_engineering
 cp .env.example .env
 uv sync
 uv run python _build_notebook.py

@@ -23,8 +23,9 @@ This aligns with the group’s broader goals: learn AI/ML and agentic foundation
 | --- | --- | --- |
 | [`tutorials/`](./tutorials) | A 12-module path from retrieval-augmented generation (RAG) foundations to an evaluated agentic RAG capstone | Explanations, notebooks, slides, corpora, evaluation questions, frozen outputs |
 | [`voiceagents/`](./voiceagents) | A hands-on real-time voice-agent minicourse that builds transcription, translation, and tool-using voice applications | Python CLIs, FastAPI services, Next.js apps, tutorials, slides, backend tests |
+| [`feature_engineering/`](./feature_engineering) | A first-principles feature-store lab using Chronon and a real retail transaction log | Executable notebook, Chronon definitions, theory guide, diagrams, slides, and data documentation |
 
-The two paths reinforce each other. The RAG track emphasizes retrieval quality, grounded generation, metrics, and agent evaluation. The voice track makes those systems tangible through real-time audio, browser and server transports, secure token handling, tool calls, and observability.
+The three paths reinforce each other. The RAG track emphasizes retrieval quality, grounded generation, metrics, and agent evaluation. The voice track makes those systems tangible through real-time audio, browser and server transports, secure token handling, tool calls, and observability. The feature-engineering lab shows how to define, validate, and serve point-in-time-correct model inputs.
 
 ![Evidence-centered research cycle](./assets/research-cycle.svg)
 
@@ -99,6 +100,26 @@ Use each module’s README for its exact command. For the web capstones, run the
 
 ![Secure real-time voice-agent architecture](./assets/voice-agent-architecture.svg)
 
+## Learning path 3: Feature engineering and storage
+
+[`feature_engineering/`](./feature_engineering) is a self-contained lab on feature stores, temporal correctness, and operational contracts. Using the [UCI Online Retail dataset](https://doi.org/10.24432/C5BW33), it builds historical purchase and cancellation features for a repeat-purchase prediction problem, then contrasts a valid chronological model with an intentionally leaked one.
+
+The tutorial pairs a transparent NumPy reference implementation with genuine Chronon `GroupBy` and `Join` definitions. An optional local Spark backfill validates a small Chronon execution path; it is deliberately separate from the production deployment concerns of warehouse, stream, orchestration, online-store, and service integrations.
+
+### Run the feature-engineering lab
+
+Requirements: Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/). No API key is required.
+
+```bash
+cd feature_engineering
+cp .env.example .env
+uv sync
+uv run python _build_notebook.py
+uv run jupyter lab
+```
+
+Start with [`feature_engineering/README.md`](./feature_engineering/README.md), then open `feature_store_tutorial.ipynb`. The companion [`FEATURE_STORE_THEORY.md`](./feature_engineering/FEATURE_STORE_THEORY.md) explains the concepts, diagrams, counterexamples, and production considerations. The initial notebook run downloads its public source data to an ignored local cache.
+
 ## Working as a research team
 
 Use the curriculum to create research, not merely finish lessons. A practical team loop is:
@@ -134,5 +155,6 @@ Projects associated with the group span agentic long-term memory, multi-agent an
 - [`tutorials/`](./tutorials): Agentic RAG curriculum.
 - [`voiceagents/README.md`](./voiceagents/README.md): voice-agent course overview and setup.
 - [`voiceagents/docs/COURSE_DESIGN.md`](./voiceagents/docs/COURSE_DESIGN.md): instructional design for the voice course.
+- [`feature_engineering/README.md`](./feature_engineering/README.md): feature-engineering lab overview, setup, and validation commands.
 
 This repository is a learning laboratory: build carefully, question results, support teammates, and leave an evidence trail that makes the next research iteration better.
