@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Past events make features and future events make labels</title>
+  <desc id="desc">A timeline centers on a June 1 prediction. Purchases in the previous 30 days are used for a spending feature. A later purchase in the next 30 days makes the repeat-purchase label equal to one. The current order is context and is not counted as prior history.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto"><path d="M1 1L12 7L1 13Z" fill="#17211b"/></marker>
+    <style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 20px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 16px Inter,Arial,sans-serif;fill:#41504a}.small{font:600 14px Inter,Arial,sans-serif;fill:#41504a}.axis{stroke:#17211b;stroke-width:4;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">Stand at the prediction time and look both ways</text>
+  <text x="60" y="88" class="sub">Past facts build model inputs. Later facts tell us whether the prediction target happened.</text>
+
+  <rect x="82" y="132" width="493" height="84" rx="18" fill="#dff7ef"/>
+  <text x="108" y="166" class="head">FEATURE WINDOW: previous 30 days</text>
+  <text x="108" y="194" class="body">Question: How much did the customer spend before June 1?</text>
+  <rect x="625" y="132" width="493" height="84" rx="18" fill="#ffe9e5"/>
+  <text x="651" y="166" class="head">LABEL WINDOW: next 30 days</text>
+  <text x="651" y="194" class="body">Question: Did the customer buy again after June 1?</text>
+
+  <path d="M80 354H1120" class="axis"/>
+  <rect x="120" y="304" width="445" height="50" rx="12" fill="#dff7ef"/>
+  <rect x="635" y="304" width="365" height="50" rx="12" fill="#ffe9e5"/>
+  <text x="120" y="390" class="small">May 2</text><text x="382" y="390" class="small">May 18</text><text x="527" y="390" class="small">Jun 1</text><text x="790" y="390" class="small">Jun 20</text><text x="963" y="390" class="small">Jul 1</text>
+
+  <g transform="translate(170 245)"><circle cx="0" cy="109" r="12" fill="#008f83"/><rect x="-62" y="0" width="124" height="68" rx="12" fill="#fff" stroke="#008f83" stroke-width="2"/><text x="-42" y="28" class="body">purchase £40</text><text x="-31" y="51" class="small">count it</text><line y1="68" y2="97" stroke="#008f83" stroke-width="3"/></g>
+  <g transform="translate(425 245)"><circle cx="0" cy="109" r="12" fill="#008f83"/><rect x="-62" y="0" width="124" height="68" rx="12" fill="#fff" stroke="#008f83" stroke-width="2"/><text x="-42" y="28" class="body">purchase £65</text><text x="-31" y="51" class="small">count it</text><line y1="68" y2="97" stroke="#008f83" stroke-width="3"/></g>
+  <g transform="translate(600 226)"><line y1="0" y2="196" stroke="#d94f45" stroke-width="6"/><circle cy="128" r="15" fill="#d94f45"/><rect x="-108" y="205" width="216" height="65" rx="12" fill="#f4d35e"/><text x="-88" y="232" class="head">Current order</text><text x="-88" y="255" class="body">decision at June 1</text></g>
+  <g transform="translate(820 245)"><circle cx="0" cy="109" r="12" fill="#d94f45"/><rect x="-72" y="0" width="144" height="68" rx="12" fill="#fff" stroke="#d94f45" stroke-width="2"/><text x="-52" y="28" class="body">later purchase</text><text x="-43" y="51" class="small">label = 1</text><line y1="68" y2="97" stroke="#d94f45" stroke-width="3"/></g>
+
+  <g transform="translate(82 552)">
+    <rect width="1036" height="78" rx="18" fill="#17211b"/>
+    <text x="26" y="32" style="font:700 18px Inter,Arial,sans-serif;fill:#fff">Worked answer</text>
+    <text x="26" y="58" style="font:400 16px Inter,Arial,sans-serif;fill:#d8e0dc">prior_30d_spend = £40 + £65 = £105   ·   repeat_purchase_30d = 1   ·   current order is not prior history</text>
+  </g>
+</svg>

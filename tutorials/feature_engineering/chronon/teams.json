@@ -1,0 +1,18 @@
+{
+  "default": {
+    "namespace": "feature_store_tutorial",
+    "table_properties": {
+      "source": "chronon-feature-store-tutorial"
+    },
+    "common_env": {
+      "PARTITION_COLUMN": "ds",
+      "PARTITION_FORMAT": "yyyy-MM-dd",
+      "SPARK_SUBMIT_PATH": "spark-submit",
+      "JOB_MODE": "local[*]"
+    }
+  },
+  "retail": {
+    "description": "Ownership boundary for the Online Retail teaching case",
+    "namespace": "feature_store_tutorial"
+  }
+}

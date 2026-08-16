@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">An order has an event time, a prediction time, and an availability time</title>
+  <desc id="desc">An order happens at 9:30. The model predicts at 10:00. The record reaches the feature system at 10:10. Since it arrived after the prediction, the live model could not use it.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto"><path d="M1 1L12 7L1 13Z" fill="#17211b"/></marker>
+    <style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 20px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 16px Inter,Arial,sans-serif;fill:#41504a}.time{font:700 26px Inter,Arial,sans-serif;fill:#17211b}.badge{font:700 13px Inter,Arial,sans-serif;fill:#fff}.axis{stroke:#17211b;stroke-width:4;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">One order, three different times</text>
+  <text x="60" y="88" class="sub">The order happened before the prediction, but the computer learned about it afterward.</text>
+
+  <path d="M115 296H1085" class="axis"/>
+  <text x="90" y="329" class="body">earlier</text><text x="1040" y="329" class="body">later</text>
+
+  <g transform="translate(190 128)">
+    <rect width="240" height="116" rx="18" fill="#dff7ef" stroke="#008f83" stroke-width="3"/>
+    <circle cx="28" cy="28" r="17" fill="#008f83"/><text x="23" y="33" class="badge">1</text>
+    <text x="55" y="35" class="head">Event time</text>
+    <text x="24" y="72" class="time">09:30</text>
+    <text x="24" y="99" class="body">The customer buys.</text>
+    <line x1="120" y1="116" x2="120" y2="168" stroke="#008f83" stroke-width="5"/>
+  </g>
+
+  <g transform="translate(480 332)">
+    <line x1="120" y1="-36" x2="120" y2="0" stroke="#d94f45" stroke-width="6"/>
+    <rect width="240" height="116" rx="18" fill="#ffe9e5" stroke="#d94f45" stroke-width="3"/>
+    <circle cx="28" cy="28" r="17" fill="#d94f45"/><text x="23" y="33" class="badge">2</text>
+    <text x="55" y="35" class="head">Prediction time</text>
+    <text x="24" y="72" class="time">10:00</text>
+    <text x="24" y="99" class="body">The model must decide.</text>
+  </g>
+
+  <g transform="translate(770 128)">
+    <rect width="240" height="116" rx="18" fill="#f4d35e" stroke="#17211b" stroke-width="3"/>
+    <circle cx="28" cy="28" r="17" fill="#17211b"/><text x="23" y="33" class="badge">3</text>
+    <text x="55" y="35" class="head">Available time</text>
+    <text x="24" y="72" class="time">10:10</text>
+    <text x="24" y="99" class="body">The record becomes usable.</text>
+    <line x1="120" y1="116" x2="120" y2="168" stroke="#17211b" stroke-width="5"/>
+  </g>
+
+  <g transform="translate(112 512)">
+    <rect width="976" height="108" rx="20" fill="#17211b"/>
+    <text x="30" y="39" style="font:700 21px Inter,Arial,sans-serif;fill:#fff">Can the 10:00 model use this order?  No.</text>
+    <text x="30" y="72" style="font:400 16px Inter,Arial,sans-serif;fill:#d8e0dc">It happened at 09:30, but the feature system did not have it until 10:10.</text>
+    <text x="760" y="72" style="font:700 15px Inter,Arial,sans-serif;fill:#f4d35e">KNOWN LATE = NOT KNOWN YET</text>
+  </g>
+</svg>

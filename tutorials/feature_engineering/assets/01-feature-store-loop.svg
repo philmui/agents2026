@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">How one feature rule supports training and live predictions</title>
+  <desc id="desc">A four-step diagram. Order events enter one shared rule. The rule calculates customer spending before a cutoff. It produces historical training values and a current live value. A final check compares both paths.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto"><path d="M1 1L12 7L1 13Z" fill="#17211b"/></marker>
+    <style>
+      .title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.step{font:700 14px Inter,Arial,sans-serif;fill:#fff}.head{font:700 21px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 16px Inter,Arial,sans-serif;fill:#41504a}.small{font:600 14px Inter,Arial,sans-serif;fill:#41504a}.mono{font:500 15px ui-monospace,Menlo,monospace;fill:#17211b}.line{stroke:#17211b;stroke-width:3;fill:none;marker-end:url(#arrow);stroke-linecap:round}
+    </style>
+  </defs>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">One feature rule, used in two places</text>
+  <text x="60" y="88" class="sub">Read left to right. The example asks how much one customer spent before a decision.</text>
+
+  <g transform="translate(60 138)">
+    <rect width="205" height="330" rx="22" fill="#fff" stroke="#00a896" stroke-width="3"/>
+    <circle cx="32" cy="32" r="19" fill="#008f83"/><text x="28" y="37" class="step">1</text>
+    <text x="60" y="39" class="head">Order events</text>
+    <text x="24" y="83" class="small">customer 17850</text>
+    <g transform="translate(24 104)">
+      <rect width="157" height="50" rx="10" fill="#dff7ef"/><text x="13" y="21" class="mono">May 2</text><text x="13" y="41" class="body">£40 purchase</text>
+      <rect y="66" width="157" height="50" rx="10" fill="#dff7ef"/><text x="13" y="87" class="mono">May 18</text><text x="13" y="107" class="body">£65 purchase</text>
+      <rect y="132" width="157" height="50" rx="10" fill="#ffe9e5"/><text x="13" y="153" class="mono">Jun 3</text><text x="13" y="173" class="body">£20 after cutoff</text>
+    </g>
+    <text x="24" y="309" class="body">Facts from tables</text>
+  </g>
+
+  <path d="M275 303H336" class="line"/>
+  <g transform="translate(348 138)">
+    <rect width="300" height="330" rx="22" fill="#fff8d9" stroke="#17211b" stroke-width="3"/>
+    <circle cx="32" cy="32" r="19" fill="#17211b"/><text x="28" y="37" class="step">2</text>
+    <text x="60" y="39" class="head">One shared rule</text>
+    <text x="26" y="91" class="body">For this customer:</text>
+    <rect x="26" y="113" width="248" height="96" rx="14" fill="#f4d35e"/>
+    <text x="45" y="143" class="small">FEATURE</text>
+    <text x="45" y="170" class="head">spend in prior 30 days</text>
+    <text x="45" y="196" class="mono">[cutoff - 30d, cutoff)</text>
+    <text x="26" y="249" class="body">The rule always excludes events</text>
+    <text x="26" y="273" class="body">at or after the cutoff.</text>
+    <text x="26" y="311" class="small">Owner: retail-ml · version: v1</text>
+  </g>
+
+  <path d="M658 225H713" class="line"/>
+  <path d="M658 384H713" class="line"/>
+  <g transform="translate(725 116)">
+    <circle cx="20" cy="20" r="19" fill="#d94f45"/><text x="16" y="25" class="step">3</text>
+    <text x="48" y="27" class="head">Two useful outputs</text>
+    <rect y="56" width="405" height="132" rx="20" fill="#dff7ef" stroke="#008f83" stroke-width="2"/>
+    <text x="24" y="89" class="head">Training history</text>
+    <text x="24" y="116" class="body">Cutoff: Jun 1 → £105</text>
+    <text x="24" y="142" class="body">Used to learn from old decisions</text>
+    <text x="345" y="120" class="head">PAST</text>
+    <rect y="214" width="405" height="132" rx="20" fill="#ffe9e5" stroke="#d94f45" stroke-width="2"/>
+    <text x="24" y="247" class="head">Live lookup</text>
+    <text x="24" y="274" class="body">Cutoff: now → current value</text>
+    <text x="24" y="300" class="body">Used for a new model decision</text>
+    <text x="350" y="278" class="head">NOW</text>
+  </g>
+
+  <g transform="translate(252 518)">
+    <rect width="696" height="102" rx="20" fill="#17211b"/>
+    <circle cx="38" cy="35" r="19" fill="#f4d35e"/><text x="34" y="40" style="font:700 14px Inter,Arial,sans-serif;fill:#17211b">4</text>
+    <text x="68" y="41" style="font:700 21px Inter,Arial,sans-serif;fill:#fff">Check the promise</text>
+    <text x="38" y="76" style="font:400 16px Inter,Arial,sans-serif;fill:#d8e0dc">For the same customer and cutoff, both paths should return the same feature value.</text>
+  </g>
+</svg>

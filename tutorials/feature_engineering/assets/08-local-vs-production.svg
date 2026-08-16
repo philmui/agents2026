@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">The notebook teaches feature rules while production Chronon runs them at scale</title>
+  <desc id="desc">A side-by-side comparison. The notebook uses a small local dataset, visible calculations, and fast tests to explain correctness. Production uses large data, scheduled and streaming systems, access controls, and monitoring. Both should use the same feature meaning and time boundary.</desc>
+  <style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 21px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 15px Inter,Arial,sans-serif;fill:#41504a}.label{font:700 13px Inter,Arial,sans-serif;fill:#8a3c32;letter-spacing:1px}.white{font:700 18px Inter,Arial,sans-serif;fill:#fff}</style>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">A classroom model and a production system have different jobs</text>
+  <text x="60" y="88" class="sub">The notebook explains and tests the rules. Chronon applies those rules to much larger workloads.</text>
+
+  <g transform="translate(62 135)">
+    <rect width="478" height="400" rx="24" fill="#fff" stroke="#008f83" stroke-width="3"/>
+    <rect width="478" height="67" rx="24" fill="#dff7ef"/><rect y="43" width="478" height="24" fill="#dff7ef"/>
+    <text x="28" y="42" class="head">Notebook lab</text>
+    <text x="28" y="100" class="label">PURPOSE</text><text x="28" y="128" class="head">Understand and prove the rule</text>
+    <g transform="translate(28 154)">
+      <rect width="422" height="58" rx="12" fill="#f8f5eb"/><circle cx="29" cy="29" r="15" fill="#008f83"/><text x="24" y="34" class="white" style="font-size:13px">1</text><text x="57" y="25" class="body">Use small, inspectable examples</text><text x="57" y="45" class="body">such as one customer and three orders.</text>
+      <rect y="72" width="422" height="58" rx="12" fill="#f8f5eb"/><circle cx="29" cy="101" r="15" fill="#008f83"/><text x="24" y="106" class="white" style="font-size:13px">2</text><text x="57" y="97" class="body">Show each cutoff and calculation</text><text x="57" y="117" class="body">so mistakes are visible.</text>
+      <rect y="144" width="422" height="58" rx="12" fill="#f8f5eb"/><circle cx="29" cy="173" r="15" fill="#008f83"/><text x="24" y="178" class="white" style="font-size:13px">3</text><text x="57" y="169" class="body">Run fast boundary and leakage tests</text><text x="57" y="189" class="body">before scaling the work.</text>
+    </g>
+    <text x="28" y="382" class="body">It does not provide production serving.</text>
+  </g>
+
+  <g transform="translate(660 135)">
+    <rect width="478" height="400" rx="24" fill="#fff" stroke="#d94f45" stroke-width="3"/>
+    <rect width="478" height="67" rx="24" fill="#ffe9e5"/><rect y="43" width="478" height="24" fill="#ffe9e5"/>
+    <text x="28" y="42" class="head">Production Chronon</text>
+    <text x="28" y="100" class="label">PURPOSE</text><text x="28" y="128" class="head">Compute and deliver reliably</text>
+    <g transform="translate(28 154)">
+      <rect width="422" height="58" rx="12" fill="#f8f5eb"/><circle cx="29" cy="29" r="15" fill="#d94f45"/><text x="24" y="34" class="white" style="font-size:13px">1</text><text x="57" y="25" class="body">Backfill many historical rows</text><text x="57" y="45" class="body">with distributed computation.</text>
+      <rect y="72" width="422" height="58" rx="12" fill="#f8f5eb"/><circle cx="29" cy="101" r="15" fill="#d94f45"/><text x="24" y="106" class="white" style="font-size:13px">2</text><text x="57" y="97" class="body">Update and fetch current values</text><text x="57" y="117" class="body">for live model requests.</text>
+      <rect y="144" width="422" height="58" rx="12" fill="#f8f5eb"/><circle cx="29" cy="173" r="15" fill="#d94f45"/><text x="24" y="178" class="white" style="font-size:13px">3</text><text x="57" y="169" class="body">Schedule, monitor, and control access</text><text x="57" y="189" class="body">so a team can operate it.</text>
+    </g>
+    <text x="28" y="382" class="body">It still needs human review and testing.</text>
+  </g>
+
+  <g transform="translate(241 572)">
+    <rect width="718" height="63" rx="17" fill="#17211b"/>
+    <text x="28" y="26" style="font:700 17px Inter,Arial,sans-serif;fill:#fff">What must stay the same?</text>
+    <text x="28" y="49" style="font:400 15px Inter,Arial,sans-serif;fill:#d8e0dc">Feature meaning · customer key · time boundary · missing-value rule</text>
+  </g>
+</svg>

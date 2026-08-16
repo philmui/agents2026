@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">A latest-value join leaks future information while a point-in-time join does not</title>
+  <desc id="desc">For a prediction at 10:00, the latest-value method incorrectly uses an order count updated at 10:30. The point-in-time method uses the count of two available at 9:00. A future event must stay hidden from the historical prediction.</desc>
+  <style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 21px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 16px Inter,Arial,sans-serif;fill:#41504a}.small{font:700 14px Inter,Arial,sans-serif;fill:#41504a}.time{font:700 18px ui-monospace,Menlo,monospace;fill:#17211b}</style>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">Do not let a historical model see the future</text>
+  <text x="60" y="88" class="sub">Question at 10:00: “How many prior orders did this customer have?”</text>
+
+  <g transform="translate(58 132)">
+    <rect width="522" height="415" rx="22" fill="#fff" stroke="#d94f45" stroke-width="4"/>
+    <circle cx="34" cy="34" r="20" fill="#d94f45"/><text x="28" y="40" style="font:700 18px Inter,Arial,sans-serif;fill:#fff">×</text>
+    <text x="66" y="41" class="head">Wrong: ask for the latest value</text>
+    <line x1="58" y1="170" x2="464" y2="170" stroke="#17211b" stroke-width="3"/>
+    <circle cx="138" cy="170" r="11" fill="#008f83"/><circle cx="258" cy="170" r="14" fill="#d94f45"/><circle cx="400" cy="170" r="11" fill="#8b9691"/>
+    <text x="105" y="145" class="time">09:00</text><text x="225" y="145" class="time">10:00</text><text x="367" y="145" class="time">10:30</text>
+    <text x="86" y="211" class="body">order count = 2</text><text x="207" y="241" class="small">PREDICT</text><text x="345" y="211" class="body">order count = 3</text>
+    <path d="M400 227C400 278 342 290 299 306" fill="none" stroke="#d94f45" stroke-width="4" stroke-dasharray="7 6"/>
+    <rect x="52" y="278" width="418" height="86" rx="14" fill="#ffe9e5"/>
+    <text x="76" y="311" class="head">Returned value: 3</text>
+    <text x="76" y="340" class="body">The 10:30 event had not happened yet.</text>
+    <text x="52" y="395" class="small">This makes training look unrealistically easy.</text>
+  </g>
+
+  <g transform="translate(620 132)">
+    <rect width="522" height="415" rx="22" fill="#fff" stroke="#008f83" stroke-width="4"/>
+    <circle cx="34" cy="34" r="20" fill="#008f83"/><text x="27" y="41" style="font:700 18px Inter,Arial,sans-serif;fill:#fff">✓</text>
+    <text x="66" y="41" class="head">Right: stop at the prediction time</text>
+    <line x1="58" y1="170" x2="464" y2="170" stroke="#17211b" stroke-width="3"/>
+    <rect x="58" y="157" width="200" height="26" rx="13" fill="#dff7ef"/>
+    <circle cx="138" cy="170" r="11" fill="#008f83"/><circle cx="258" cy="170" r="14" fill="#d94f45"/><circle cx="400" cy="170" r="11" fill="#fff" stroke="#8b9691" stroke-width="3"/>
+    <text x="105" y="145" class="time">09:00</text><text x="225" y="145" class="time">10:00</text><text x="367" y="145" class="time">10:30</text>
+    <text x="86" y="211" class="body">order count = 2</text><text x="207" y="241" class="small">CUTOFF</text><text x="342" y="211" class="body">keep hidden</text>
+    <path d="M258 254V290" stroke="#008f83" stroke-width="4"/>
+    <rect x="52" y="278" width="418" height="86" rx="14" fill="#dff7ef"/>
+    <text x="76" y="311" class="head">Returned value: 2</text>
+    <text x="76" y="340" class="body">Only information before 10:00 is used.</text>
+    <text x="52" y="395" class="small">Recomputing later still gives the same answer.</text>
+  </g>
+
+  <rect x="184" y="580" width="832" height="55" rx="16" fill="#17211b"/>
+  <text x="214" y="614" style="font:700 17px Inter,Arial,sans-serif;fill:#fff">Point-in-time rule: for every old prediction, hide everything that came later.</text>
+</svg>

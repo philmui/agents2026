@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Five checks follow a feature from source data to model outcome</title>
+  <desc id="desc">A numbered chain checks source data, calculation, freshness, delivery, and model behavior. Each check asks a plain question and names an example failure. A successful pipeline job alone does not prove that the model received a good feature.</desc>
+  <defs><marker id="arrow" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto"><path d="M1 1L12 7L1 13Z" fill="#17211b"/></marker><style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 18px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 14px Inter,Arial,sans-serif;fill:#41504a}.num{font:700 14px Inter,Arial,sans-serif;fill:#fff}.line{stroke:#17211b;stroke-width:3;fill:none;marker-end:url(#arrow)}</style></defs>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">Follow the feature all the way to the model</text>
+  <text x="60" y="88" class="sub">A green job only says the code ran. These checks ask whether the result was useful and trustworthy.</text>
+
+  <g transform="translate(43 152)">
+    <g>
+      <rect width="198" height="286" rx="20" fill="#fff" stroke="#8b9691" stroke-width="2"/>
+      <circle cx="31" cy="31" r="18" fill="#17211b"/><text x="27" y="36" class="num">1</text><text x="58" y="37" class="head">Source data</text>
+      <text x="18" y="82" class="body">Did order events arrive?</text>
+      <rect x="18" y="106" width="162" height="71" rx="11" fill="#f8f5eb"/><text x="31" y="132" class="body">CHECK</text><text x="31" y="156" class="head">rows · schema</text>
+      <rect x="18" y="199" width="162" height="59" rx="11" fill="#ffe9e5"/><text x="31" y="225" class="body">FAILURE EXAMPLE</text><text x="31" y="247" class="body">customer_id disappears</text>
+    </g>
+    <path d="M205 143H225" class="line"/>
+    <g transform="translate(232)">
+      <rect width="198" height="286" rx="20" fill="#fff" stroke="#8b9691" stroke-width="2"/>
+      <circle cx="31" cy="31" r="18" fill="#008f83"/><text x="27" y="36" class="num">2</text><text x="58" y="37" class="head">Calculation</text>
+      <text x="18" y="82" class="body">Does the rule still work?</text>
+      <rect x="18" y="106" width="162" height="71" rx="11" fill="#dff7ef"/><text x="31" y="132" class="body">CHECK</text><text x="31" y="156" class="head">nulls · ranges</text>
+      <rect x="18" y="199" width="162" height="59" rx="11" fill="#ffe9e5"/><text x="31" y="225" class="body">FAILURE EXAMPLE</text><text x="31" y="247" class="body">all values become zero</text>
+    </g>
+    <path d="M437 143H457" class="line"/>
+    <g transform="translate(464)">
+      <rect width="198" height="286" rx="20" fill="#fff" stroke="#8b9691" stroke-width="2"/>
+      <circle cx="31" cy="31" r="18" fill="#c69b00"/><text x="27" y="36" class="num">3</text><text x="58" y="37" class="head">Freshness</text>
+      <text x="18" y="82" class="body">How old is the value?</text>
+      <rect x="18" y="106" width="162" height="71" rx="11" fill="#fff8d9"/><text x="31" y="132" class="body">CHECK</text><text x="31" y="156" class="head">event age · lag</text>
+      <rect x="18" y="199" width="162" height="59" rx="11" fill="#ffe9e5"/><text x="31" y="225" class="body">FAILURE EXAMPLE</text><text x="31" y="247" class="body">last update was 8h ago</text>
+    </g>
+    <path d="M669 143H689" class="line"/>
+    <g transform="translate(696)">
+      <rect width="198" height="286" rx="20" fill="#fff" stroke="#8b9691" stroke-width="2"/>
+      <circle cx="31" cy="31" r="18" fill="#d94f45"/><text x="27" y="36" class="num">4</text><text x="58" y="37" class="head">Delivery</text>
+      <text x="18" y="82" class="body">Did the model receive it?</text>
+      <rect x="18" y="106" width="162" height="71" rx="11" fill="#ffe9e5"/><text x="31" y="132" class="body">CHECK</text><text x="31" y="156" class="head">missing · speed</text>
+      <rect x="18" y="199" width="162" height="59" rx="11" fill="#ffe9e5"/><text x="31" y="225" class="body">FAILURE EXAMPLE</text><text x="31" y="247" class="body">lookup times out</text>
+    </g>
+    <path d="M901 143H921" class="line"/>
+    <g transform="translate(928)">
+      <rect width="198" height="286" rx="20" fill="#17211b"/>
+      <circle cx="31" cy="31" r="18" fill="#f4d35e"/><text x="27" y="36" style="font:700 14px Inter,Arial,sans-serif;fill:#17211b">5</text><text x="58" y="37" style="font:700 18px Inter,Arial,sans-serif;fill:#fff">Model result</text>
+      <text x="18" y="82" style="font:400 14px Inter,Arial,sans-serif;fill:#d8e0dc">Did predictions change?</text>
+      <rect x="18" y="106" width="162" height="71" rx="11" fill="#fff8d9"/><text x="31" y="132" class="body">CHECK</text><text x="31" y="156" class="head">quality · fallback</text>
+      <rect x="18" y="199" width="162" height="59" rx="11" fill="#ffe9e5"/><text x="31" y="225" class="body">FAILURE EXAMPLE</text><text x="31" y="247" class="body">scores suddenly shift</text>
+    </g>
+  </g>
+
+  <rect x="161" y="489" width="878" height="108" rx="19" fill="#f4d35e"/>
+  <text x="190" y="526" class="head">An alert needs an action</text>
+  <text x="190" y="554" class="body">Example: if feature age exceeds 60 minutes, page the retail ML owner and use the reviewed fallback.</text>
+  <text x="190" y="579" class="body">A chart without an owner or response plan does not protect the model.</text>
+</svg>

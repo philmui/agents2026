@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Chronon turns source events into features attached to prediction rows</title>
+  <desc id="desc">Four numbered stages explain Chronon. Source chooses order fields and time. GroupBy summarizes prior orders for each customer. Join attaches those features to each prediction row. Chronon then creates training data and current lookups from the definitions.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto"><path d="M1 1L12 7L1 13Z" fill="#17211b"/></marker>
+    <style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 20px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 15px Inter,Arial,sans-serif;fill:#41504a}.small{font:700 13px Inter,Arial,sans-serif;fill:#fff}.mono{font:500 14px ui-monospace,Menlo,monospace;fill:#17211b}.line{stroke:#17211b;stroke-width:3;fill:none;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">Chronon in four steps</text>
+  <text x="60" y="88" class="sub">The names are technical. The jobs they perform are straightforward.</text>
+
+  <g transform="translate(52 136)">
+    <rect width="230" height="336" rx="22" fill="#dff7ef" stroke="#008f83" stroke-width="3"/>
+    <circle cx="30" cy="30" r="18" fill="#008f83"/><text x="26" y="35" class="small">1</text>
+    <text x="58" y="37" class="head">Source</text>
+    <text x="22" y="76" class="body">Choose the raw columns:</text>
+    <rect x="22" y="94" width="186" height="110" rx="12" fill="#fff"/>
+    <text x="38" y="121" class="mono">customer_id</text><text x="38" y="145" class="mono">order_value</text><text x="38" y="169" class="mono">order_time</text><text x="38" y="193" class="mono">order_id</text>
+    <text x="22" y="240" class="body">Also name the time column.</text>
+    <rect x="22" y="270" width="186" height="42" rx="10" fill="#fff8d9"/><text x="35" y="296" class="mono">time = order_time</text>
+  </g>
+
+  <path d="M292 304H331" class="line"/>
+  <g transform="translate(343 136)">
+    <rect width="250" height="336" rx="22" fill="#fff8d9" stroke="#17211b" stroke-width="3"/>
+    <circle cx="30" cy="30" r="18" fill="#17211b"/><text x="26" y="35" class="small">2</text>
+    <text x="58" y="37" class="head">GroupBy</text>
+    <text x="22" y="76" class="body">Group rows by customer.</text>
+    <g transform="translate(22 97)">
+      <rect width="206" height="45" rx="10" fill="#fff"/><text x="14" y="28" class="mono">17850 · £40</text>
+      <rect y="54" width="206" height="45" rx="10" fill="#fff"/><text x="14" y="82" class="mono">17850 · £65</text>
+      <path d="M103 105V137" class="line"/>
+      <rect y="146" width="206" height="58" rx="10" fill="#f4d35e"/><text x="14" y="171" class="body">sum prior 30 days</text><text x="14" y="194" class="mono">17850 → £105</text>
+    </g>
+    <text x="22" y="324" class="body">One customer gets one summary.</text>
+  </g>
+
+  <path d="M603 304H642" class="line"/>
+  <g transform="translate(654 136)">
+    <rect width="250" height="336" rx="22" fill="#ffe9e5" stroke="#d94f45" stroke-width="3"/>
+    <circle cx="30" cy="30" r="18" fill="#d94f45"/><text x="26" y="35" class="small">3</text>
+    <text x="58" y="37" class="head">Join</text>
+    <text x="22" y="76" class="body">Start with one decision row.</text>
+    <rect x="22" y="96" width="206" height="82" rx="12" fill="#fff"/>
+    <text x="37" y="122" class="mono">customer: 17850</text><text x="37" y="146" class="mono">cutoff: Jun 1</text><text x="37" y="168" class="mono">current order: £30</text>
+    <text x="22" y="213" class="body">Attach only eligible history.</text>
+    <path d="M125 225V251" class="line"/>
+    <rect x="22" y="260" width="206" height="52" rx="10" fill="#f4d35e"/>
+    <text x="37" y="292" class="mono">prior spend: £105</text>
+  </g>
+
+  <path d="M914 304H953" class="line"/>
+  <g transform="translate(965 136)">
+    <rect width="183" height="336" rx="22" fill="#fff" stroke="#17211b" stroke-width="3"/>
+    <circle cx="30" cy="30" r="18" fill="#17211b"/><text x="26" y="35" class="small">4</text>
+    <text x="58" y="37" class="head">Use</text>
+    <rect x="18" y="88" width="147" height="82" rx="12" fill="#dff7ef"/>
+    <text x="33" y="118" class="head">Backfill</text><text x="33" y="144" class="body">many old rows</text>
+    <rect x="18" y="195" width="147" height="82" rx="12" fill="#ffe9e5"/>
+    <text x="33" y="225" class="head">Fetch</text><text x="33" y="251" class="body">one current row</text>
+    <text x="18" y="315" class="body">Same rule, different job.</text>
+  </g>
+
+  <g transform="translate(171 526)">
+    <rect width="858" height="92" rx="18" fill="#17211b"/>
+    <text x="28" y="36" style="font:700 19px Inter,Arial,sans-serif;fill:#fff">Remember the verbs</text>
+    <text x="28" y="65" style="font:400 16px Inter,Arial,sans-serif;fill:#d8e0dc">Source selects · GroupBy summarizes · Join attaches · Chronon computes and delivers</text>
+  </g>
+</svg>

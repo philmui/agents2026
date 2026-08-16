@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A clear introduction to feature engineering, time, and storage with Chronon and UCI Online Retail.">
+  <title>Feature Stores: Giving Models the Right Past</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <style>
+    :root {
+      --paper: #fffdf7;
+      --white: #ffffff;
+      --ink: #17211b;
+      --muted: #526059;
+      --soft: #f3f0e7;
+      --line: #cbd2cd;
+      --teal: #00a896;
+      --teal-soft: #dff7ef;
+      --coral: #ff6b5c;
+      --coral-soft: #ffe9e5;
+      --yellow: #f4d35e;
+      --shadow: 0 18px 44px rgba(23, 33, 27, 0.09);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; background: var(--paper); }
+    body { font-family: Inter, Arial, sans-serif; color: var(--ink); }
+
+    .reveal {
+      color: var(--ink);
+      font-family: Inter, Arial, sans-serif;
+      font-size: 28px;
+      background: var(--paper);
+    }
+
+    .reveal .slides { text-align: left; }
+    .reveal .slides section {
+      width: 100%;
+      height: 100%;
+      padding: 48px 68px 62px;
+      overflow: hidden;
+      background: var(--paper);
+      text-align: left;
+    }
+
+    .slide-shell {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      transform-origin: top left;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    .reveal h1, .reveal h2, .reveal h3 {
+      margin: 0;
+      color: inherit;
+      font-family: Inter, Arial, sans-serif;
+      text-transform: none;
+      letter-spacing: -0.045em;
+      text-shadow: none;
+    }
+    .reveal h1 { font-size: 72px; line-height: 0.98; font-weight: 800; }
+    .reveal h2 { font-size: 45px; line-height: 1.04; font-weight: 760; }
+    .reveal h3 { font-size: 24px; line-height: 1.12; font-weight: 720; letter-spacing: -0.02em; }
+    .reveal p { margin: 0; font-size: 23px; line-height: 1.42; }
+
+    .eyebrow {
+      margin-bottom: 13px;
+      color: #8a3c32;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .reveal .lede { margin-top: 18px; color: var(--muted); font-size: 25px; font-weight: 400; }
+    .reveal .micro { color: var(--muted); font-size: 14px; line-height: 1.35; }
+    .reveal .small { color: var(--muted); font-size: 18px; line-height: 1.35; }
+    .strong { color: var(--ink); font-weight: 720; }
+    .teal { color: var(--teal); }
+    .coral { color: var(--coral); }
+    .yellow { color: #a17d00; }
+
+    .topline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 36px;
+      margin-bottom: 26px;
+    }
+    .topline h2 { max-width: 900px; }
+    .chapter {
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; flex: 1; min-height: 0; }
+    .split-58 { display: grid; grid-template-columns: 1.35fr 0.9fr; gap: 48px; align-items: center; flex: 1; min-height: 0; }
+    .split-42 { display: grid; grid-template-columns: 0.85fr 1.35fr; gap: 48px; align-items: center; flex: 1; min-height: 0; }
+    .stack { display: flex; flex-direction: column; gap: 16px; }
+    .reveal .bottom { margin-top: auto; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+      padding: 26px 28px;
+    }
+    .card.teal-bg { border-color: var(--teal); background: var(--teal-soft); }
+    .card.coral-bg { border-color: var(--coral); background: var(--coral-soft); }
+    .card.yellow-bg { border-color: var(--ink); background: var(--yellow); }
+    .card.ink-bg { border-color: var(--ink); background: var(--ink); color: var(--white); }
+    .card.soft-bg { background: var(--soft); }
+    .card p { margin-top: 8px; font-size: 18px; }
+
+    .card-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .card-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: auto; }
+    .metric {
+      min-height: 152px;
+      border-radius: 22px;
+      padding: 24px;
+      background: var(--white);
+      border: 1px solid var(--line);
+    }
+    .metric:nth-child(2) { background: var(--teal-soft); border-color: var(--teal); }
+    .metric:nth-child(3) { background: var(--yellow); border-color: var(--ink); }
+    .metric:nth-child(4) { background: var(--coral-soft); border-color: var(--coral); }
+    .metric .number { display: block; font-size: 46px; line-height: 1; font-weight: 800; letter-spacing: -0.05em; }
+    .metric .label { display: block; margin-top: 14px; color: var(--muted); font-size: 15px; line-height: 1.3; }
+
+    .asset-frame {
+      width: 100%;
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .asset-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-height: 550px;
+      object-fit: contain;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+    .asset-frame.tight img { max-height: 500px; }
+
+    .code-card {
+      overflow: hidden;
+      border: 1px solid #38443e;
+      border-radius: 22px;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+    }
+    .code-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid #39443e;
+      color: #d9e0dc;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+    }
+    .dots { display: flex; gap: 7px; }
+    .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); }
+    .dots i:nth-child(2) { background: var(--yellow); }
+    .dots i:nth-child(3) { background: var(--teal); }
+    .reveal pre {
+      width: 100%;
+      margin: 0;
+      padding: 19px 22px 21px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #f8fbf9;
+      font: 500 17px/1.48 "Roboto Mono", monospace;
+      white-space: pre-wrap;
+    }
+    .reveal code { font-family: "Roboto Mono", monospace; }
+    .kw { color: #ff8f83; }
+    .fn { color: #58d4c4; }
+    .st { color: #f7dc72; }
+    .cm { color: #91a198; }
+    .nu { color: #99c7ff; }
+
+    .flow-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; align-items: stretch; position: relative; }
+    .flow-row:before {
+      content: "";
+      position: absolute;
+      left: 11%; right: 11%; top: 50%;
+      border-top: 3px solid var(--ink);
+      z-index: 0;
+    }
+    .flow-node {
+      min-height: 142px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      border-radius: 22px;
+      background: var(--paper);
+      padding: 22px;
+    }
+    .flow-node:nth-child(2) { background: var(--teal-soft); border-color: var(--teal); }
+    .flow-node:nth-child(3) { background: var(--yellow); }
+    .flow-node:nth-child(4) { background: var(--coral-soft); border-color: var(--coral); }
+    .flow-node span { margin-top: 7px; color: var(--muted); font-size: 15px; }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      border-top: 1px solid var(--line);
+      padding: 15px 0;
+      align-items: baseline;
+    }
+    .decision:first-child { border-top: 0; }
+    .decision dt { color: var(--muted); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+    .decision dd { margin: 0; font-size: 23px; font-weight: 620; }
+
+    .formula {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 126px;
+      border-radius: 24px;
+      background: var(--yellow);
+      color: var(--ink);
+      font: 600 26px/1.4 "Roboto Mono", monospace;
+      letter-spacing: -0.03em;
+    }
+
+    .matrix { display: grid; grid-template-columns: 1.1fr repeat(3, 0.7fr); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+    .matrix > div { padding: 16px 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 17px; }
+    .matrix > div:nth-child(4n) { border-right: 0; }
+    .matrix > div:nth-last-child(-n + 4) { border-bottom: 0; }
+    .matrix .head { background: var(--ink); color: var(--white); font-weight: 700; }
+    .matrix .yes { text-align: center; background: var(--teal-soft); color: #007a6c; font-weight: 800; }
+    .matrix .no { text-align: center; background: var(--soft); color: #a0aaa4; }
+
+    .experiment { display: grid; grid-template-columns: 1fr 110px 1fr; gap: 24px; align-items: center; flex: 1; }
+    .experiment .arrow { color: var(--ink); font-size: 54px; text-align: center; }
+    .experiment .lane { min-height: 330px; border-radius: 26px; padding: 30px; background: var(--white); border: 2px solid var(--line); }
+    .experiment .lane.bad { background: var(--coral-soft); border-color: var(--coral); }
+    .step-tag { display: inline-flex; padding: 7px 11px; border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 13px; font-weight: 800; }
+    .experiment .lane p { margin-top: 24px; font-size: 20px; }
+    .signal { margin-top: 28px; padding: 17px 19px; border-radius: 17px; background: var(--teal-soft); font-weight: 700; font-size: 17px; }
+    .bad .signal { background: var(--white); color: #a54136; }
+
+    .source-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .source-link {
+      display: block;
+      min-height: 72px;
+      padding: 17px 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--white);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .source-link span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 500; }
+    .source-link:hover { border-color: var(--teal); background: var(--teal-soft); }
+
+    .giant { font-size: 112px; line-height: 0.9; font-weight: 800; letter-spacing: -0.07em; }
+    .quote { max-width: 900px; font-size: 47px; line-height: 1.14; font-weight: 730; letter-spacing: -0.04em; }
+    .stamp { display: inline-flex; padding: 11px 15px; border-radius: 999px; background: var(--teal-soft); color: #007b6e; font-size: 14px; font-weight: 800; }
+
+    .ink-slide, .reveal .slides section.ink-slide { background: var(--ink); color: var(--white); }
+    .ink-slide .eyebrow { color: #6de1d2; }
+    .ink-slide .lede, .ink-slide .small, .ink-slide .micro { color: #c7d0cb; }
+    .yellow-slide, .reveal .slides section.yellow-slide { background: var(--yellow); }
+    .teal-slide, .reveal .slides section.teal-slide { background: var(--teal-soft); }
+    .coral-slide, .reveal .slides section.coral-slide { background: var(--coral-soft); }
+
+    .global-footer {
+      position: fixed;
+      right: 24px;
+      bottom: 15px;
+      z-index: 40;
+      color: #6e7a73;
+      font: 650 12px/1 Inter, Arial, sans-serif;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+    }
+    .reveal .slide-number {
+      left: 24px;
+      right: auto;
+      bottom: 13px;
+      z-index: 41;
+      padding: 0;
+      background: transparent;
+      color: #6e7a73;
+      font: 650 12px/1 Inter, Arial, sans-serif;
+    }
+    .reveal .controls { right: 22px; bottom: 34px; transform: scale(0.65); transform-origin: bottom right; color: var(--teal); }
+    .reveal .progress { height: 4px; color: var(--teal); }
+    .reveal a { color: inherit; }
+
+    .mermaid-wrap {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 8px;
+      border-radius: 24px;
+      background: var(--white);
+      border: 1px solid var(--line);
+    }
+    .mermaid { width: 100%; text-align: center; font-family: Arial, sans-serif !important; }
+    .mermaid svg { max-width: 100% !important; max-height: 470px !important; }
+    .mermaid foreignObject, .mermaid .label { overflow: visible !important; }
+    .mermaid .nodeLabel p { margin: 0 !important; font-size: 14px !important; line-height: 1.15 !important; }
+
+    @media (max-width: 800px) {
+      .global-footer { right: 12px; }
+      .reveal .slide-number { left: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="global-footer" aria-hidden="true">© mui-group</div>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 01 -->
+      <section class="ink-slide">
+        <div class="slide-shell">
+          <div class="eyebrow">Modern ML systems · Chronon</div>
+          <div class="split-58">
+            <div>
+              <h1 style="font-size:64px">Feature Stores:<br>Giving Models the<br><span class="teal">Right Past</span></h1>
+              <p class="lede">Feature engineering, time, and storage<br>with Chronon and UCI Online Retail.</p>
+            </div>
+            <div class="stack">
+              <div class="card yellow-bg">
+                <h3>One decision</h3>
+                <p>Will this customer buy again within 30 days?</p>
+              </div>
+              <div class="card" style="background:#233028;border-color:#3f5147;color:white">
+                <h3>One invariant</h3>
+                <p style="color:#c7d0cb">Use only information known before the prediction.</p>
+              </div>
+            </div>
+          </div>
+          <p class="micro bottom">Use ← and → to navigate · press F for fullscreen</p>
+        </div>
+      </section>
+
+      <!-- 02 -->
+      <section class="teal-slide">
+        <div class="slide-shell">
+          <div class="eyebrow">Learning contract</div>
+          <h2>Four useful abilities.</h2>
+          <div class="card-grid-4" style="margin-top:auto;margin-bottom:auto">
+            <div class="card"><div class="giant teal">1</div><h3 style="margin-top:16px">Set the time</h3><p>Define the cutoff.</p></div>
+            <div class="card"><div class="giant coral">2</div><h3 style="margin-top:16px">Build features</h3><p>Write the logic once.</p></div>
+            <div class="card"><div class="giant yellow">3</div><h3 style="margin-top:16px">Check the result</h3><p>Test both paths.</p></div>
+            <div class="card ink-bg"><div class="giant">4</div><h3 style="margin-top:16px">Take responsibility</h3><p style="color:#c7d0cb">Name an owner and rules.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">First principle</div><h2>A feature store is more<br>than a database.</h2></div>
+            <span class="chapter">01 · Meaning</span>
+          </div>
+          <div class="flow-row" style="margin-top:auto;margin-bottom:auto">
+            <div class="flow-node"><h3>Raw events</h3><span>orders, refunds</span></div>
+            <div class="flow-node"><h3>Temporal logic</h3><span>keys, windows, cutoffs</span></div>
+            <div class="flow-node"><h3>Feature contract</h3><span>version, owner, lineage</span></div>
+            <div class="flow-node"><h3>Model delivery</h3><span>training and serving</span></div>
+          </div>
+          <div class="card coral-bg bottom" style="padding:18px 24px">
+            <p><span class="strong">Important:</span> a fast database is only storage unless the team also defines, tests, and owns the features.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Real-world laboratory</div><h2>Retail data is delightfully messy.</h2></div>
+            <span class="chapter">UCI Online Retail</span>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><span class="number">541,909</span><span class="label">invoice line events</span></div>
+            <div class="metric"><span class="number">4,372</span><span class="label">identified customers</span></div>
+            <div class="metric"><span class="number">25,900</span><span class="label">distinct invoices</span></div>
+            <div class="metric"><span class="number">24.9%</span><span class="label">rows missing customer ID</span></div>
+          </div>
+          <div class="card-grid-3 bottom" style="margin-top:16px">
+            <div class="card soft-bg"><h3>Returns</h3><p>Invoice IDs can start with C.</p></div>
+            <div class="card soft-bg"><h3>Granularity</h3><p>One invoice spans many lines.</p></div>
+            <div class="card soft-bg"><h3>Time</h3><p>Dec 2010 to Dec 2011.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 -->
+      <section class="yellow-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Decision first</div><h2>Write the prediction contract.</h2></div>
+            <span class="chapter">Repeat purchase</span>
+          </div>
+          <div class="split-58">
+            <dl>
+              <div class="decision"><dt>Entity</dt><dd>customer_id</dd></div>
+              <div class="decision"><dt>Decision event</dt><dd>completed invoice</dd></div>
+              <div class="decision"><dt>Cutoff</dt><dd>invoice timestamp</dd></div>
+              <div class="decision"><dt>Label</dt><dd>new purchase in 30d</dd></div>
+            </dl>
+            <div class="card ink-bg">
+              <p class="micro" style="color:#9fb0a7">ONE ROW MEANS</p>
+              <p style="margin-top:16px;font-size:30px;line-height:1.25">What was knowable when this order completed?</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Event modeling</div><h2>Turn line items into three streams.</h2></div>
+            <span class="chapter">Clean once</span>
+          </div>
+          <div class="flow-row" style="margin-top:auto;margin-bottom:auto">
+            <div class="flow-node"><h3>Invoice lines</h3><span>quantity × unit price</span></div>
+            <div class="flow-node"><h3>Orders</h3><span>one completed invoice</span></div>
+            <div class="flow-node"><h3>Cancellations</h3><span>refund behavior</span></div>
+            <div class="flow-node"><h3>Predictions</h3><span>one decision row</span></div>
+          </div>
+          <div class="card coral-bg bottom" style="padding:18px 24px">
+            <p><span class="strong">Caution:</span> do not treat negative quantities or cancellation invoices as ordinary purchases.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">System loop</div><h2>Definitions flow both ways.</h2></div>
+            <span class="chapter">One shared rule</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/01-feature-store-loop.svg" alt="Four steps show order events entering one rule, producing training and live values, and then being compared.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section class="coral-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Time rules</div><h2>Every event has three clocks.</h2></div>
+            <span class="chapter">02 · Time</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/02-three-clocks.svg" alt="An order happens at 9:30, the model predicts at 10:00, and the record becomes available too late at 10:10.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Historical truth</div><h2>A window ends at each decision.</h2></div>
+            <span class="chapter">As-of view</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/03-point-in-time-window.svg" alt="A worked timeline uses purchases before June 1 for a feature and a later purchase for the label.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Leakage exposed</div><h2>“Latest” is not historical.</h2></div>
+            <span class="chapter">Recompute test</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/05-wrong-vs-right-join.svg" alt="Comparison of a leaking latest-value join and a stable point-in-time join.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="ink-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Boundary rule</div><h2>Make inclusion explicit.</h2></div>
+            <span class="chapter" style="border-color:#52645a;color:#b9c6bf">Half-open window</span>
+          </div>
+          <div class="card-grid-2" style="margin-top:44px">
+            <div>
+              <p class="micro" style="margin-bottom:10px;color:#70dccc">FEATURE WINDOW</p>
+              <div class="formula" style="font-size:20px">cutoff - 30d ≤ event &lt; cutoff</div>
+            </div>
+            <div>
+              <p class="micro" style="margin-bottom:10px;color:#ff9f95">LABEL WINDOW</p>
+              <div class="formula" style="font-size:20px;background:var(--coral-soft)">cutoff &lt; repeat ≤ cutoff + 30d</div>
+            </div>
+          </div>
+          <div class="card-grid-2 bottom">
+            <div class="card" style="background:#233028;border-color:#44554b;color:white">
+              <h3>Same-timestamp event?</h3>
+              <p style="color:#c7d0cb">Exclude unless ordering is guaranteed.</p>
+            </div>
+            <div class="card coral-bg" style="color:var(--ink)">
+              <h3>Arrived ten minutes late?</h3>
+              <p>Event time alone can still leak.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Placement matters</div><h2>Store history. Pass context.</h2></div>
+            <span class="chapter">Precompute test</span>
+          </div>
+          <div class="split">
+            <div class="card teal-bg" style="min-height:340px">
+              <p class="eyebrow teal">Feature store</p>
+              <h3 style="font-size:30px">Known before request</h3>
+              <p style="margin-top:26px">purchase_sum_30d</p>
+              <p>cancel_count_90d</p>
+              <p>average_order_30d</p>
+            </div>
+            <div class="card coral-bg" style="min-height:340px">
+              <p class="eyebrow coral">Request context</p>
+              <h3 style="font-size:30px">Known at decision</h3>
+              <p style="margin-top:26px">current_order_value</p>
+              <p>active_offer</p>
+              <p>device_session</p>
+            </div>
+          </div>
+          <p class="small bottom">Counterexample: storing the current cart as history creates staleness and key-mismatch risk.</p>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="teal-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Chronon mental model</div><h2>Declare meaning once.</h2></div>
+            <span class="chapter">03 · Build</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/04-chronon-object-model.svg" alt="Four steps explain how Chronon selects source fields, summarizes customer history, joins features to decisions, and delivers values.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Step 1 · Source</div><h2>Name columns and event time.</h2></div>
+            <span class="chapter">purchases.py</span>
+          </div>
+          <div class="split-42">
+            <div class="stack">
+              <div class="card yellow-bg"><h3>Table</h3><p>Historical backfill.</p></div>
+              <div class="card teal-bg"><h3>Topic</h3><p>Fresh updates.</p></div>
+              <div class="card coral-bg"><h3>ts</h3><p>Temporal anchor.</p></div>
+            </div>
+            <div class="code-card">
+              <div class="code-head"><span>chronon/group_bys/retail/purchases.py</span><span class="dots"><i></i><i></i><i></i></span></div>
+              <pre><code>source = <span class="fn">Source</span>(events=<span class="fn">EventSource</span>(
+    table=<span class="st">"retail.orders"</span>,
+    topic=<span class="st">"retail.orders.v1"</span>,
+    query=<span class="fn">Query</span>(
+        selects=<span class="fn">select</span>(
+            <span class="st">"customer_id"</span>, <span class="st">"order_id"</span>,
+            <span class="st">"order_value"</span>, <span class="st">"item_count"</span>,
+        ),
+        time_column=<span class="st">"ts"</span>,
+    ),
+))</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Step 2 · GroupBy</div><h2>Bind keys, operations, windows.</h2></div>
+            <span class="chapter">Temporal accuracy</span>
+          </div>
+          <div class="split-42">
+            <div>
+              <div class="giant teal">7<br>30<br>90</div>
+              <p class="lede">day windows</p>
+            </div>
+            <div class="code-card">
+              <div class="code-head"><span>purchase features</span><span class="dots"><i></i><i></i><i></i></span></div>
+              <pre><code>v1 = <span class="fn">GroupBy</span>(
+    sources=[source],
+    keys=[<span class="st">"customer_id"</span>],
+    aggregations=[<span class="fn">Aggregation</span>(
+        input_column=<span class="st">"order_value"</span>,
+        operation=Operation.SUM,
+        windows=WINDOWS,
+    )],
+    accuracy=Accuracy.TEMPORAL,
+    online=<span class="kw">True</span>,
+)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 -->
+      <section class="yellow-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Feature family</div><h2>Windows are hypotheses.</h2></div>
+            <span class="chapter">Not decoration</span>
+          </div>
+          <div class="matrix" style="margin-top:auto;margin-bottom:auto">
+            <div class="head">Signal</div><div class="head">7d</div><div class="head">30d</div><div class="head">90d</div>
+            <div>purchase sum</div><div class="yes">●</div><div class="yes">●</div><div class="yes">●</div>
+            <div>order count</div><div class="yes">●</div><div class="yes">●</div><div class="yes">●</div>
+            <div>average order</div><div class="no">○</div><div class="yes">●</div><div class="yes">●</div>
+            <div>item count</div><div class="no">○</div><div class="yes">●</div><div class="no">○</div>
+          </div>
+          <div class="card bottom" style="padding:18px 24px">
+            <p><span class="strong">Caution:</span> more windows raise compute, storage, serving payload, and multiple-testing cost.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Step 3 · Join</div><h2>Anchor features to decisions.</h2></div>
+            <span class="chapter">repeat_purchase_training.py</span>
+          </div>
+          <div class="split-42">
+            <div class="card coral-bg">
+              <p class="eyebrow coral">Left side owns time</p>
+              <h3 style="font-size:30px">One prediction row</h3>
+              <p style="margin-top:20px">customer_id</p>
+              <p>order_id</p>
+              <p>ts</p>
+            </div>
+            <div class="code-card">
+              <div class="code-head"><span>point-in-time training join</span><span class="dots"><i></i><i></i><i></i></span></div>
+              <pre><code>v1 = <span class="fn">Join</span>(
+    left=prediction_events,
+    right_parts=[
+        <span class="fn">JoinPart</span>(
+            group_by=purchases_v1,
+            prefix=<span class="st">"purchase"</span>),
+        <span class="fn">JoinPart</span>(
+            group_by=cancellations_v1,
+            prefix=<span class="st">"cancel"</span>),
+    ],
+    check_consistency=<span class="kw">True</span>,
+)</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 18 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">One definition, two paths</div><h2>Parity is a measurable claim.</h2></div>
+            <span class="chapter">04 · Deliver</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/06-offline-online-parity.svg" alt="A controlled test asks both the historical and live paths for the same customer, cutoff, and feature value.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 -->
+      <section class="ink-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Consistency test</div><h2>Compare results, not guesses.</h2></div>
+            <span class="chapter" style="border-color:#52645a;color:#b9c6bf">Same key · same cutoff</span>
+          </div>
+          <div class="split-58">
+            <div class="code-card" style="box-shadow:none;border-color:#52645a">
+              <div class="code-head"><span>parity_check.py</span><span class="dots"><i></i><i></i><i></i></span></div>
+              <pre><code>offline = <span class="fn">backfill</span>(key, cutoff)
+online  = <span class="fn">replay_fetch</span>(key, cutoff)
+
+<span class="kw">assert</span> offline.types == online.types
+<span class="kw">assert</span> <span class="fn">same_nulls</span>(offline, online)
+np.testing.<span class="fn">assert_allclose</span>(
+    offline.values, online.values,
+    rtol=<span class="nu">1e-6</span>, atol=<span class="nu">1e-9</span>)</code></pre>
+            </div>
+            <div class="stack">
+              <div class="card yellow-bg"><h3>Values</h3><p>Within tolerance.</p></div>
+              <div class="card" style="background:#233028;border-color:#52645a;color:white"><h3>Also test</h3><p style="color:#c7d0cb">nulls · types · age</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 20 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Honest local lab</div><h2>Inspect locally. Scale deliberately.</h2></div>
+            <span class="chapter">Reference runner</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/08-local-vs-production.svg" alt="The notebook explains and tests feature rules while production Chronon computes and delivers them at scale.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 21 -->
+      <section class="teal-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Reproducible setup</div><h2>Environment before experiment.</h2></div>
+            <span class="chapter">uv + dotenv</span>
+          </div>
+          <div class="split-58">
+            <div class="code-card">
+              <div class="code-head"><span>terminal</span><span class="dots"><i></i><i></i><i></i></span></div>
+              <pre><code>cd topics/19_feature_store
+uv sync
+cp .env.example .env
+uv run jupyter lab</code></pre>
+            </div>
+            <div class="code-card">
+              <div class="code-head"><span>notebook bootstrap</span><span class="dots"><i></i><i></i><i></i></span></div>
+              <pre><code><span class="kw">from</span> dotenv <span class="kw">import</span> (
+    find_dotenv,
+    load_dotenv,
+)
+
+<span class="fn">load_dotenv</span>(<span class="fn">find_dotenv</span>())</code></pre>
+            </div>
+          </div>
+          <p class="small bottom">The tutorial needs no API key. Local settings still belong in <span class="strong">.env</span>.</p>
+        </div>
+      </section>
+
+      <!-- 22 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Leakage experiment</div><h2>Hold the model constant.</h2></div>
+            <span class="chapter">Time split only</span>
+          </div>
+          <div class="experiment">
+            <div class="lane">
+              <span class="step-tag">POINT-IN-TIME</span>
+              <h3 style="font-size:30px;margin-top:20px">History before ts</h3>
+              <p>Train early.<br>Validate later.<br>Recompute stably.</p>
+              <div class="signal">Credible offline signal</div>
+            </div>
+            <div class="arrow">vs</div>
+            <div class="lane bad">
+              <span class="step-tag" style="background:white;color:#a54136">LEAKY</span>
+              <h3 style="font-size:30px;margin-top:20px">Full future history</h3>
+              <p>Same model.<br>Same split.<br>Wrong features.</p>
+              <div class="signal">Suspicious lift is an alarm</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 23 -->
+      <section class="yellow-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Production meaning</div><h2>A feature needs clear rules and an owner.</h2></div>
+            <span class="chapter">05 · Govern</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/07-feature-contract.svg" alt="A worked feature instruction card explains meaning, customer key, time rule, missing values, source, owner, and delivery promise.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 24 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Change management</div><h2>Version semantics, not filenames.</h2></div>
+            <span class="chapter">Breaking means changed truth</span>
+          </div>
+          <div class="card-grid-3" style="margin-top:auto;margin-bottom:auto">
+            <div class="card teal-bg"><div class="stamp">SAFE</div><h3 style="font-size:28px;margin-top:20px">Clarify docs</h3><p>No value changes.</p></div>
+            <div class="card yellow-bg"><div class="stamp" style="background:white;color:#7c6000">MEASURE</div><h3 style="font-size:28px;margin-top:20px">Add a feature</h3><p>Payload and latency grow.</p></div>
+            <div class="card coral-bg"><div class="stamp" style="background:white;color:#a54136">VERSION</div><h3 style="font-size:28px;margin-top:20px">Change window</h3><p>Historical values change.</p></div>
+          </div>
+          <p class="small bottom">Counterintuitive: an added column can be data-compatible yet still violate a serving SLA.</p>
+        </div>
+      </section>
+
+      <!-- 25 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Observe outcomes</div><h2>Freshness is not fetch latency.</h2></div>
+            <span class="chapter">Layered signals</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/09-observability-stack.svg" alt="Five checks follow a feature through source data, calculation, freshness, delivery, and model results.">
+          </div>
+          <div class="card-grid-2" style="margin-top:12px">
+            <div class="card teal-bg" style="padding:13px 18px"><p><span class="strong">Freshness</span> · age of feature value</p></div>
+            <div class="card coral-bg" style="padding:13px 18px"><p><span class="strong">Latency</span> · time to fetch it</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 26 -->
+      <section class="teal-slide">
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Production dataflow</div><h2>One definition, specialized engines.</h2></div>
+            <span class="chapter">Chronon at scale</span>
+          </div>
+          <div class="mermaid-wrap">
+            <pre class="mermaid">
+flowchart LR
+  D[Definition] --> S[Stream]
+  D --> B[Backfill]
+  S --> K[(Online)]
+  B --> O[(Offline)]
+  K --> F[Serve]
+  O --> R[Train]
+            </pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- 27 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Architecture choice</div><h2>Complexity must earn its keep.</h2></div>
+            <span class="chapter">Fit the problem</span>
+          </div>
+          <div class="asset-frame tight">
+            <img src="../assets/10-when-to-use.svg" alt="Three questions help a team choose between a simpler warehouse pipeline and a feature store trial.">
+          </div>
+        </div>
+      </section>
+
+      <!-- 28 -->
+      <section class="ink-slide">
+        <div class="slide-shell">
+          <div class="eyebrow">Go-live test</div>
+          <h2>Ship only when all four agree.</h2>
+          <div class="card-grid-4" style="margin-top:auto;margin-bottom:auto">
+            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant teal">T</div><h3 style="margin-top:18px">Truth</h3><p style="color:#c7d0cb">PIT tests pass.</p></div>
+            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant coral">D</div><h3 style="margin-top:18px">Delivery</h3><p style="color:#c7d0cb">Parity meets SLA.</p></div>
+            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant yellow">O</div><h3 style="margin-top:18px">Ownership</h3><p style="color:#c7d0cb">Alerts have humans.</p></div>
+            <div class="card yellow-bg"><div class="giant">V</div><h3 style="margin-top:18px">Value</h3><p>Reuse beats cost.</p></div>
+          </div>
+          <p class="quote bottom" style="font-size:39px">One clear rule. Different ways to store and deliver it. <span class="teal">Check what reaches the model.</span></p>
+        </div>
+      </section>
+
+      <!-- 29 -->
+      <section>
+        <div class="slide-shell">
+          <div class="topline">
+            <div><div class="eyebrow">Sources and further reading</div><h2>Follow the ideas to their roots.</h2></div>
+            <span class="chapter">Open in new tab</span>
+          </div>
+          <div class="source-list">
+            <a class="source-link" href="https://chronon.ai/" target="_blank" rel="noreferrer">Chronon<span>Platform overview and documentation</span></a>
+            <a class="source-link" href="https://archive.ics.uci.edu/dataset/352/online+retail" target="_blank" rel="noreferrer">UCI Online Retail<span>Dataset description and license</span></a>
+            <a class="source-link" href="https://www.databricks.com/blog/what-feature-store-complete-guide-ml-feature-engineering" target="_blank" rel="noreferrer">Databricks<span>Feature store architecture guide</span></a>
+            <a class="source-link" href="https://www.featurestore.org/" target="_blank" rel="noreferrer">FeatureStore.org<span>Community landscape and references</span></a>
+            <a class="source-link" href="https://www.ibm.com/think/topics/feature-store" target="_blank" rel="noreferrer">IBM<span>Feature store concepts</span></a>
+            <a class="source-link" href="https://chalk.ai/blog/what-is-a-feature-store" target="_blank" rel="noreferrer">Chalk<span>Online feature system perspective</span></a>
+            <a class="source-link" href="https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store.html" target="_blank" rel="noreferrer" style="grid-column:1 / span 2">AWS SageMaker<span>Online and offline feature store documentation</span></a>
+          </div>
+          <p class="micro bottom">Dataset statistics shown here were computed from the tutorial’s cached CSV.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "base",
+      securityLevel: "loose",
+      flowchart: { curve: "linear", nodeSpacing: 30, rankSpacing: 44, htmlLabels: false },
+      themeVariables: {
+        fontFamily: "Arial, sans-serif",
+        fontSize: "15px",
+        primaryColor: "#dff7ef",
+        primaryTextColor: "#17211b",
+        primaryBorderColor: "#00a896",
+        secondaryColor: "#f4d35e",
+        tertiaryColor: "#ffe9e5",
+        lineColor: "#17211b",
+        clusterBkg: "#fffdf7",
+        edgeLabelBackground: "#fffdf7"
+      }
+    });
+
+    async function renderMermaidFor(slide) {
+      const diagram = slide && slide.querySelector(".mermaid:not([data-processed='true'])");
+      if (!diagram) return;
+      await mermaid.run({ nodes: [diagram] });
+    }
+
+    function fitSlides() {
+      document.querySelectorAll(".reveal .slides section").forEach((slide) => {
+        const shell = slide.querySelector(":scope > .slide-shell");
+        if (!shell) return;
+        shell.style.transform = "";
+        shell.style.width = "100%";
+        const availableHeight = shell.clientHeight;
+        const availableWidth = shell.clientWidth;
+        const scale = Math.min(
+          1,
+          availableHeight / Math.max(shell.scrollHeight, 1),
+          availableWidth / Math.max(shell.scrollWidth, 1)
+        );
+        if (scale < 0.995) {
+          shell.style.transform = `scale(${scale})`;
+        }
+      });
+    }
+
+    const deck = new Reveal({
+      width: 1280,
+      height: 720,
+      margin: 0,
+      minScale: 0.2,
+      maxScale: 2,
+      controls: false,
+      progress: true,
+      hash: true,
+      keyboard: true,
+      overview: true,
+      center: false,
+      touch: true,
+      transition: "fade",
+      backgroundTransition: "fade",
+      slideNumber: "c/t",
+      showSlideNumber: "all"
+    });
+
+    await deck.initialize();
+    await renderMermaidFor(deck.getCurrentSlide());
+    fitSlides();
+    requestAnimationFrame(fitSlides);
+    document.fonts.ready.then(fitSlides);
+    window.addEventListener("resize", fitSlides, { passive: true });
+    deck.on("slidechanged", async (event) => {
+      await renderMermaidFor(event.currentSlide);
+      fitSlides();
+    });
+  </script>
+  <noscript>This presentation requires JavaScript for navigation.</noscript>
+</body>
+</html>

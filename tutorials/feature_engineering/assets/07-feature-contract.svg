@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">A feature contract answers the questions needed to use a feature safely</title>
+  <desc id="desc">A worked feature card for average order value in the prior 30 days. It states what is calculated, which customer it describes, which events count, what missing means, where the data comes from, who owns it, how fresh it should be, and which models use it.</desc>
+  <style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 17px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 15px Inter,Arial,sans-serif;fill:#41504a}.small{font:700 12px Inter,Arial,sans-serif;fill:#8a3c32;letter-spacing:1px}.mono{font:500 16px ui-monospace,Menlo,monospace;fill:#17211b}</style>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">A feature needs an instruction card</text>
+  <text x="60" y="88" class="sub">The name is only a label. The contract below explains what the number actually means.</text>
+
+  <rect x="72" y="127" width="1056" height="470" rx="24" fill="#fff" stroke="#17211b" stroke-width="3"/>
+  <rect x="72" y="127" width="1056" height="82" rx="24" fill="#f4d35e"/><rect x="72" y="181" width="1056" height="28" fill="#f4d35e"/>
+  <text x="105" y="158" class="small">TECHNICAL NAME</text><text x="105" y="188" class="mono">customer_avg_order_value_30d</text>
+  <rect x="798" y="147" width="296" height="42" rx="12" fill="#fff"/><text x="816" y="173" class="body">Example: (£40 + £65) ÷ 2 = £52.50</text>
+
+  <g transform="translate(105 239)">
+    <rect width="300" height="112" rx="16" fill="#dff7ef"/>
+    <text x="20" y="27" class="small">WHAT DOES IT CALCULATE?</text>
+    <text x="20" y="56" class="head">Average completed-order value</text>
+    <text x="20" y="82" class="body">Unit: pounds (GBP)</text><text x="20" y="103" class="body">Type: decimal number</text>
+  </g>
+  <g transform="translate(450 239)">
+    <rect width="300" height="112" rx="16" fill="#fff8d9"/>
+    <text x="20" y="27" class="small">WHO DOES IT DESCRIBE?</text>
+    <text x="20" y="56" class="head">One customer</text>
+    <text x="20" y="84" class="mono">key = customer_id</text>
+  </g>
+  <g transform="translate(795 239)">
+    <rect width="300" height="112" rx="16" fill="#ffe9e5"/>
+    <text x="20" y="27" class="small">WHICH EVENTS COUNT?</text>
+    <text x="20" y="56" class="head">Orders in the prior 30 days</text>
+    <text x="20" y="82" class="body">Exclude the current order</text><text x="20" y="103" class="body">and everything after it.</text>
+  </g>
+
+  <g transform="translate(105 376)">
+    <rect width="300" height="95" rx="16" fill="#f8f5eb" stroke="#c8cfc9"/>
+    <text x="20" y="27" class="small">WHAT DOES MISSING MEAN?</text>
+    <text x="20" y="56" class="head">No eligible prior orders</text>
+    <text x="20" y="80" class="body">Keep null; do not invent £0.</text>
+  </g>
+  <g transform="translate(450 376)">
+    <rect width="300" height="95" rx="16" fill="#f8f5eb" stroke="#c8cfc9"/>
+    <text x="20" y="27" class="small">WHERE DID IT COME FROM?</text>
+    <text x="20" y="56" class="head">Completed orders table</text>
+    <text x="20" y="80" class="body">Source version: settled_orders_v2</text>
+  </g>
+  <g transform="translate(795 376)">
+    <rect width="300" height="95" rx="16" fill="#f8f5eb" stroke="#c8cfc9"/>
+    <text x="20" y="27" class="small">WHO IS RESPONSIBLE?</text>
+    <text x="20" y="56" class="head">Retail ML team</text>
+    <text x="20" y="80" class="body">Feature version: v1</text>
+  </g>
+
+  <rect x="105" y="496" width="990" height="68" rx="16" fill="#17211b"/>
+  <text x="128" y="523" style="font:700 16px Inter,Arial,sans-serif;fill:#fff">Delivery promise</text><text x="128" y="548" style="font:400 15px Inter,Arial,sans-serif;fill:#d8e0dc">99% updated within 60 seconds · used by repeat-purchase-v1 and retention-offer-v3</text>
+
+  <text x="230" y="633" class="head">Contract = meaning + time rule + missing rule + source + owner + delivery promise</text>
+</svg>

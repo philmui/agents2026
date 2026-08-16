@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">A decision guide for choosing a feature store or a simpler warehouse pipeline</title>
+  <desc id="desc">Three questions guide the choice. Are historical features difficult or repeated? Must values be shared or delivered quickly? Can a team own the system? Mostly no points to a versioned warehouse pipeline. Yes to all points to a feature store candidate. Teams should choose based on measured need.</desc>
+  <defs><marker id="arrow" viewBox="0 0 14 14" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto"><path d="M1 1L12 7L1 13Z" fill="#17211b"/></marker><style>.title{font:700 34px Inter,Arial,sans-serif;fill:#17211b}.sub{font:400 18px Inter,Arial,sans-serif;fill:#41504a}.head{font:700 18px Inter,Arial,sans-serif;fill:#17211b}.body{font:400 15px Inter,Arial,sans-serif;fill:#41504a}.num{font:700 14px Inter,Arial,sans-serif;fill:#fff}.line{stroke:#17211b;stroke-width:3;fill:none;marker-end:url(#arrow)}.dash{stroke:#8b9691;stroke-width:2.5;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow)}</style></defs>
+  <rect width="1200" height="675" rx="28" fill="#fffdf7"/>
+  <text x="60" y="58" class="title">A feature store should solve a real problem</text>
+  <text x="60" y="88" class="sub">Follow the questions. “No” is a valid engineering answer.</text>
+
+  <g transform="translate(62 143)">
+    <rect width="276" height="182" rx="21" fill="#fff8d9" stroke="#17211b" stroke-width="3"/>
+    <circle cx="31" cy="31" r="18" fill="#17211b"/><text x="27" y="36" class="num">1</text>
+    <text x="58" y="37" class="head">Is history difficult?</text>
+    <text x="22" y="78" class="body">Examples:</text><text x="22" y="104" class="body">many time windows</text><text x="22" y="128" class="body">strict past-only cutoffs</text><text x="22" y="152" class="body">frequent historical rebuilds</text>
+  </g>
+  <path d="M348 234H415" class="line"/>
+  <text x="369" y="218" class="head">YES</text>
+  <g transform="translate(427 143)">
+    <rect width="276" height="182" rx="21" fill="#dff7ef" stroke="#008f83" stroke-width="3"/>
+    <circle cx="31" cy="31" r="18" fill="#008f83"/><text x="27" y="36" class="num">2</text>
+    <text x="58" y="37" class="head">Will the work be reused?</text>
+    <text x="22" y="78" class="body">Examples:</text><text x="22" y="104" class="body">several models need it</text><text x="22" y="128" class="body">training and live use</text><text x="22" y="152" class="body">many people need one rule</text>
+  </g>
+  <path d="M713 234H780" class="line"/>
+  <text x="734" y="218" class="head">YES</text>
+  <g transform="translate(792 143)">
+    <rect width="346" height="182" rx="21" fill="#ffe9e5" stroke="#d94f45" stroke-width="3"/>
+    <circle cx="31" cy="31" r="18" fill="#d94f45"/><text x="27" y="36" class="num">3</text>
+    <text x="58" y="37" class="head">Can a team own the system?</text>
+    <text x="22" y="78" class="body">Someone must handle:</text><text x="22" y="104" class="body">failures and alerts</text><text x="22" y="128" class="body">access and security</text><text x="22" y="152" class="body">cost and feature changes</text>
+  </g>
+
+  <path d="M965 335V386" class="line"/><text x="980" y="368" class="head">YES</text>
+  <g transform="translate(748 398)">
+    <rect width="390" height="144" rx="22" fill="#dff7ef" stroke="#008f83" stroke-width="4"/>
+    <text x="28" y="42" class="head">Feature store is a strong candidate</text>
+    <text x="28" y="75" class="body">Run a small trial. Measure correctness,</text><text x="28" y="98" class="body">reuse, speed, reliability, and cost.</text>
+    <rect x="28" y="111" width="334" height="2" fill="#008f83"/><text x="28" y="134" class="body">Adopt it only if the evidence is useful.</text>
+  </g>
+
+  <path d="M200 335C200 390 251 414 322 430" class="dash"/>
+  <path d="M565 335C565 378 491 400 443 430" class="dash"/>
+  <path d="M792 234C714 234 667 423 540 452" class="dash"/>
+  <text x="185" y="374" class="head">NO</text><text x="543" y="374" class="head">NO</text><text x="694" y="292" class="head">NO</text>
+  <g transform="translate(62 430)">
+    <rect width="560" height="144" rx="22" fill="#fff" stroke="#8b9691" stroke-width="3"/>
+    <text x="28" y="42" class="head">Start with a simpler pipeline</text>
+    <text x="28" y="75" class="body">Use reviewed SQL or Python, version the code,</text><text x="28" y="98" class="body">test time cutoffs, and store results in the warehouse.</text>
+    <text x="28" y="128" class="body">You can reconsider when the repeated problems are clear.</text>
+  </g>
+
+  <rect x="216" y="609" width="768" height="38" rx="12" fill="#17211b"/>
+  <text x="247" y="634" style="font:700 15px Inter,Arial,sans-serif;fill:#fff">The best design is the smallest one that stays correct and can be owned.</text>
+</svg>

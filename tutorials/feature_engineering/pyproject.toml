@@ -1,0 +1,43 @@
+[project]
+name = "features"
+version = "0.1.0"
+description = "A point-in-time correct feature store tutorial using Chronon and the UCI Online Retail dataset."
+# Chronon 0.0.114 pins PySpark 3.3.1. Python 3.10 is the conservative local
+# authoring choice for that Spark line. Production execution is shown through
+# Chronon's Docker or cluster workflow, not an in-notebook Spark process.
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    # Chronon's Python package provides the real GroupBy, Join, Query, and
+    # compiler APIs used in the notebook. The optional lab runs its assembly
+    # locally; production Spark execution belongs on Docker or a cluster.
+    "chronon-ai==0.0.114",
+    # A project-local Java 17 runtime keeps the optional real Chronon Spark lab
+    # reproducible without requiring a machine-wide JDK installation.
+    "jdk4py==17.0.9.2",
+    # Chronon's Jupyter module imports this package but 0.0.114 does not declare
+    # it directly, so the tutorial makes the dependency explicit.
+    "typing-extensions>=4.12,<5",
+
+    # Data preparation and the small local semantic reference implementation.
+    # The local runner lets a learner inspect point-in-time behavior without
+    # pretending that pandas is the Chronon production engine.
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "pyarrow>=17",
+    "requests>=2.32",
+
+    # The time-split model comparison makes leakage visible with metrics.
+    "scikit-learn>=1.5,<2",
+
+    # Secrets and configuration are read from the nearest .env file.
+    "python-dotenv>=1.0,<2",
+
+    # Notebook authoring, execution, and validation.
+    "jupyterlab>=4.2,<5",
+    "ipykernel>=6.29,<7",
+    "nbformat>=5.10,<6",
+    "nbclient>=0.10,<1",
+]
+
+[tool.uv]
+package = false
