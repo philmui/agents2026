@@ -24,7 +24,7 @@ nb["metadata"] = {
         "language": "python",
         "name": "python3",
     },
-    "language_info": {"name": "python", "version": "3.10"},
+    "language_info": {"name": "python", "version": "3.12"},
 }
 
 
@@ -190,7 +190,7 @@ add_markdown(
     ```
 
     `uv sync` creates the project environment from the manifest and lock file.
-    Chronon 0.0.114 pins PySpark 3.3.1, so this project uses Python 3.10. The
+    This project uses Python 3.12. The
     optional local Spark lab uses a Java 17 runtime supplied by the `jdk4py`
     package. It does not require a machine-wide JDK.
 
@@ -220,7 +220,7 @@ add_code(
 
     ROOT = Path.cwd().resolve()
     if not (ROOT / "pyproject.toml").exists():
-        raise RuntimeError("Start Jupyter from topics/19_feature_store.")
+        raise RuntimeError("Start Jupyter from the feature_engineering directory.")
 
     CACHE_PATH = ROOT / os.getenv(
         "UCI_RETAIL_CACHE", "data/cache/online_retail.csv"

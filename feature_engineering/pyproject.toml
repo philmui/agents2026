@@ -2,9 +2,9 @@
 name = "features"
 version = "0.1.0"
 description = "A point-in-time correct feature store tutorial using Chronon and the UCI Online Retail dataset."
-# Chronon 0.0.114 pins PySpark 3.3.1. Python 3.10 is the conservative local
-# authoring choice for that Spark line. Production execution is shown through
-# Chronon's Docker or cluster workflow, not an in-notebook Spark process.
+# Python 3.12 is pinned in .python-version and reflected in uv.lock. Production
+# execution is shown through Chronon's Docker or cluster workflow, not an
+# in-notebook Spark process.
 requires-python = ">=3.12,<3.14"
 dependencies = [
     # Chronon's Python package provides the real GroupBy, Join, Query, and
