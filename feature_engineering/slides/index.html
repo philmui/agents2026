@@ -352,7 +352,7 @@
           <div class="split-58">
             <div>
               <h1 style="font-size:64px">Feature Stores:<br>Giving Models the<br><span class="teal">Right Past</span></h1>
-              <p class="lede">Feature engineering, time, and storage<br>with Chronon and UCI Online Retail.</p>
+              <p class="lede">How to build features, handle time, and store them<br>with Chronon and UCI Online Retail.</p>
             </div>
             <div class="stack">
               <div class="card yellow-bg">
@@ -360,27 +360,33 @@
                 <p>Will this customer buy again within 30 days?</p>
               </div>
               <div class="card" style="background:#233028;border-color:#3f5147;color:white">
-                <h3>One invariant</h3>
-                <p style="color:#c7d0cb">Use only information known before the prediction.</p>
+                <h3>One firm rule</h3>
+                <p style="color:#c7d0cb">Use only facts known before the prediction.</p>
               </div>
             </div>
           </div>
           <p class="micro bottom">Use ← and → to navigate · press F for fullscreen</p>
         </div>
+        <aside class="notes">
+          Start with the big picture. A machine learning model is a program that learns patterns from examples and then makes predictions about new cases. To make a prediction it needs inputs, and each input is called a feature. A feature store is the shared system that builds those features and hands them to the model. The whole deck is organized around one honest question we keep coming back to: could the model really have known this fact at the moment it made its decision? Our running example is a real online shop, and the one thing we predict is whether a customer will come back and buy again within 30 days. The single rule to remember, shown on the right, is that a model may only use facts that were already known before the prediction.
+        </aside>
       </section>
 
       <!-- 02 -->
       <section class="teal-slide">
         <div class="slide-shell">
-          <div class="eyebrow">Learning contract</div>
-          <h2>Four useful abilities.</h2>
+          <div class="eyebrow">What you will learn</div>
+          <h2>Four things you will be able to do.</h2>
           <div class="card-grid-4" style="margin-top:auto;margin-bottom:auto">
-            <div class="card"><div class="giant teal">1</div><h3 style="margin-top:16px">Set the time</h3><p>Define the cutoff.</p></div>
-            <div class="card"><div class="giant coral">2</div><h3 style="margin-top:16px">Build features</h3><p>Write the logic once.</p></div>
-            <div class="card"><div class="giant yellow">3</div><h3 style="margin-top:16px">Check the result</h3><p>Test both paths.</p></div>
-            <div class="card ink-bg"><div class="giant">4</div><h3 style="margin-top:16px">Take responsibility</h3><p style="color:#c7d0cb">Name an owner and rules.</p></div>
+            <div class="card"><div class="giant teal">1</div><h3 style="margin-top:16px">Set the time</h3><p>Pick the moment the model decides.</p></div>
+            <div class="card"><div class="giant coral">2</div><h3 style="margin-top:16px">Build features</h3><p>Write the rule down once.</p></div>
+            <div class="card"><div class="giant yellow">3</div><h3 style="margin-top:16px">Check the result</h3><p>Test training and live serving.</p></div>
+            <div class="card ink-bg"><div class="giant">4</div><h3 style="margin-top:16px">Take responsibility</h3><p style="color:#c7d0cb">Give every feature an owner.</p></div>
           </div>
         </div>
+        <aside class="notes">
+          Here is the map of the whole talk in four moves. First, set the time: decide the exact moment the model makes its call, because everything else is measured against that instant. Second, build the features: write down, one time, the rule that turns raw events into an input number. Third, check the result: confirm the numbers used for training match the numbers served to the live model, and prove no future information leaked in. Fourth, take responsibility: give every feature a named owner, a version, and a record of where it came from, so that when something breaks there is a person to call. If a student remembers only these four moves, they have the shape of the entire field.
+        </aside>
       </section>
 
       <!-- 03 -->
@@ -392,14 +398,17 @@
           </div>
           <div class="flow-row" style="margin-top:auto;margin-bottom:auto">
             <div class="flow-node"><h3>Raw events</h3><span>orders, refunds</span></div>
-            <div class="flow-node"><h3>Temporal logic</h3><span>keys, windows, cutoffs</span></div>
-            <div class="flow-node"><h3>Feature contract</h3><span>version, owner, lineage</span></div>
-            <div class="flow-node"><h3>Model delivery</h3><span>training and serving</span></div>
+            <div class="flow-node"><h3>Time rules</h3><span>keys, windows, cutoffs</span></div>
+            <div class="flow-node"><h3>Feature contract</h3><span>owner, version, where it came from</span></div>
+            <div class="flow-node"><h3>Delivery</h3><span>training and live serving</span></div>
           </div>
           <div class="card coral-bg bottom" style="padding:18px 24px">
-            <p><span class="strong">Important:</span> a fast database is only storage unless the team also defines, tests, and owns the features.</p>
+            <p><span class="strong">Important:</span> a fast database is just storage. It becomes a feature store only when a team defines, tests, and owns the features.</p>
           </div>
         </div>
+        <aside class="notes">
+          A common misunderstanding is that a feature store is just a fast database. It is not. Read the row left to right, because it shows the four stages that actually make it a feature store. It starts with raw events, the things that happened, like orders and refunds. Then come the time rules, which say which key to group by (here, the customer), how far back to look, and where to draw the cutoff. Then a feature contract, which is the written agreement about what the feature means, who owns it, its version, and where it came from. Finally delivery, which sends the exact same values to both training and the live service. A database gives you only the storage. It becomes a feature store when a team adds the meaning, the tests, and the ownership around it.
+        </aside>
       </section>
 
       <!-- 04 -->
@@ -413,36 +422,42 @@
             <div class="metric"><span class="number">541,909</span><span class="label">invoice line events</span></div>
             <div class="metric"><span class="number">4,372</span><span class="label">identified customers</span></div>
             <div class="metric"><span class="number">25,900</span><span class="label">distinct invoices</span></div>
-            <div class="metric"><span class="number">24.9%</span><span class="label">rows missing customer ID</span></div>
+            <div class="metric"><span class="number">24.9%</span><span class="label">rows with no customer ID</span></div>
           </div>
           <div class="card-grid-3 bottom" style="margin-top:16px">
-            <div class="card soft-bg"><h3>Returns</h3><p>Invoice IDs can start with C.</p></div>
-            <div class="card soft-bg"><h3>Granularity</h3><p>One invoice spans many lines.</p></div>
-            <div class="card soft-bg"><h3>Time</h3><p>Dec 2010 to Dec 2011.</p></div>
+            <div class="card soft-bg"><h3>Returns</h3><p>A returned order's invoice ID starts with C.</p></div>
+            <div class="card soft-bg"><h3>Row size</h3><p>One order can fill many rows.</p></div>
+            <div class="card soft-bg"><h3>Time span</h3><p>Dec 2010 to Dec 2011.</p></div>
           </div>
         </div>
+        <aside class="notes">
+          We learn on real data, not a tidy toy example, because real data is where the interesting mistakes hide. This is a British online gift shop's sales log from late 2010 to late 2011. Point out the numbers that shape our work. There are 541,909 rows, but a row is one product line, not one order, so a single order with five items shows up as five rows. Nearly a quarter of the rows have no customer ID, probably guest checkouts, and we cannot attach those to anyone's history. Returns are marked by an invoice ID that starts with the letter C. Every one of these quirks forces a decision, and making those decisions carefully, instead of quietly deleting rows, is a large part of honest feature engineering.
+        </aside>
       </section>
 
       <!-- 05 -->
       <section class="yellow-slide">
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Decision first</div><h2>Write the prediction contract.</h2></div>
+            <div><div class="eyebrow">Decision first</div><h2>Write down what you are predicting.</h2></div>
             <span class="chapter">Repeat purchase</span>
           </div>
           <div class="split-58">
             <dl>
-              <div class="decision"><dt>Entity</dt><dd>customer_id</dd></div>
-              <div class="decision"><dt>Decision event</dt><dd>completed invoice</dd></div>
-              <div class="decision"><dt>Cutoff</dt><dd>invoice timestamp</dd></div>
-              <div class="decision"><dt>Label</dt><dd>new purchase in 30d</dd></div>
+              <div class="decision"><dt>Entity</dt><dd>one customer (customer_id)</dd></div>
+              <div class="decision"><dt>Decision event</dt><dd>a finished order</dd></div>
+              <div class="decision"><dt>Cutoff</dt><dd>the time on that order</dd></div>
+              <div class="decision"><dt>Label</dt><dd>buys again within 30 days</dd></div>
             </dl>
             <div class="card ink-bg">
               <p class="micro" style="color:#9fb0a7">ONE ROW MEANS</p>
-              <p style="margin-top:16px;font-size:30px;line-height:1.25">What was knowable when this order completed?</p>
+              <p style="margin-top:16px;font-size:30px;line-height:1.25">What did we know when this order finished?</p>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          The most common beginner mistake is to open the data and ask "what can I compute?" Do the opposite: start by writing down the decision in plain words, and let that dictate everything else. Read the four rows on the left as one sentence. The entity is the thing we are describing, one customer. The decision event is the moment we act, a finished order. The cutoff is the timestamp on that order, the line between past and future. The label is the answer we are trying to predict, whether that customer buys again within 30 days. The card on the right captures the mindset for every single training row: freeze time at the order and ask only what we honestly knew at that instant. Nail down the decision and the rest of the design almost falls out of it.
+        </aside>
       </section>
 
       <!-- 06 -->
@@ -454,27 +469,33 @@
           </div>
           <div class="flow-row" style="margin-top:auto;margin-bottom:auto">
             <div class="flow-node"><h3>Invoice lines</h3><span>quantity × unit price</span></div>
-            <div class="flow-node"><h3>Orders</h3><span>one completed invoice</span></div>
-            <div class="flow-node"><h3>Cancellations</h3><span>refund behavior</span></div>
-            <div class="flow-node"><h3>Predictions</h3><span>one decision row</span></div>
+            <div class="flow-node"><h3>Orders</h3><span>one row per finished order</span></div>
+            <div class="flow-node"><h3>Cancellations</h3><span>returns and refunds</span></div>
+            <div class="flow-node"><h3>Predictions</h3><span>one row per decision</span></div>
           </div>
           <div class="card coral-bg bottom" style="padding:18px 24px">
-            <p><span class="strong">Caution:</span> do not treat negative quantities or cancellation invoices as ordinary purchases.</p>
+            <p><span class="strong">Caution:</span> never count a negative quantity or a C invoice as a purchase, or a customer who returned everything looks like your best one.</p>
           </div>
         </div>
+        <aside class="notes">
+          Raw data almost never arrives in the shape you want, so the first real step is to reshape it. We take the messy invoice lines and turn them into three clean tables. Orders is one row per finished purchase, with its total value. Cancellations is one row per return or refund. Predictions is one row per decision we want to score, which for us lines up with each finished order. Doing this cleanup once, in a way that produces the exact same tables every time, matters because a feature you cannot reproduce is a feature you cannot debug. The caution at the bottom is a real trap: a return is stored as a negative quantity, so if you accidentally treat it as a purchase, a customer who sent everything back can look like your biggest spender.
+        </aside>
       </section>
 
       <!-- 07 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">System loop</div><h2>Definitions flow both ways.</h2></div>
+            <div><div class="eyebrow">The loop</div><h2>One rule feeds both training and serving.</h2></div>
             <span class="chapter">One shared rule</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/01-feature-store-loop.svg" alt="Four steps show order events entering one rule, producing training and live values, and then being compared.">
           </div>
         </div>
+        <aside class="notes">
+          Walk the loop out loud. Order events arrive, one written rule turns them into a feature such as "money spent in the last 30 days", and that same rule produces two things: the values used to train the model, and the values served to the live model. The last step compares those two sets of values. If you skip the comparison, the two sides can drift apart without anyone noticing, and the model you tested is not the model your customers meet. That gap has a name later in the deck: training-serving skew, which is any difference between the inputs used in training and the inputs used in production.
+        </aside>
       </section>
 
       <!-- 08 -->
@@ -488,39 +509,48 @@
             <img src="../assets/02-three-clocks.svg" alt="An order happens at 9:30, the model predicts at 10:00, and the record becomes available too late at 10:10.">
           </div>
         </div>
+        <aside class="notes">
+          The three clocks are event time, which is when something actually happened; availability time, which is when your pipeline could first see it and use it; and prediction time, which is the moment the model made, or would have made, a decision. Work the picture: a customer spends £42 at 09:30, the model has to answer at 10:00, and that order only lands in your table at 10:10. Its event time is before the prediction, so a careless query will include it, but it was not available yet. Include it and your training data quietly contains a fact the live system could not have had. You would notice this in production as a model that scored well offline and then performs worse than expected on real traffic.
+        </aside>
       </section>
 
       <!-- 09 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Historical truth</div><h2>A window ends at each decision.</h2></div>
-            <span class="chapter">As-of view</span>
+            <div><div class="eyebrow">Looking back honestly</div><h2>Every decision gets its own window.</h2></div>
+            <span class="chapter">What was known then</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/03-point-in-time-window.svg" alt="A worked timeline uses purchases before June 1 for a feature and a later purchase for the label.">
           </div>
         </div>
+        <aside class="notes">
+          A point-in-time join is a lookup that returns only what was known at each past prediction time, and the window is the stretch of history it is allowed to look at. Try it with numbers. A customer spends £10 on 1 January, £20 on 10 January, and £999 on 11 January. If the decision you are scoring happened on 10 January, the correct 30-day total is £30, not £1,029. The £999 comes later, so it belongs to the label side of the timeline, not the feature side. Notice that the answer changes for every row, because each row has its own cutoff. That is why you cannot compute one total per customer and reuse it everywhere.
+        </aside>
       </section>
 
       <!-- 10 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Leakage exposed</div><h2>“Latest” is not historical.</h2></div>
+            <div><div class="eyebrow">Leakage exposed</div><h2>Today's total is not the old total.</h2></div>
             <span class="chapter">Recompute test</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/05-wrong-vs-right-join.svg" alt="Comparison of a leaking latest-value join and a stable point-in-time join.">
           </div>
         </div>
+        <aside class="notes">
+          The tempting shortcut is to join each training row to the customer's current totals, because that query is short and fast. It is also wrong, because today's total already contains everything the customer did after the decision you are scoring. That is data leakage: the answer sneaks into the inputs. Here is the test that catches it. Run the same query again next month. A point-in-time join gives you the same numbers as before, because history did not change. The latest-value join gives you different numbers every time you run it, because the "latest" value keeps moving. A feature that will not reproduce is a feature you cannot debug or trust.
+        </aside>
       </section>
 
       <!-- 11 -->
       <section class="ink-slide">
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Boundary rule</div><h2>Make inclusion explicit.</h2></div>
+            <div><div class="eyebrow">Boundary rule</div><h2>Say exactly which events count.</h2></div>
             <span class="chapter" style="border-color:#52645a;color:#b9c6bf">Half-open window</span>
           </div>
           <div class="card-grid-2" style="margin-top:44px">
@@ -535,15 +565,18 @@
           </div>
           <div class="card-grid-2 bottom">
             <div class="card" style="background:#233028;border-color:#44554b;color:white">
-              <h3>Same-timestamp event?</h3>
-              <p style="color:#c7d0cb">Exclude unless ordering is guaranteed.</p>
+              <h3>An event at the exact cutoff?</h3>
+              <p style="color:#c7d0cb">Leave it out unless you know the true order.</p>
             </div>
             <div class="card coral-bg" style="color:var(--ink)">
               <h3>Arrived ten minutes late?</h3>
-              <p>Event time alone can still leak.</p>
+              <p>Going by event time alone still leaks.</p>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          A half-open window includes one end and excludes the other, and the two formulas on the slide say which end. The feature window runs from 30 days before the cutoff up to the cutoff but stops just short of it. The label window starts just after the cutoff and runs 30 days forward. Written that way, no event can land in both, so a fact can never be an input and an answer at the same time. The awkward case is an event stamped at exactly the cutoff. You usually cannot tell whether it happened a moment before or a moment after the decision, so exclude it: one row too few is a small loss, but one leaked row teaches the model to cheat.
+        </aside>
       </section>
 
       <!-- 12 -->
@@ -556,48 +589,54 @@
           <div class="split">
             <div class="card teal-bg" style="min-height:340px">
               <p class="eyebrow teal">Feature store</p>
-              <h3 style="font-size:30px">Known before request</h3>
+              <h3 style="font-size:30px">Known before the request</h3>
               <p style="margin-top:26px">purchase_sum_30d</p>
               <p>cancel_count_90d</p>
               <p>average_order_30d</p>
             </div>
             <div class="card coral-bg" style="min-height:340px">
               <p class="eyebrow coral">Request context</p>
-              <h3 style="font-size:30px">Known at decision</h3>
+              <h3 style="font-size:30px">Arrives with the request</h3>
               <p style="margin-top:26px">current_order_value</p>
               <p>active_offer</p>
               <p>device_session</p>
             </div>
           </div>
-          <p class="small bottom">Counterexample: storing the current cart as history creates staleness and key-mismatch risk.</p>
+          <p class="small bottom">Counterexample: store the current cart as history and your copy is out of date within seconds, and can attach to the wrong key.</p>
         </div>
+        <aside class="notes">
+          Not every fact belongs in the feature store, and knowing what to leave out is as important as knowing what to put in. The split is about time. On the left are summaries of the past, like how much a customer spent in the last 30 days. These take real work to compute from history, they are reused across decisions, and they belong in the store. On the right is the request context: facts that arrive with the request itself and are already known, like the value of the order sitting in front of you right now, or which offer is active. There is no reason to precompute those; just pass them straight to the model. A quick test: if the value would be stale a second from now, it is context, not a stored feature.
+        </aside>
       </section>
 
       <!-- 13 -->
       <section class="teal-slide">
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Chronon mental model</div><h2>Declare meaning once.</h2></div>
+            <div><div class="eyebrow">How Chronon thinks</div><h2>Write the meaning down once.</h2></div>
             <span class="chapter">03 · Build</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/04-chronon-object-model.svg" alt="Four steps explain how Chronon selects source fields, summarizes customer history, joins features to decisions, and delivers values.">
           </div>
         </div>
+        <aside class="notes">
+          Chronon splits the job into four named pieces, and the next three slides show the code for the first three. A Source says which table and stream to read and which column holds the event time. A GroupBy says which key to group by, what to compute, and over which windows. A Join attaches those computed features to a list of past decisions. Then delivery hands the same values to training and to the live service. The point of naming the pieces is that the meaning lives in one definition instead of being retyped in a training script and again in a serving service, which is how the two ever end up disagreeing.
+        </aside>
       </section>
 
       <!-- 14 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Step 1 · Source</div><h2>Name columns and event time.</h2></div>
+            <div><div class="eyebrow">Step 1 · Source</div><h2>Name the columns and the clock.</h2></div>
             <span class="chapter">purchases.py</span>
           </div>
           <div class="split-42">
             <div class="stack">
-              <div class="card yellow-bg"><h3>Table</h3><p>Historical backfill.</p></div>
-              <div class="card teal-bg"><h3>Topic</h3><p>Fresh updates.</p></div>
-              <div class="card coral-bg"><h3>ts</h3><p>Temporal anchor.</p></div>
+              <div class="card yellow-bg"><h3>Table</h3><p>The full stored history.</p></div>
+              <div class="card teal-bg"><h3>Topic</h3><p>The live feed of new events.</p></div>
+              <div class="card coral-bg"><h3>ts</h3><p>The column that says when.</p></div>
             </div>
             <div class="code-card">
               <div class="code-head"><span>chronon/group_bys/retail/purchases.py</span><span class="dots"><i></i><i></i><i></i></span></div>
@@ -615,13 +654,16 @@
             </div>
           </div>
         </div>
+        <aside class="notes">
+          This is the first of three code slides, and none of them require you to write code fluently, only to read the meaning off each line. A Source tells Chronon where the raw events live and how to read their time. Walk the three cards. The table is the full stored history, used for training. The topic is the live feed of new events, used to keep serving fresh, and having both is how one definition can drive both paths. The time_column names the single column that says when each event happened, and picking the right time column is the whole game, because that is the clock everything is measured against. The selects line just lists the raw fields we care about. Nothing here computes a feature yet; this step only points at trustworthy inputs.
+        </aside>
       </section>
 
       <!-- 15 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Step 2 · GroupBy</div><h2>Bind keys, operations, windows.</h2></div>
+            <div><div class="eyebrow">Step 2 · GroupBy</div><h2>Pick the key, the calculation, the windows.</h2></div>
             <span class="chapter">Temporal accuracy</span>
           </div>
           <div class="split-42">
@@ -645,13 +687,16 @@
             </div>
           </div>
         </div>
+        <aside class="notes">
+          If the Source said where to read, the GroupBy says what to compute. Read it as a sentence: group the events by customer_id, and for each customer add up order_value over the last 7, 30, and 90 days. "Aggregation" is just a fancy word for a summary like a sum, a count, or an average. Writing three windows at once means one line of code produces three related features, without anyone copying and pasting a query three times. Two settings do the heavy lifting. Accuracy set to TEMPORAL means "compute the value as of the exact prediction moment," not a stale snapshot from last midnight. And online set to True means this feature is meant to be served live, not just used in training. Those windows are not decoration; each one is a hypothesis about how far back customer behavior actually matters.
+        </aside>
       </section>
 
       <!-- 16 -->
       <section class="yellow-slide">
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Feature family</div><h2>Windows are hypotheses.</h2></div>
+            <div><div class="eyebrow">Feature family</div><h2>Each window is a guess you are testing.</h2></div>
             <span class="chapter">Not decoration</span>
           </div>
           <div class="matrix" style="margin-top:auto;margin-bottom:auto">
@@ -662,22 +707,25 @@
             <div>item count</div><div class="no">○</div><div class="yes">●</div><div class="no">○</div>
           </div>
           <div class="card bottom" style="padding:18px 24px">
-            <p><span class="strong">Caution:</span> more windows raise compute, storage, serving payload, and multiple-testing cost.</p>
+            <p><span class="strong">Caution:</span> every extra window costs more computing, more storage, and a bigger reply. It also raises the chance one window looks useful by luck.</p>
           </div>
         </div>
+        <aside class="notes">
+          This grid shows the feature family we just defined: each signal, like purchase sum or order count, measured across the 7, 30, and 90 day windows. A filled dot means we build that combination; an empty dot means we chose not to. The teaching point is that every dot is a deliberate choice, not a default to switch all on. Each extra window costs more computation, more storage, and a slightly slower lookup. Worse, and this surprises people, the more windows you try, the more likely one of them looks predictive purely by luck, the way flipping enough coins eventually gives a long streak of heads. So add a window because you have a reason to believe that time span matters, and be ready to drop the ones that never earn their keep.
+        </aside>
       </section>
 
       <!-- 17 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Step 3 · Join</div><h2>Anchor features to decisions.</h2></div>
+            <div><div class="eyebrow">Step 3 · Join</div><h2>Attach features to each decision.</h2></div>
             <span class="chapter">repeat_purchase_training.py</span>
           </div>
           <div class="split-42">
             <div class="card coral-bg">
-              <p class="eyebrow coral">Left side owns time</p>
-              <h3 style="font-size:30px">One prediction row</h3>
+              <p class="eyebrow coral">The left side sets the time</p>
+              <h3 style="font-size:30px">One row per prediction</h3>
               <p style="margin-top:20px">customer_id</p>
               <p>order_id</p>
               <p>ts</p>
@@ -699,19 +747,25 @@
             </div>
           </div>
         </div>
+        <aside class="notes">
+          The third code step ties it all together. A Join takes the list of decisions we want to score, the "left" side, and attaches the computed features to each one, evaluated as of that row's own timestamp. The card on the left is the key idea: the left side sets the time. Each row carries a customer_id to look up and a ts that says the exact moment to look, so every row gets features frozen at its own cutoff. The right_parts are the feature groups we bolt on, here purchases and cancellations, and the prefix just keeps their column names from colliding. The check_consistency flag turns on the safety net we will see next: Chronon keeps the records needed to compare the live and historical paths and confirm they agree.
+        </aside>
       </section>
 
       <!-- 18 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">One definition, two paths</div><h2>Parity is a measurable claim.</h2></div>
+            <div><div class="eyebrow">One definition, two paths</div><h2>You can measure whether both paths agree.</h2></div>
             <span class="chapter">04 · Deliver</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/06-offline-online-parity.svg" alt="A controlled test asks both the historical and live paths for the same customer, cutoff, and feature value.">
           </div>
         </div>
+        <aside class="notes">
+          Two stores hold the same features in different shapes. The offline store keeps the full history and is arranged for big scans during training. The online store keeps only current values and is arranged to return one key very fast. Saying "they should match" is a wish; asking both for the same customer at the same cutoff and comparing the answers is a test. Pin down the key, the cutoff, and the feature name so the only thing that differs is which path answered. The Chronon fixture in this tutorial does exactly that, asserting £30 of prior purchases and £7 of prior cancellations. Without a test like this, a mismatch shows up as a model that looked fine in testing and then makes odd predictions in production.
+        </aside>
       </section>
 
       <!-- 19 -->
@@ -734,31 +788,37 @@ np.testing.<span class="fn">assert_allclose</span>(
     rtol=<span class="nu">1e-6</span>, atol=<span class="nu">1e-9</span>)</code></pre>
             </div>
             <div class="stack">
-              <div class="card yellow-bg"><h3>Values</h3><p>Within tolerance.</p></div>
-              <div class="card" style="background:#233028;border-color:#52645a;color:white"><h3>Also test</h3><p style="color:#c7d0cb">nulls · types · age</p></div>
+              <div class="card yellow-bg"><h3>Values</h3><p>Equal within a tiny tolerance.</p></div>
+              <div class="card" style="background:#233028;border-color:#52645a;color:white"><h3>Also test</h3><p style="color:#c7d0cb">missing values · types · age</p></div>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          This is the parity check in code, and it is the moment the promise "both paths agree" turns from a hope into a test. We compute the feature two ways for the same key and cutoff: backfill is the historical path, replay_fetch is the live path. Then we assert they match. Point out why the comparison is not a plain equals sign. Computers store decimals with tiny rounding error, so we allow a minuscule tolerance rather than demanding the numbers be identical to the last digit. And matching values is not enough on its own: we also check that the data types agree and that a missing value on one side is missing on the other, because a zero and a blank mean very different things. A test that has never been able to fail is not really protecting you, so it is worth deliberately breaking a value once to confirm the check catches it.
+        </aside>
       </section>
 
       <!-- 20 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Honest local lab</div><h2>Inspect locally. Scale deliberately.</h2></div>
+            <div><div class="eyebrow">Honest local lab</div><h2>Learn it locally. Scale it on purpose.</h2></div>
             <span class="chapter">Reference runner</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/08-local-vs-production.svg" alt="The notebook explains and tests feature rules while production Chronon computes and delivers them at scale.">
           </div>
         </div>
+        <aside class="notes">
+          Be honest about what the notebook is and is not. On your laptop you can read the rule, run it on 541,909 order lines, and check that it does the right thing, which is exactly what you need in order to understand it. A real deployment runs the same definitions on cluster software that processes far more data and answers live lookups in milliseconds. The lesson to take away is that the definition is the part you carry across; the machinery underneath it changes. Do not promise a laptop result will hold at production scale until you have run the parity test on the real path.
+        </aside>
       </section>
 
       <!-- 21 -->
       <section class="teal-slide">
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Reproducible setup</div><h2>Environment before experiment.</h2></div>
+            <div><div class="eyebrow">Reproducible setup</div><h2>Set up your tools first.</h2></div>
             <span class="chapter">uv + dotenv</span>
           </div>
           <div class="split-58">
@@ -779,33 +839,39 @@ uv run jupyter lab</code></pre>
 <span class="fn">load_dotenv</span>(<span class="fn">find_dotenv</span>())</code></pre>
             </div>
           </div>
-          <p class="small bottom">The tutorial needs no API key. Local settings still belong in <span class="strong">.env</span>.</p>
+          <p class="small bottom">This tutorial needs no API key. Local settings still belong in <span class="strong">.env</span>.</p>
         </div>
+        <aside class="notes">
+          A short practical slide about getting the notebook running. The tool uv is a Python package manager; uv sync reads a locked list of exact package versions and installs precisely those, which is what makes the notebook behave the same on your machine as on ours. Reproducibility is not busywork: if two people run slightly different versions, they can get different numbers and waste hours chasing a bug that is really just a version mismatch. The .env file holds local settings and secrets, and load_dotenv reads it in. This particular lesson needs no API key, but the habit of keeping settings and passwords in .env, never typed into a shared notebook cell, is one worth building early.
+        </aside>
       </section>
 
       <!-- 22 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Leakage experiment</div><h2>Hold the model constant.</h2></div>
+            <div><div class="eyebrow">Leakage experiment</div><h2>Change only the features, not the model.</h2></div>
             <span class="chapter">Time split only</span>
           </div>
           <div class="experiment">
             <div class="lane">
               <span class="step-tag">POINT-IN-TIME</span>
-              <h3 style="font-size:30px;margin-top:20px">History before ts</h3>
-              <p>Train early.<br>Validate later.<br>Recompute stably.</p>
-              <div class="signal">Credible offline signal</div>
+              <h3 style="font-size:30px;margin-top:20px">Only history before ts</h3>
+              <p>Train on early data.<br>Test on later data.<br>Get the same numbers twice.</p>
+              <div class="signal">A score you can believe</div>
             </div>
             <div class="arrow">vs</div>
             <div class="lane bad">
               <span class="step-tag" style="background:white;color:#a54136">LEAKY</span>
-              <h3 style="font-size:30px;margin-top:20px">Full future history</h3>
+              <h3 style="font-size:30px;margin-top:20px">History that includes the future</h3>
               <p>Same model.<br>Same split.<br>Wrong features.</p>
-              <div class="signal">Suspicious lift is an alarm</div>
+              <div class="signal">A suspiciously good score is a warning</div>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          This is the payoff experiment, and it is designed like a fair science experiment: change one thing and hold everything else constant. Both sides use the same model and the same time-based split, where we train on earlier data and test on later data, exactly as real life forces us to. The only difference is the features. The left side uses honest point-in-time features, using only history before the cutoff, and it earns a believable score, clearly better than guessing but far from perfect. The right side sneaks in a feature secretly built from the future, and it scores almost perfectly. The lesson students should carry away is counterintuitive: a suspiciously high score is not a trophy, it is a warning siren that information from the future has leaked into your inputs.
+        </aside>
       </section>
 
       <!-- 23 -->
@@ -819,46 +885,55 @@ uv run jupyter lab</code></pre>
             <img src="../assets/07-feature-contract.svg" alt="A worked feature instruction card explains meaning, customer key, time rule, missing values, source, owner, and delivery promise.">
           </div>
         </div>
+        <aside class="notes">
+          A feature contract is the written rules for a feature: what it means, which key it is looked up by, its type, its time rule, who owns it, which version it is, how fresh it must be, what a missing value means, and where the numbers came from. That last item is called lineage, the recorded trail from a value back to its sources and the version of the definition that produced it. The freshness promise is a service level objective, a written target such as "99 percent of values readable within 60 seconds". Write all of this down, because the alternative is that the meaning lives only in one engineer's head. The symptom of a missing contract is a pager alert at 2am that nobody can act on, since nobody knows whether zero means "spent nothing" or "we have no data".
+        </aside>
       </section>
 
       <!-- 24 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Change management</div><h2>Version semantics, not filenames.</h2></div>
-            <span class="chapter">Breaking means changed truth</span>
+            <div><div class="eyebrow">Change management</div><h2>Version the meaning, not the filename.</h2></div>
+            <span class="chapter">A break means values changed</span>
           </div>
           <div class="card-grid-3" style="margin-top:auto;margin-bottom:auto">
-            <div class="card teal-bg"><div class="stamp">SAFE</div><h3 style="font-size:28px;margin-top:20px">Clarify docs</h3><p>No value changes.</p></div>
-            <div class="card yellow-bg"><div class="stamp" style="background:white;color:#7c6000">MEASURE</div><h3 style="font-size:28px;margin-top:20px">Add a feature</h3><p>Payload and latency grow.</p></div>
-            <div class="card coral-bg"><div class="stamp" style="background:white;color:#a54136">VERSION</div><h3 style="font-size:28px;margin-top:20px">Change window</h3><p>Historical values change.</p></div>
+            <div class="card teal-bg"><div class="stamp">SAFE</div><h3 style="font-size:28px;margin-top:20px">Improve the docs</h3><p>No value changes.</p></div>
+            <div class="card yellow-bg"><div class="stamp" style="background:white;color:#7c6000">MEASURE</div><h3 style="font-size:28px;margin-top:20px">Add a feature</h3><p>The reply gets bigger and slower.</p></div>
+            <div class="card coral-bg"><div class="stamp" style="background:white;color:#a54136">VERSION</div><h3 style="font-size:28px;margin-top:20px">Change a window</h3><p>Old values change too.</p></div>
           </div>
-          <p class="small bottom">Counterintuitive: an added column can be data-compatible yet still violate a serving SLA.</p>
+          <p class="small bottom">Counterintuitive: adding one column can leave every old value correct and still push the lookup past its promised response time.</p>
         </div>
+        <aside class="notes">
+          Features change over time, and how you handle change decides whether models quietly break. The three cards rank changes by risk. Improving the documentation is safe, because no numbers move. Adding a new feature needs measurement, because even though old values stay correct, the reply gets bigger and the lookup slower, and it can blow past your promised response time. Changing a window, say from 30 days to 45, is the dangerous one: it silently changes the meaning of a column that models already depend on. The rule is to version the meaning, not just rename the file. When meaning changes, create a v2, move consumers over deliberately, and retire v1, rather than editing the old feature in place and hoping nothing downstream notices.
+        </aside>
       </section>
 
       <!-- 25 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Observe outcomes</div><h2>Freshness is not fetch latency.</h2></div>
-            <span class="chapter">Layered signals</span>
+            <div><div class="eyebrow">Observe outcomes</div><h2>Fast is not the same as up to date.</h2></div>
+            <span class="chapter">Checks at every layer</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/09-observability-stack.svg" alt="Five checks follow a feature through source data, calculation, freshness, delivery, and model results.">
           </div>
           <div class="card-grid-2" style="margin-top:12px">
-            <div class="card teal-bg" style="padding:13px 18px"><p><span class="strong">Freshness</span> · age of feature value</p></div>
-            <div class="card coral-bg" style="padding:13px 18px"><p><span class="strong">Latency</span> · time to fetch it</p></div>
+            <div class="card teal-bg" style="padding:13px 18px"><p><span class="strong">Freshness</span> · how old the value is</p></div>
+            <div class="card coral-bg" style="padding:13px 18px"><p><span class="strong">Latency</span> · how long the lookup takes</p></div>
           </div>
         </div>
+        <aside class="notes">
+          These two are easy to confuse and they fail in different ways. A lookup can return in two milliseconds and still hand back a number computed six hours ago. Watch both, and watch them at five layers: is the source data arriving, is the calculation running, is the value fresh enough, is delivery meeting its target, and are the model's results still sensible. Latency targets are usually written as p99 latency, meaning the response time that 99 percent of requests come in under, which describes the slow tail rather than the typical case. If you only chart average latency, the slowest 1 percent of your customers, who are often your busiest ones, stay invisible.
+        </aside>
       </section>
 
       <!-- 26 -->
       <section class="teal-slide">
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Production dataflow</div><h2>One definition, specialized engines.</h2></div>
+            <div><div class="eyebrow">Production dataflow</div><h2>One definition, two different engines.</h2></div>
             <span class="chapter">Chronon at scale</span>
           </div>
           <div class="mermaid-wrap">
@@ -873,19 +948,25 @@ flowchart LR
             </pre>
           </div>
         </div>
+        <aside class="notes">
+          Read the diagram from the left. One definition splits into two jobs. The stream job reads new events as they arrive and keeps the online store current, so serving has fresh values. The backfill job recomputes historical values from the source history and fills the offline store, so training has a truthful past. They meet again at the definition, which is the whole point: two very different engines, one written meaning. If instead you let the streaming code and the batch code each carry their own copy of the rule, the two will drift apart, and you will only find out when the live model starts behaving unlike the one you tested.
+        </aside>
       </section>
 
       <!-- 27 -->
       <section>
         <div class="slide-shell">
           <div class="topline">
-            <div><div class="eyebrow">Architecture choice</div><h2>Complexity must earn its keep.</h2></div>
+            <div><div class="eyebrow">Architecture choice</div><h2>Only add complexity that pays for itself.</h2></div>
             <span class="chapter">Fit the problem</span>
           </div>
           <div class="asset-frame tight">
             <img src="../assets/10-when-to-use.svg" alt="Three questions help a team choose between a simpler warehouse pipeline and a feature store trial.">
           </div>
         </div>
+        <aside class="notes">
+          A feature store is real infrastructure, so it needs a reason. Ask three questions. Do several models or teams need the same features, so that defining them once actually saves work? Does anything have to be answered live, rather than in a nightly batch? Do your features depend on time windows that are easy to get wrong? If the answers are no, a plain scheduled query against your historical tables is the better engineering decision, and choosing it is not a failure. Adopting a platform you do not need costs you real operational work and buys you nothing.
+        </aside>
       </section>
 
       <!-- 28 -->
@@ -894,13 +975,16 @@ flowchart LR
           <div class="eyebrow">Go-live test</div>
           <h2>Ship only when all four agree.</h2>
           <div class="card-grid-4" style="margin-top:auto;margin-bottom:auto">
-            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant teal">T</div><h3 style="margin-top:18px">Truth</h3><p style="color:#c7d0cb">PIT tests pass.</p></div>
-            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant coral">D</div><h3 style="margin-top:18px">Delivery</h3><p style="color:#c7d0cb">Parity meets SLA.</p></div>
-            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant yellow">O</div><h3 style="margin-top:18px">Ownership</h3><p style="color:#c7d0cb">Alerts have humans.</p></div>
-            <div class="card yellow-bg"><div class="giant">V</div><h3 style="margin-top:18px">Value</h3><p>Reuse beats cost.</p></div>
+            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant teal">T</div><h3 style="margin-top:18px">Truth</h3><p style="color:#c7d0cb">Point-in-time tests pass.</p></div>
+            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant coral">D</div><h3 style="margin-top:18px">Delivery</h3><p style="color:#c7d0cb">Both paths agree, fast enough.</p></div>
+            <div class="card" style="background:#233028;border-color:#52645a;color:white"><div class="giant yellow">O</div><h3 style="margin-top:18px">Ownership</h3><p style="color:#c7d0cb">Every alert has a person.</p></div>
+            <div class="card yellow-bg"><div class="giant">V</div><h3 style="margin-top:18px">Value</h3><p>Reuse is worth the cost.</p></div>
           </div>
           <p class="quote bottom" style="font-size:39px">One clear rule. Different ways to store and deliver it. <span class="teal">Check what reaches the model.</span></p>
         </div>
+        <aside class="notes">
+          This is the summary checklist, and the four letters spell TDOV. Truth means the point-in-time tests pass, so no future information is leaking backward into the past. Delivery means the training path and the live path produce matching values, and the live one is fast enough to meet its promise. Ownership means every alert has a named human behind it, because a feature nobody owns is a feature nobody fixes. Value means the reuse actually justifies the cost of running the platform. Present these as four gates, all of which must be green before shipping. The closing line is the whole course in one breath: there is one clear rule, stored and delivered in different ways, and your job is to keep checking that what actually reaches the model matches what you intended.
+        </aside>
       </section>
 
       <!-- 29 -->
@@ -919,8 +1003,11 @@ flowchart LR
             <a class="source-link" href="https://chalk.ai/blog/what-is-a-feature-store" target="_blank" rel="noreferrer">Chalk<span>Online feature system perspective</span></a>
             <a class="source-link" href="https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store.html" target="_blank" rel="noreferrer" style="grid-column:1 / span 2">AWS SageMaker<span>Online and offline feature store documentation</span></a>
           </div>
-          <p class="micro bottom">Dataset statistics shown here were computed from the tutorial’s cached CSV.</p>
+          <p class="micro bottom">Dataset statistics shown here were computed from the tutorial's cached CSV.</p>
         </div>
+        <aside class="notes">
+          Close by pointing people to the sources so they can go deeper on their own. Chronon is the open-source feature platform this course is built around. The UCI link is the exact dataset we used, with its description and license, so anyone can download it and reproduce our numbers. The remaining links, from Databricks, IBM, Chalk, AWS, and the FeatureStore.org community, give several independent takes on the same ideas, which is useful because vendor pages each frame the problem to favor their own product. Encourage students to notice where the sources agree, since the shared ground is usually the trustworthy part. And remind them that all of the dataset statistics on these slides came from actually running the notebook, not from memory.
+        </aside>
       </section>
 
     </div>
@@ -929,6 +1016,7 @@ flowchart LR
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    import RevealNotes from "https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.esm.js";
 
     mermaid.initialize({
       startOnLoad: false,
@@ -990,7 +1078,8 @@ flowchart LR
       transition: "fade",
       backgroundTransition: "fade",
       slideNumber: "c/t",
-      showSlideNumber: "all"
+      showSlideNumber: "all",
+      plugins: [RevealNotes]
     });
 
     await deck.initialize();
