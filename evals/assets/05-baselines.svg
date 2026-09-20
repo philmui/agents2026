@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}</style>
+  </defs>
+  <title id="title">Two dumb baselines bracket the range</title>
+  <desc id="desc">On a zero to one scale, the echo baseline sits near the bottom and the oracle sits at one. Your real system must beat echo, and the oracle must reach exactly one or the scorer itself is broken.</desc>
+  <text x="34" y="42" class="title">Always run the two dumb baselines first</text>
+  <text x="34" y="72" class="sub">Echo repeats the input. Oracle returns the expected answer. They test the harness before it tests anything else.</text>
+
+  <!-- number line -->
+  <line x1="100" y1="210" x2="820" y2="210" stroke="#94a3b8" stroke-width="2.5"/>
+  <text x="100" y="240" text-anchor="middle" class="cap">0.0</text>
+  <text x="820" y="240" text-anchor="middle" class="cap">1.0</text>
+
+  <!-- echo marker (low) -->
+  <line x1="188" y1="188" x2="188" y2="232" stroke="#dc2626" stroke-width="3.5"/>
+  <rect x="104" y="118" width="176" height="64" rx="14" fill="#fef2f2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="192" y="145" text-anchor="middle" class="lbl">echo the input</text>
+  <text x="192" y="169" text-anchor="middle" class="cap">a deliberately terrible floor</text>
+
+  <!-- oracle marker (1.0) -->
+  <line x1="820" y1="188" x2="820" y2="232" stroke="#059669" stroke-width="3.5"/>
+  <rect x="640" y="118" width="200" height="64" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="740" y="145" text-anchor="middle" class="lbl">oracle (cheats)</text>
+  <text x="740" y="169" text-anchor="middle" class="cap">returns the expected answer</text>
+
+  <!-- your system somewhere in between -->
+  <line x1="560" y1="192" x2="560" y2="228" stroke="#2563eb" stroke-width="3.5"/>
+  <rect x="466" y="256" width="188" height="64" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="560" y="283" text-anchor="middle" class="lbl">your real system</text>
+  <text x="560" y="307" text-anchor="middle" class="cap">must land above echo</text>
+  <line x1="560" y1="254" x2="560" y2="230" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- two verdicts -->
+  <rect x="34" y="344" width="404" height="58" rx="14" fill="#fef2f2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="236" y="369" text-anchor="middle" class="cap" font-weight="700">Real system does not beat echo?</text>
+  <text x="236" y="390" text-anchor="middle" class="cap">Something is broken upstream of the model.</text>
+
+  <rect x="462" y="344" width="404" height="58" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="2.5"/>
+  <text x="664" y="369" text-anchor="middle" class="cap" font-weight="700">Oracle does not score 1.0?</text>
+  <text x="664" y="390" text-anchor="middle" class="cap">Your scorer is wrong. Fix it before you trust anything.</text>
+</svg>

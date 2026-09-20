@@ -1,0 +1,51 @@
+[project]
+name = "evals-from-scratch-tutorial"
+version = "0.1.0"
+description = "Build a defensible LLM and agent eval harness from nothing: dataset, scorers, a calibrated judge, synthetic failures, bootstrap intervals, and trajectory evaluation."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # --- Talking to the model ---
+    # `openai` is the official Python SDK and the ONLY network dependency in this
+    # module. It does two distinct jobs, kept deliberately separate so the tutorial
+    # can teach a real calibration lesson: it runs the SYSTEM under test
+    # (SYSTEM_MODEL) and, using a DIFFERENT model, it acts as the LLM judge
+    # (JUDGE_MODEL) in sections 7 through 9. Every call is cached to artifacts/, so
+    # a second run reads from disk and is effectively free. First touched in section 7.
+    "openai>=1.60",
+
+    # --- Secrets ---
+    # python-dotenv reads a local `.env` into the environment so the OpenAI client
+    # finds OPENAI_API_KEY without it ever being hard-coded. We load it with
+    # load_dotenv(find_dotenv()), which walks up the directory tree to the nearest
+    # `.env`, so the notebook resolves your key no matter which folder it runs from.
+    # Loaded in the very first setup cell, before any API call.
+    "python-dotenv>=1.0",
+
+    # --- Jupyter tooling so `uv run jupyter lab` works out of the box ---
+    # jupyterlab is the notebook environment the tutorial ships in; ipykernel is the
+    # kernel that actually executes the cells inside the project's .venv, so every
+    # import in evals_tutorial.ipynb resolves against these pinned deps rather than
+    # whatever happens to be on your global Python.
+    "jupyterlab>=4.0",
+    "ipykernel>=6.29",
+
+    # --- The numeric core of the eval math ---
+    # numpy does the sampling (the stratified calibration sample in section 9 and the
+    # corruption picks in section 10), the correlation between judge and human scores
+    # in section 9, and the bootstrap resampling that produces every confidence
+    # interval in section 11. The bootstrap is the one piece of real statistics in the
+    # module, and vectorizing it with numpy keeps 5000 resamples instant.
+    "numpy>=1.26",
+]
+
+# `uv sync` reads this file, creates `.venv`, and resolves these dependencies. The
+# repository-level policy ignores `uv.lock`, so record the resolved package set in
+# experiment metadata when reproducing a published run. The OpenAI SDK and the model
+# behind an endpoint can change independently, which is exactly why section 9 warns
+# that a calibrated judge is calibrated against ONE model version.
+#
+# No [build-system] table: this is a tutorial project, not a package to be built and
+# published, so uv treats it as a non-packaged workspace.
+[tool.uv]
+package = false

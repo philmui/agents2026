@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}.axis{font-size:12.5px;fill:#64748b;}</style>
+  </defs>
+  <title id="title">The same true improvement, invisible at small n</title>
+  <desc id="desc">A genuine five point improvement is measured at six eval-set sizes. At five or ten cases the confidence interval on the difference spans zero, so the win cannot be claimed. Only at a few hundred cases does the interval clear zero.</desc>
+  <text x="34" y="40" class="title">Is the difference real? Put an interval on it.</text>
+  <text x="34" y="68" class="sub">The same true 5-point improvement, measured at six eval-set sizes. The interval is on the DIFFERENCE.</text>
+
+  <!-- zero line: value v maps to x = 310 + v*1600 -->
+  <line x1="310" y1="100" x2="310" y2="306" stroke="#0f172a" stroke-width="1.5"/>
+  <text x="310" y="328" text-anchor="middle" class="cap" font-weight="700">difference = 0</text>
+  <text x="150" y="328" text-anchor="middle" class="axis">worse</text>
+  <text x="500" y="328" text-anchor="middle" class="axis">better</text>
+
+  <!-- rows: each an interval bar centered near +0.05, width shrinks with n -->
+  <!-- n=5: huge, spans 0 -->
+  <text x="90" y="122" class="cap">n = 5</text>
+  <line x1="139" y1="118" x2="608" y2="118" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="379" cy="118" r="5" fill="#0f172a"/>
+  <text x="640" y="123" class="cap" fill="#dc2626" font-weight="700">spans 0: cannot tell</text>
+
+  <!-- n=10 -->
+  <text x="86" y="156" class="cap">n = 10</text>
+  <line x1="196" y1="152" x2="561" y2="152" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="380" cy="152" r="5" fill="#0f172a"/>
+  <text x="640" y="157" class="cap" fill="#dc2626" font-weight="700">spans 0: cannot tell</text>
+
+  <!-- n=20 -->
+  <text x="86" y="190" class="cap">n = 20</text>
+  <line x1="251" y1="186" x2="523" y2="186" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="385" cy="186" r="5" fill="#0f172a"/>
+  <text x="640" y="191" class="cap" fill="#dc2626" font-weight="700">spans 0: cannot tell</text>
+
+  <!-- n=50 -->
+  <text x="86" y="224" class="cap">n = 50</text>
+  <line x1="300" y1="220" x2="484" y2="220" stroke="#d97706" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="390" cy="220" r="5" fill="#0f172a"/>
+  <text x="640" y="225" class="cap" fill="#d97706" font-weight="700">still touches 0</text>
+
+  <!-- n=200 -->
+  <text x="80" y="258" class="cap">n = 200</text>
+  <line x1="344" y1="254" x2="452" y2="254" stroke="#059669" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="396" cy="254" r="5" fill="#0f172a"/>
+  <text x="640" y="259" class="cap" fill="#059669" font-weight="700">clears 0: real, and visible</text>
+
+  <!-- n=1000 -->
+  <text x="76" y="292" class="cap">n = 1000</text>
+  <line x1="369" y1="288" x2="428" y2="288" stroke="#059669" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="398" cy="288" r="5" fill="#0f172a"/>
+  <text x="640" y="293" class="cap" fill="#059669" font-weight="700">clears 0: real, and visible</text>
+
+  <text x="450" y="360" text-anchor="middle" class="lbl">The improvement is real in every row. You cannot SEE it in most of them.</text>
+  <text x="450" y="392" text-anchor="middle" class="sub">Rule of thumb: a 5-point difference needs a few hundred cases; a 20-point difference, a few dozen. Report the interval, not just the mean.</text>
+</svg>
