@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <!-- Forward arrowhead: slate. Rounded joins keep the tip from looking jagged. -->
+    <marker id="arr" viewBox="0 0 12 12" refX="9.5" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1,1 L10.5,6 L1,11 Z" fill="#475569" stroke="#475569" stroke-width="1" stroke-linejoin="round"/>
+    </marker>
+    <!-- Return arrowhead: amber, matched to the feedback loop so the flow reads as its own. -->
+    <marker id="arrLoop" viewBox="0 0 12 12" refX="9.5" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1,1 L10.5,6 L1,11 Z" fill="#d97706" stroke="#d97706" stroke-width="1" stroke-linejoin="round"/>
+    </marker>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}</style>
+  </defs>
+  <title id="title">An eval turns a feeling into a number you can defend</title>
+  <desc id="desc">A change goes in, an eval produces a number with an interval, and that one number is used both to decide whether to merge and whether to fund. A smooth feedback loop returns from the decisions back into the eval, because every decision ships a change the next eval measures again.</desc>
+  <text x="34" y="40" class="title">From "it seems better" to a number you can defend</text>
+  <text x="34" y="68" class="sub">The same number decides the merge and the funding. Very little else does both jobs.</text>
+
+  <!-- left: the vague claim -->
+  <rect x="34" y="120" width="210" height="120" rx="14" fill="#fef2f2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="139" y="168" text-anchor="middle" class="lbl">"It seems better"</text>
+  <text x="139" y="200" text-anchor="middle" class="cap">A feeling. Not comparable,</text>
+  <text x="139" y="220" text-anchor="middle" class="cap">not fundable, not defensible.</text>
+
+  <!-- claim -> eval -->
+  <line x1="244" y1="180" x2="300" y2="180" stroke="#475569" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- middle: the eval -->
+  <rect x="302" y="110" width="224" height="140" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="414" y="150" text-anchor="middle" class="lbl">The eval</text>
+  <text x="414" y="182" text-anchor="middle" class="cap">data you did not pick,</text>
+  <text x="414" y="202" text-anchor="middle" class="cap">a scorer, an interval</text>
+  <text x="414" y="228" text-anchor="middle" class="mono">0.88 [0.81, 0.94]</text>
+
+  <!-- eval -> decisions -->
+  <line x1="526" y1="180" x2="582" y2="180" stroke="#475569" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arr)"/>
+
+  <!-- right: the two decisions the same number serves -->
+  <rect x="584" y="120" width="282" height="52" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="725" y="152" text-anchor="middle" class="cap"><tspan font-weight="700" fill="#0f172a">Engineer</tspan>: should I merge this change?</text>
+
+  <rect x="584" y="188" width="282" height="52" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.5"/>
+  <text x="725" y="220" text-anchor="middle" class="cap"><tspan font-weight="700" fill="#0f172a">VP</tspan>: should I fund the next quarter?</text>
+
+  <!-- feedback loop: a smooth, symmetric arc from the decisions back UP into the eval box. -->
+  <path d="M725 240
+           C 725 330, 414 330, 414 252"
+        fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"
+        stroke-dasharray="1 8" stroke-linejoin="round" marker-end="url(#arrLoop)"/>
+  <text x="569" y="322" text-anchor="middle" class="sub" fill="#d97706">every decision ships a change, which the next eval measures again</text>
+
+  <!-- the ground-truth footing -->
+  <text x="450" y="384" text-anchor="middle" class="sub">The number is never the whole truth. It is the part everyone can act on.</text>
+</svg>

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evals from Scratch: LLMs and Agents</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css">
+<style>
+:root{
+  --ink:#0f172a; --body:#334155; --muted:#64748b;
+  --blue:#2563eb; --violet:#7c3aed;
+  --blue-bg:#eff6ff; --violet-bg:#f5f3ff;
+  --line:#e2e8f0;
+  --green:#059669; --amber:#d97706; --red:#dc2626;
+}
+.reveal{ font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:30px; color:var(--body); }
+/* Use the full frame: reveal defaults to a narrow centered column, which leaves big
+   side margins around every slide (and shrinks images). Widen it to the whole width. */
+:root{ --r-content-width:1180px; }
+.reveal .slides{ text-align:left; width:100%; }
+.reveal .slides > section,
+.reveal .slides > section > section{
+  top:0 !important; height:100%; width:100%; box-sizing:border-box;
+  display:flex !important; flex-direction:column; justify-content:flex-start !important;
+  padding:18px 34px 48px !important;
+}
+.reveal h1,.reveal h2,.reveal h3{ color:var(--ink); font-weight:700; letter-spacing:-0.5px; text-transform:none; margin:0 0 0.32em; }
+.reveal h1{ font-size:2.0em; line-height:1.05; }
+.reveal h2{ font-size:1.32em; line-height:1.12; }
+.reveal h3{ font-size:0.98em; color:var(--blue); }
+.reveal p,.reveal li{ color:var(--body); line-height:1.38; }
+.reveal strong{ color:var(--ink); }
+.reveal em{ color:var(--violet); font-style:normal; font-weight:600; }
+.reveal ul,.reveal ol{ margin:0; padding-left:1.1em; }
+.reveal li{ margin:0.28em 0; }
+
+.kicker{ text-transform:uppercase; letter-spacing:0.18em; color:var(--violet); font-size:0.5em; font-weight:700; margin-bottom:0.35em; }
+.subtitle{ font-size:1.02em; color:var(--body); }
+.caption{ color:var(--muted); font-size:0.7em; margin-top:8px; line-height:1.3; }
+
+/* plain-words callout: the friendly "in everyday terms" box */
+.plain{ background:var(--blue-bg); border-left:5px solid var(--blue); border-radius:8px;
+  padding:12px 18px; font-size:0.86em; margin:6px 0; }
+.plain b{ color:var(--blue); }
+.aha{ background:#ecfdf5; border-left:5px solid var(--green); border-radius:8px;
+  padding:12px 18px; font-size:0.86em; margin:6px 0; }
+.warnbox{ background:#fffbeb; border-left:5px solid var(--amber); border-radius:8px;
+  padding:12px 18px; font-size:0.86em; margin:6px 0; }
+
+.card{ border:1px solid var(--line); border-radius:14px; padding:12px 16px; background:#fff; }
+.card.blue{ background:var(--blue-bg); border-color:#bfdbfe; }
+.card.violet{ background:var(--violet-bg); border-color:#ddd6fe; }
+.card.green{ background:#ecfdf5; border-color:#a7f3d0; }
+.card.amber{ background:#fffbeb; border-color:#fde68a; }
+.card.red{ background:#fef2f2; border-color:#fecaca; }
+.card h3{ margin:0 0 0.25em; }
+.card p{ margin:0.15em 0; font-size:0.8em; }
+
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.three{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.stack>*+*{ margin-top:10px; }
+
+/* image slide: the SVG is the star and fills the whole frame. Each hero SVG carries
+   its own title, so the slide keeps its header to a single tight line and hands the
+   whole tall band below to the drawing. A compact header makes the band's shape closer
+   to the image's, so object-fit:contain fills it with almost no letterbox gap. */
+.reveal .slides > section.hero{ padding:10px 26px 30px !important; justify-content:flex-start !important; }
+.hero .kicker{ margin-bottom:1px; }
+.hero .imgtitle{ font-size:0.82em; font-weight:700; color:var(--ink); margin:0 0 2px; line-height:1.15; }
+.svg-hero{ flex:1 1 auto; display:flex; align-items:center; justify-content:center; min-height:0; margin-top:2px; width:100%; }
+.svg-hero img{ width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; }
+/* image + text split: image still large, plain words beside it */
+.split{ display:grid; grid-template-columns:1.25fr 1fr; gap:22px; flex:1 1 auto; min-height:0; align-items:center; }
+.split .svg-side{ display:flex; align-items:center; justify-content:center; height:100%; min-height:0; }
+.split .svg-side img{ width:100%; height:100%; max-height:100%; object-fit:contain; }
+.split .text-side{ align-self:center; }
+
+.chip{ display:inline-block; padding:2px 10px; border-radius:999px; font-size:0.58em; font-weight:700; }
+.chip.ok{ background:#ecfdf5; color:var(--green); }
+.chip.warn{ background:#fffbeb; color:var(--amber); }
+.chip.bad{ background:#fef2f2; color:var(--red); }
+
+.reveal pre{ margin:0.25em 0; box-shadow:none; }
+.reveal pre code{ border:1px solid var(--line); border-radius:12px; font-size:0.6em; line-height:1.45; padding:14px 16px; }
+
+.bignum{ font-size:3.4em; font-weight:700; color:var(--blue); line-height:1; letter-spacing:-2px; }
+.metric-label{ color:var(--muted); font-size:0.76em; }
+
+table.report{ border-collapse:collapse; width:100%; font-size:0.72em; }
+table.report th{ text-align:left; color:var(--muted); font-weight:700; border-bottom:1px solid var(--line); padding:6px 8px; }
+table.report td{ border-bottom:1px solid var(--line); padding:6px 8px; color:var(--body); }
+
+/* section divider: a full bright panel that announces a new part.
+   Higher-specificity selector so vertical centering beats the base flex-start rule. */
+.reveal .slides > section.divider{ justify-content:center !important; align-items:flex-start;
+  background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 100%); padding-left:60px !important; }
+section.divider .partno{ font-size:1.0em; color:var(--violet); font-weight:700; letter-spacing:0.12em; margin-bottom:0.2em; }
+section.divider h2{ font-size:2.2em; }
+section.divider .subtitle{ font-size:1.15em; max-width:70%; }
+
+.reveal .slides section::after{ content:"© mui-group"; position:absolute; bottom:12px; left:30px; font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- ============================================================ -->
+<!-- 1. TITLE -->
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">Agent Research · Topic 20</div>
+  <h1>Evals from Scratch</h1>
+  <p class="subtitle">How to measure whether an AI is actually good, in numbers you can defend.</p>
+  <div class="plain" style="margin-top:22px;">
+    <b>What is an "eval"?</b> Short for <em>evaluation</em>. It is a repeatable test that
+    turns "this AI seems better" into a real number you can trust, compare, and show to
+    anyone. That is the entire course, and we build one by hand.
+  </div>
+  <p class="caption">No AI or machine-learning background needed. If you can read a recipe, you are ready.</p>
+</section>
+
+<!-- 2. THE HOOK: everyday analogy -->
+<section>
+  <div class="kicker">Start with something familiar</div>
+  <h2>Your school gets a new essay-grading app</h2>
+  <div class="stack">
+    <p style="font-size:0.92em;">A teacher says, <em>"I think it grades better than the old one."</em>
+    That is a <b>feeling</b>. The principal cannot spend money on a feeling, and nobody
+    can tell what "better" even means.</p>
+    <div class="aha">
+      <b>So what would you actually do?</b> Take a stack of essays a human already graded.
+      Run both apps on them. Count how often each app matches the human. Now "better" is a
+      <b>number</b> you can compare, repeat, and defend.
+    </div>
+    <p style="font-size:0.92em;">That simple move is the whole idea. Everything in this
+    deck is a careful, honest version of it.</p>
+  </div>
+  <p class="caption">Feeling to number. That translation is job number one.</p>
+</section>
+
+<!-- 3. WHY THIS MATTERS -->
+<section>
+  <div class="kicker">Why bother</div>
+  <h2>You cannot act on a feeling</h2>
+  <div class="two">
+    <div class="card red">
+      <h3>"It seems better"</h3>
+      <p>A vibe. You cannot fund it, ship it, or win an argument with it. Two people can
+      look at the same demo and disagree forever.</p>
+    </div>
+    <div class="card green">
+      <h3>0.88, and probably between 0.79 and 0.95</h3>
+      <p>A measurement. Comparable across versions, repeatable by anyone, and honest that
+      it is not perfectly certain.</p>
+    </div>
+  </div>
+  <div class="warnbox" style="margin-top:14px;">
+    <b>The catch we spend the whole course on:</b> a number you cannot trust is <em>worse</em>
+    than a feeling, because it looks like proof. People build on it, then it collapses.
+  </div>
+</section>
+
+<!-- 4. IMAGE (hero): the eval loop -->
+<section class="hero">
+  <div class="kicker">The big picture · one number, two decisions, one loop</div>
+  <div class="svg-hero"><img src="../assets/01-eval-loop.svg" alt="From a feeling to a defensible number to a decision, and a feedback loop back"></div>
+</section>
+
+<!-- 5. EXPLAIN the loop -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>Why the same number does two jobs</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">Look at the picture on the last slide. A vague claim goes
+    in on the left. The <b>eval</b> in the middle turns it into a score with a range.
+    That single score then serves <b>two very different people</b>:</p>
+    <div class="two">
+      <div class="card blue"><h3>The engineer asks</h3><p>"Should I merge this change into the product?"</p></div>
+      <div class="card violet"><h3>The manager asks</h3><p>"Should I fund this project next quarter?"</p></div>
+    </div>
+    <div class="aha"><b>And it never stops.</b> Every decision ships a change, and the next
+    eval measures that change again. That circle is why evals are a habit, not a one-time test.</div>
+  </div>
+  <p class="caption">The number is never the whole truth. It is the part everyone can act on.</p>
+</section>
+
+<!-- 6. ROADMAP -->
+<section>
+  <div class="kicker">Where we are going</div>
+  <h2>The plan, in four parts</h2>
+  <div class="stack" style="font-size:0.82em;">
+    <div class="card"><b>Part 1 · Build the grading machine.</b> Get answer keys, write a
+    tiny harness, add simple scorers, and test the grader itself.</div>
+    <div class="card"><b>Part 2 · Bring in an AI judge.</b> Use AI to grade things code
+    cannot, then prove whether you can trust it (this is the part everyone skips).</div>
+    <div class="card"><b>Part 3 · Be honest about the numbers.</b> Make rare failures on
+    purpose, and put an "error bar" on every score.</div>
+    <div class="card"><b>Part 4 · Grade agents.</b> When the AI takes actions, grade the
+    <em>path</em> it took, not just the final answer.</div>
+  </div>
+  <p class="caption">Each part builds directly on the one before it.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 1 DIVIDER -->
+<!-- ============================================================ -->
+<section class="divider">
+  <div class="partno">PART 1</div>
+  <h2>Build the grading machine</h2>
+  <p class="subtitle" style="margin-top:10px;">Answer keys, a tiny harness, simple scorers, and a test of the grader itself.</p>
+</section>
+
+<!-- 7. IMAGE (hero): ground truth -->
+<section class="hero">
+  <div class="kicker">Step 1 · Get answer keys</div>
+  <p class="imgtitle">Where the "correct answers" come from</p>
+  <div class="svg-hero"><img src="../assets/02-ground-truth-sources.svg" alt="Labeled data you already own, plus back-testing against the past"></div>
+</section>
+
+<!-- 8. EXPLAIN ground truth -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>You already own more answer keys than you think</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">To grade anything you need <b>ground truth</b>: correct
+    answers decided by someone other than the AI. People say "but we have no labeled
+    data." That is almost always false.</p>
+    <div class="plain"><b>The trick, called back-testing:</b> the answer was often recorded
+    as a <em>side effect</em> of past work. A solved support ticket already shows which team
+    fixed it. An approved document already shows a human approved it. Run your AI on last
+    year's cases and compare to what actually happened.</div>
+    <div class="warnbox"><b>Where it breaks:</b> if the world changed (new product, new
+    policy), yesterday's correct answer may be wrong for today. A stale answer key is a
+    comforting lie.</div>
+  </div>
+</section>
+
+<!-- 9. READ YOUR TRACES (connective, the "most of the job" idea) -->
+<section>
+  <div class="kicker">Step 2 · The unglamorous majority of the work</div>
+  <h2>Read what your AI actually did, one at a time</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">Before you can grade, you have to learn <b>how your AI goes
+    wrong</b>. The only way is to read real runs and write down what broke. The full record
+    of one run is called a <em>trace</em>.</p>
+    <div class="two">
+      <div class="card"><h3>The boring 5 steps</h3><p>1. Grab 50 to 100 real traces.
+      2. Write one plain sentence per mistake. 3. Group the sentences. 4. Count and sort.
+      5. Stop when nothing new shows up.</p></div>
+      <div class="card amber"><h3>The number that surprises people</h3>
+      <p><span class="chip warn">60 to 80%</span> of an expert's eval time is spent here,
+      reading, not writing code.</p></div>
+    </div>
+    <div class="aha"><b>The prize is the ranked list of failures</b>, not a score. It tells
+    you exactly which scorer to write next.</div>
+  </div>
+</section>
+
+<!-- 10. IMAGE (hero): the harness -->
+<section class="hero">
+  <div class="kicker">Step 3 · The grading machine</div>
+  <p class="imgtitle">The whole "harness" is 3 functions and a loop</p>
+  <div class="svg-hero"><img src="../assets/03-harness.svg" alt="Three functions and a loop make the eval harness"></div>
+</section>
+
+<!-- 11. EXPLAIN the harness -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>Small enough to trust completely</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">A <b>harness</b> is the machine that does the grading.
+    Every fancy dashboard you have seen is just decoration on top of these three simple pieces:</p>
+    <div class="three" style="font-size:0.95em;">
+      <div class="card blue"><h3>Result</h3><p>One graded answer: the question, what the AI said, and its scores. One row of a gradebook.</p></div>
+      <div class="card blue"><h3>run_eval</h3><p>The loop. Walk every question, run the AI once, hand its answer to every scorer.</p></div>
+      <div class="card blue"><h3>report</h3><p>Add it up: the average per scorer, plus the overall pass rate.</p></div>
+    </div>
+    <div class="aha"><b>The clever part:</b> the thing being graded can be <em>any</em>
+    function that takes an input and returns an output. So this same tiny machine grades a
+    prompt today and a full agent tomorrow, unchanged.</div>
+  </div>
+</section>
+
+<!-- 12. HARNESS IN CODE -->
+<section>
+  <div class="kicker">The same idea, in code</div>
+  <h2>Forty lines, no magic</h2>
+  <pre><code class="language-python" data-trim>@dataclass
+class Result:
+    case: dict; actual: str; scores: dict
+    @property
+    def passed(self):            # passes only if EVERY scorer clears the bar
+        return all(v >= 0.5 for v in self.scores.values())
+
+def run_eval(cases, system, scorers):
+    return [Result(c, system(c["input"]),
+                   {name: score(system(c["input"]), c)
+                    for name, score in scorers.items()})
+            for c in cases]</code></pre>
+  <p class="caption">"system" is any input to output function. That looseness is what lets it grade anything.</p>
+</section>
+
+<!-- 13. IMAGE (hero): scorer ladder -->
+<section class="hero">
+  <div class="kicker">Step 4 · Scorers</div>
+  <p class="imgtitle">Start with scorers that need no AI at all</p>
+  <div class="svg-hero"><img src="../assets/04-scorer-ladder.svg" alt="A ladder from free code scorers up to paid AI judges and scarce humans"></div>
+</section>
+
+<!-- 14. EXPLAIN scorers -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>Four checks, each returns 0 to 1</h2>
+  <div class="stack">
+    <p style="font-size:0.88em;">A <b>scorer</b> is just a small function: it reads one
+    answer and returns a number from 0 (wrong) to 1 (perfect). The plain-code ones are
+    free, instant, and never surprise you. They catch more than people expect.</p>
+    <div class="two" style="font-size:0.95em;">
+      <div class="card"><h3><span class="chip ok">exact</span> exact match</h3><p>Must match perfectly. For IDs, categories, routing, where "close" is still wrong.</p></div>
+      <div class="card"><h3><span class="chip ok">f1</span> word overlap</h3><p>How many words match. Forgives phrasing, good for free text.</p></div>
+      <div class="card"><h3><span class="chip ok">required</span> did it include X?</h3><p>Did the answer cite the policy number? Quietly the most useful check.</p></div>
+      <div class="card"><h3><span class="chip warn">declines</span> did it refuse?</h3><p>Did it say "I don't know" when it should have? A system that never refuses will confidently make things up.</p></div>
+    </div>
+  </div>
+  <p class="caption">Same 0-to-1 scale everywhere, so scores mix and average cleanly.</p>
+</section>
+
+<!-- 15. IMAGE (hero): baselines -->
+<section class="hero">
+  <div class="kicker">Step 5 · Who grades the grader?</div>
+  <p class="imgtitle">Test the machine before you trust it</p>
+  <div class="svg-hero"><img src="../assets/05-baselines.svg" alt="Echo scores near the floor and oracle scores near the ceiling, bracketing the range"></div>
+</section>
+
+<!-- 16. EXPLAIN baselines -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>Two silly systems with predictable scores</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">Before trusting the grader on a real system, feed it two
+    <b>baselines</b> whose scores you already know. If the numbers come out wrong, the bug
+    is in your grader.</p>
+    <div class="two">
+      <div class="card red"><h3>echo</h3><p>Just repeats the question back. Should score near the <b>bottom</b>. If your real AI cannot beat echo, something upstream is broken.</p></div>
+      <div class="card green"><h3>oracle</h3><p>Cheats by handing back the correct answer. Should score a perfect <b>1.0</b>.</p></div>
+    </div>
+    <div class="aha"><b>The payoff:</b> if the oracle is <em>not</em> 1.0, your scorer is
+    broken, because you literally gave it the right answer and it marked it wrong. Far
+    better to learn that now than during a real change later.</div>
+  </div>
+</section>
+
+<!-- 17. FEEDBACK -->
+<section>
+  <div class="kicker">Step 6 · Learn from users</div>
+  <h2>A thumbs-down is useless without a reason</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">Your scorers only check what you thought of in advance.
+    Users hit problems you never imagined, so you ask them. But a lonely thumbs-down tells
+    you <em>something</em> broke, not <em>what</em>.</p>
+    <div class="warnbox"><b>The one rule that matters:</b> when someone rates an answer
+    negatively, require a short typed reason. That sentence is the real data. The thumb is
+    just the trigger that gets it.</div>
+    <pre><code class="language-python" data-trim>if not helpful and not reason.strip():
+    return "Please say what was wrong. That part is the useful bit."</code></pre>
+    <div class="aha"><b>This closes the loop:</b> a negative rating with a reason becomes a
+    brand-new test case that guards against that failure forever.</div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 2 DIVIDER -->
+<!-- ============================================================ -->
+<section class="divider">
+  <div class="partno">PART 2</div>
+  <h2>Bring in an AI judge</h2>
+  <p class="subtitle" style="margin-top:10px;">Grade what code cannot, then prove whether the judge can be trusted.</p>
+</section>
+
+<!-- 18. LLM AS JUDGE -->
+<section>
+  <div class="kicker">Step 7 · When code is not enough</div>
+  <h2>Ask another AI to grade the answer</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">Some questions have no substring to search for. "Is this
+    summary <b>faithful</b> to the article?" "Is this tone right for a worried customer?"
+    Judging those takes reading and understanding, so we ask another AI to do it. That AI
+    is an <em>LLM judge</em>, and its grading instructions are its <em>rubric</em>.</p>
+    <div class="two">
+      <div class="card green"><h3>The easy part</h3><p>Building the judge. Write a prompt asking it to score something and reply with a JSON decision.</p></div>
+      <div class="card red"><h3>The real work</h3><p>Deciding whether to believe that number. Almost everyone skips this. We do not.</p></div>
+    </div>
+    <div class="warnbox"><b>Safety rule:</b> if the judge ever replies with something we
+    cannot read, we count it as a <em>failed</em> grade worth 0, never a silent "looks fine."</div>
+  </div>
+</section>
+
+<!-- 19. TWO BARS: separation vs agreement (connective concept) -->
+<section>
+  <div class="kicker">The two questions to ask a judge</div>
+  <h2>Separation is easy. Agreement is the real test.</h2>
+  <div class="two">
+    <div class="card blue">
+      <h3>Separation</h3>
+      <p><b>Can it tell obviously-bad from obviously-good at all?</b> The low bar. If it
+      cannot even do this, nothing built on it is worth reading.</p>
+    </div>
+    <div class="card violet">
+      <h3>Agreement</h3>
+      <p><b>Does it grade the way a real human would?</b> The high bar, and the one the
+      number you report actually depends on.</p>
+    </div>
+  </div>
+  <div class="warnbox" style="margin-top:14px;"><b>The trap that catches everyone:</b> a
+  judge can pass separation and still fail agreement. So "I tried it on one good and one
+  bad answer, looks great" is <em>not</em> calibration.</div>
+</section>
+
+<!-- 20. IMAGE (hero): calibration -->
+<section class="hero">
+  <div class="kicker">Step 8 · Calibrate the judge</div>
+  <p class="imgtitle">Check the judge against human grades</p>
+  <div class="svg-hero"><img src="../assets/06-judge-calibration.svg" alt="Separation versus agreement, the two calibration questions"></div>
+</section>
+
+<!-- 21. EXPLAIN calibration -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>Calibration means: match it against grades you trust</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">To <b>calibrate</b> is to compare the judge's grades to
+    human grades and measure how well they line up. This is the step that turns a
+    defensible eval into a decorative one, and it gets skipped because it needs human
+    grades to compare against, which most teams never collected.</p>
+    <div class="plain"><b>We ship you some.</b> A public dataset (SummEval) with 480
+    computer-written summaries, each rated 1 to 5 by <b>three human experts</b> on four
+    qualities. Before judging anything, we first look at what the humans did.</div>
+    <div class="aha"><b>Always ask first:</b> what would this score read if the thing it
+    measures were absent? That baseline is the <em>chance floor</em>, and it decides
+    whether any number means anything at all.</div>
+  </div>
+</section>
+
+<!-- 22. IMAGE (hero): agreement interval + chance floor -->
+<section class="hero">
+  <div class="kicker">Step 8 · The chance floor</div>
+  <p class="imgtitle">Human agreement, measured against pure guessing</p>
+  <div class="svg-hero"><img src="../assets/07-agreement-interval.svg" alt="Human agreement bracketed and compared against a 33 percent chance floor"></div>
+</section>
+
+<!-- 23. FACTS VS OPINIONS -->
+<section>
+  <div class="kicker">A surprising finding</div>
+  <h2>Some things are facts, some are opinions</h2>
+  <div class="stack">
+    <p style="font-size:0.88em;">Even the three human experts could not agree on everything.
+    Compared to the 33% you would get from random guessing:</p>
+    <div class="two" style="font-size:0.95em;">
+      <div class="card green"><p><span class="chip ok">consistency 80%+</span> Experts almost always agree. Close to a <b>fact</b>: either the summary invents something or it does not.</p></div>
+      <div class="card green"><p><span class="chip ok">fluency ~70%</span> A real, usable signal.</p></div>
+      <div class="card red"><p><span class="chip bad">coherence ~32%</span> Right at the guessing floor. An <b>opinion</b>.</p></div>
+      <div class="card red"><p><span class="chip bad">relevance ~35%</span> Also on the floor. Not a signal.</p></div>
+    </div>
+    <div class="warnbox"><b>The lesson:</b> you cannot hold a judge to a standard humans
+    themselves do not meet. Grading "coherence" would just be measuring noise.</div>
+  </div>
+</section>
+
+<!-- 24. IMAGE (hero): separation vs agreement numbers -->
+<section>
+  <div class="kicker">Step 9 · Two bars, two numbers</div>
+  <p class="imgtitle">What our judge actually scored</p>
+  <div class="split">
+    <div class="svg-side"><img src="../assets/06-judge-calibration.svg" alt="Separation and agreement shown as two separate bars"></div>
+    <div class="text-side stack">
+      <div class="card blue"><h3>Separation: clear</h3><p>Avg <b>1.67</b> on known-bad, <b>3.00</b> on known-good. A gap of <b>1.33</b>. It is tracking something real.</p></div>
+      <div class="card amber"><h3>Agreement: only fair</h3><p>Correlates ~<b>0.64</b>, within 1 point <b>75%</b> of the time.</p></div>
+      <div class="aha" style="font-size:0.8em;"><b>Verdict:</b> good enough to <em>flag</em>
+      likely-bad summaries for a human, not good enough to <em>publish</em> a precise score.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 3 DIVIDER -->
+<!-- ============================================================ -->
+<section class="divider">
+  <div class="partno">PART 3</div>
+  <h2>Be honest about the numbers</h2>
+  <p class="subtitle" style="margin-top:10px;">Make rare failures on purpose, and put an error bar on every score.</p>
+</section>
+
+<!-- 25. IMAGE (hero): synthetic failures -->
+<section class="hero">
+  <div class="kicker">Step 10 · The rare-failure problem</div>
+  <p class="imgtitle">Make the failures your data almost never has</p>
+  <div class="svg-hero"><img src="../assets/08-synthetic-failures.svg" alt="Real data has few failures, so you manufacture labeled ones"></div>
+</section>
+
+<!-- 26. EXPLAIN synthetic failures -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>A smoke detector needs some smoke</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">To test whether your AI catches mistakes, you need
+    examples of mistakes. But a good AI barely makes any. Only about <b>1 in 15</b>
+    summaries here is broken, so a random handful teaches you nothing.</p>
+    <div class="plain"><b>So we manufacture them.</b> Take good summaries and break them in
+    known ways: change a number, reverse a claim, add a made-up sentence, swap a real name.
+    These are <em>synthetic failures</em>.</div>
+    <div class="aha"><b>Best part:</b> a failure you made yourself comes with its answer key
+    attached. You know exactly what you broke, so it is <b>pre-labeled for free</b>. From
+    408 good summaries we made 1276 labeled bad ones, versus 32 that occurred naturally.</div>
+  </div>
+</section>
+
+<!-- 27. SYNTHETIC: use both -->
+<section>
+  <div class="kicker">Use each for the right question</div>
+  <h2>Made-up failures and real failures answer different things</h2>
+  <div class="two">
+    <div class="card blue">
+      <h3>Synthetic (made by you)</h3>
+      <p><b>"Can the detector even detect?"</b> Balanced, cheap, and broken down by failure
+      type so you see exactly which kinds slip through.</p>
+    </div>
+    <div class="card violet">
+      <h3>Natural (from real logs)</h3>
+      <p><b>"What will this cost in production?"</b> The real, lopsided mix, which is what
+      tells you the true false-alarm rate.</p>
+    </div>
+  </div>
+  <p class="caption">Improve the system with synthetic data. Report to stakeholders with natural data.</p>
+</section>
+
+<!-- 28. IMAGE (hero): confidence interval -->
+<section class="hero">
+  <div class="kicker">Step 11 · Is the difference real?</div>
+  <p class="imgtitle">The same true gain, invisible when the test is small</p>
+  <div class="svg-hero"><img src="../assets/09-confidence-interval.svg" alt="A true 5-point improvement is invisible at small sample sizes and clear at large ones"></div>
+</section>
+
+<!-- 29. EXPLAIN confidence intervals -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>Every score needs an error bar</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">Someone announces "it went from 0.83 to 0.88, a five-point
+    win!" If the test set is small, that could easily be luck. A <b>confidence interval</b>
+    is the honest error bar: how much would the score wobble if you had tested on a slightly
+    different set?</p>
+    <div class="plain"><b>How we get it, the "bootstrap" trick:</b> take the results you
+    have, build thousands of pretend test sets by drawing from them at random, and watch how
+    much the score spreads out. That spread is the wobble. No fancy assumptions required.</div>
+    <div class="two" style="font-size:0.92em;">
+      <div class="card"><p><span class="chip ok">5-point gap</span> needs a few hundred cases to see</p></div>
+      <div class="card"><p><span class="chip ok">20-point gap</span> shows up with a few dozen</p></div>
+    </div>
+  </div>
+  <p class="caption">Report the range, not just the mean. Chasing single points on a small set is measuring noise.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 4 DIVIDER -->
+<!-- ============================================================ -->
+<section class="divider">
+  <div class="partno">PART 4</div>
+  <h2>Grade agents, not just answers</h2>
+  <p class="subtitle" style="margin-top:10px;">When the AI takes actions, grade the path it took to get there.</p>
+</section>
+
+<!-- 30. IMAGE (hero): MVP to prod -->
+<section class="hero">
+  <div class="kicker">Step 12 · Three stages</div>
+  <p class="imgtitle">The same machine means different things over time</p>
+  <div class="svg-hero"><img src="../assets/10-mvp-poc-prod.svg" alt="One harness across MVP, proof of concept, and production stages"></div>
+</section>
+
+<!-- 31. EXPLAIN stages + frameworks -->
+<section>
+  <div class="kicker">Reading the diagram + a shortcut</div>
+  <h2>MVP, then PoC, then production</h2>
+  <div class="stack" style="font-size:0.84em;">
+    <div class="card"><b>MVP</b> (first rough version): does it work at all? Judge with your goldens and your eyeballs.</div>
+    <div class="card"><b>PoC</b> (proof of concept): is it good enough to fund? Now you need real data, a calibrated judge, and intervals.</div>
+    <div class="card"><b>Production</b>: is it <em>still</em> working? Score sampled live traffic all the time.</div>
+    <div class="plain"><b>Do you have to build it all yourself?</b> No. Tools like
+    <b>Ragas</b> package these ideas. But a framework's judge is still just an AI judge, so
+    everything about calibration still applies. A version number is not a calibration.</div>
+  </div>
+</section>
+
+<!-- 32. IMAGE (hero): answer vs trajectory -->
+<section class="hero">
+  <div class="kicker">Step 13 · Agents</div>
+  <p class="imgtitle">Same answer, very different paths</p>
+  <div class="svg-hero"><img src="../assets/11-answer-vs-trajectory.svg" alt="Two agents reach the same answer, but one took an unsafe path"></div>
+</section>
+
+<!-- 33. EXPLAIN agents -->
+<section>
+  <div class="kicker">Reading the diagram</div>
+  <h2>The answer is not the whole story</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">An <b>agent</b> does more than answer: it picks tools, takes
+    several steps, and reads results along the way. The full record of what it did is its
+    <em>trajectory</em> (a fancy word for "the path it took").</p>
+    <div class="warnbox"><b>Why this matters:</b> two agents can give the <em>exact same
+    correct answer</em> while one of them quietly read private customer data it never needed.
+    An answer-only grade is blind to that.</div>
+    <p style="font-size:0.88em;">So agentic evals grade four extra things: <b>tool choice</b>
+    (right tool?), <b>task success</b> (world ended correct?), <b>efficiency</b> (how many
+    steps and how much money?), and <b>safety</b> (did it stay inside the fence?).</p>
+  </div>
+</section>
+
+<!-- 34. PASS^K -->
+<section>
+  <div class="kicker">Step 14 · Reliability</div>
+  <h2>One good demo can lie</h2>
+  <div class="stack">
+    <p style="font-size:0.9em;">An agent that succeeds once might fail the next time on the
+    same task, because it does not answer identically every run. So run it <b>k</b> times and
+    ask: how often does it succeed <em>every single time</em>? That is <b>pass^k</b>, and it
+    drops fast.</p>
+    <div class="three">
+      <div class="card green"><p class="bignum" style="font-size:1.9em;">90%</p><p class="metric-label">pass^1 (one try)</p></div>
+      <div class="card amber"><p class="bignum" style="font-size:1.9em;">73%</p><p class="metric-label">pass^3 (all of 3)</p></div>
+      <div class="card red"><p class="bignum" style="font-size:1.9em;">59%</p><p class="metric-label">pass^5 (all of 5)</p></div>
+    </div>
+    <p class="caption">A demo is pass^1. Production is the k a real user actually hits.</p>
+  </div>
+</section>
+
+<!-- 35. HOW IT ALL CONNECTS (capstone connective slide) -->
+<section>
+  <div class="kicker">Putting it together</div>
+  <h2>How every piece links up</h2>
+  <div class="stack" style="font-size:0.82em;">
+    <p><b>Answer keys</b> give you something to grade against. The <b>harness</b> does the
+    grading. <b>Simple scorers</b> handle what code can check; the <b>AI judge</b> handles
+    what it cannot, but only after <b>calibration</b> proves you can trust it.</p>
+    <p><b>User feedback</b> feeds new failures back into your answer keys. <b>Synthetic
+    failures</b> fill in the rare cases real data lacks. <b>Confidence intervals</b> keep you
+    honest about whether a change really helped.</p>
+    <p>And for <b>agents</b>, you grade the whole <b>path</b>, plus <b>reliability</b> across
+    many tries. Every arrow points back to one loop: measure, learn, improve, measure again.</p>
+  </div>
+  <p class="caption">Miss one link and the number quietly stops meaning what you think.</p>
+</section>
+
+<!-- 36. CLOSING -->
+<section>
+  <div class="kicker">The main idea</div>
+  <h2>A number you can defend</h2>
+  <div class="stack">
+    <div class="card blue"><p>Test the grader. Calibrate the judge. Put an <b>interval</b>
+    on the number. For agents, grade the <b>path</b>, not just the answer.</p></div>
+    <p class="subtitle" style="margin-top:8px;">The number was never the point. Knowing
+    exactly what would make it <em>wrong</em> is.</p>
+  </div>
+  <p class="caption">Build it yourself in the notebook. Full agentic benchmark next door in Topic 18 (tau2-bench).</p>
+</section>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+Reveal.initialize({ hash:true, slideNumber:'c/t', plugins:[RevealHighlight] });
+
+// AUTO-FIT: shrink any slide whose content overflows its section.
+(function(){
+  function fit(section){
+    if(!section) return;
+    section.style.zoom = "";
+    var guard = 0;
+    while(section.scrollHeight > section.clientHeight + 1 && guard < 40){
+      var z = parseFloat(section.style.zoom || "1");
+      var next = z - 0.03;
+      if(next < 0.5){ section.style.zoom = "0.5"; break; }
+      section.style.zoom = next.toString();
+      guard++;
+    }
+  }
+  Reveal.on('ready', function(e){ fit(e.currentSlide); });
+  Reveal.on('slidechanged', function(e){ fit(e.currentSlide); });
+  window.addEventListener('resize', function(){ fit(Reveal.getCurrentSlide()); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}.axis{font-size:12.5px;fill:#64748b;}</style>
+  </defs>
+  <title id="title">Human agreement, bracketed, against a chance floor</title>
+  <desc id="desc">Because the dataset ships only the mean of three ratings, agreement can only be bracketed. Consistency and fluency sit well above the 33 percent chance floor; coherence and relevance sit on it.</desc>
+  <text x="34" y="42" class="title">Some dimensions are facts. Some are opinions.</text>
+  <text x="34" y="72" class="sub">A mean of three ratings is lossy: 1.0 must be {1,1,1}, but 2.0 could be {2,2,2} or {1,2,3}. So agreement is an interval.</text>
+
+  <!-- axis scale: x = 130 + pct * 7.2, spanning 0% at x=130 to 100% at x=850 -->
+  <!-- 0% and 100% ticks -->
+  <line x1="130" y1="108" x2="130" y2="342" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="130" y="100" text-anchor="middle" class="axis">0%</text>
+  <line x1="850" y1="108" x2="850" y2="342" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="850" y="100" text-anchor="middle" class="axis">100%</text>
+
+  <!-- chance floor line at 33% -->
+  <line x1="368" y1="108" x2="368" y2="342" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="368" y="100" text-anchor="middle" class="axis" fill="#dc2626">what random raters score</text>
+  <text x="368" y="366" text-anchor="middle" class="cap" fill="#dc2626" font-weight="700">chance floor 33%</text>
+
+  <!-- consistency: 80% to 83% (bar sits far right, so its caption reads to the LEFT) -->
+  <text x="120" y="146" text-anchor="end" class="lbl">consistency</text>
+  <rect x="706" y="132" width="22" height="20" rx="3" fill="#059669"/>
+  <line x1="706" y1="142" x2="728" y2="142" stroke="#059669" stroke-width="3"/>
+  <text x="694" y="148" text-anchor="end" class="cap" fill="#059669" font-weight="700">80 to 83%: close to a fact</text>
+
+  <!-- fluency: 67% to 72% (caption reads to the LEFT to stay inside the frame) -->
+  <text x="120" y="201" text-anchor="end" class="lbl">fluency</text>
+  <rect x="612" y="187" width="36" height="20" rx="3" fill="#2563eb"/>
+  <text x="600" y="203" text-anchor="end" class="cap" fill="#2563eb" font-weight="700">67 to 72%</text>
+
+  <!-- coherence: 6% to 32% -->
+  <text x="120" y="256" text-anchor="end" class="lbl">coherence</text>
+  <rect x="173" y="242" width="187" height="20" rx="3" fill="#d97706"/>
+  <text x="374" y="258" class="cap" fill="#d97706" font-weight="700">6 to 32%: sits on the floor</text>
+
+  <!-- relevance: 4% to 35% -->
+  <text x="120" y="311" text-anchor="end" class="lbl">relevance</text>
+  <rect x="159" y="297" width="223" height="20" rx="3" fill="#d97706"/>
+  <text x="396" y="313" class="cap" fill="#d97706" font-weight="700">4 to 35%: sits on the floor</text>
+
+  <text x="450" y="394" text-anchor="middle" class="sub">A metric sitting on its own chance floor is not a weak signal. It is not a signal. Score the facts; treat the opinions as signals.</text>
+</svg>

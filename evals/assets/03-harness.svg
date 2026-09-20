@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}</style>
+  </defs>
+  <title id="title">An eval harness is three functions and a loop</title>
+  <desc id="desc">Cases flow into the system under test, its outputs are scored by a dictionary of scorers, and a report aggregates the scores into one row per scorer plus a pass rate.</desc>
+  <text x="34" y="40" class="title">The harness: three functions and a loop</text>
+  <text x="34" y="68" class="sub">Everything else (dashboards, frameworks, tracing) is convenience on top of this. Build it small enough to read.</text>
+
+  <!-- cases -->
+  <rect x="34" y="118" width="192" height="104" rx="14" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="130" y="158" text-anchor="middle" class="lbl">cases</text>
+  <text x="130" y="188" text-anchor="middle" class="cap">input, expected output,</text>
+  <text x="130" y="208" text-anchor="middle" class="cap">must_include, ...</text>
+
+  <line x1="228" y1="170" x2="272" y2="170" stroke="#475569" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- system -->
+  <rect x="274" y="118" width="192" height="104" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.5"/>
+  <text x="370" y="158" text-anchor="middle" class="lbl">system</text>
+  <text x="370" y="188" text-anchor="middle" class="cap">any callable</text>
+  <text x="370" y="210" text-anchor="middle" class="mono">input -&gt; output</text>
+
+  <line x1="468" y1="170" x2="512" y2="170" stroke="#475569" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- scorers -->
+  <rect x="514" y="118" width="196" height="104" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="612" y="158" text-anchor="middle" class="lbl">scorers</text>
+  <text x="612" y="188" text-anchor="middle" class="cap">a dict of functions,</text>
+  <text x="612" y="210" text-anchor="middle" class="mono">(actual, case) -&gt; 0..1</text>
+
+  <line x1="712" y1="170" x2="756" y2="170" stroke="#475569" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- report -->
+  <rect x="758" y="118" width="108" height="104" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="812" y="152" text-anchor="middle" class="lbl">report</text>
+  <text x="812" y="182" text-anchor="middle" class="cap">one row</text>
+  <text x="812" y="200" text-anchor="middle" class="cap">per scorer,</text>
+  <text x="812" y="218" text-anchor="middle" class="cap">plus a pass rate</text>
+
+  <!-- the loop -->
+  <path d="M612 224 C 612 300, 370 300, 370 224" fill="none" stroke="#475569" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arr)"/>
+  <text x="491" y="292" text-anchor="middle" class="sub">for every case: run the system, score it every way</text>
+
+  <!-- Result box -->
+  <rect x="180" y="320" width="540" height="78" rx="14" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2.5"/>
+  <text x="450" y="352" text-anchor="middle" class="lbl">Result = case + actual + scores</text>
+  <text x="450" y="380" text-anchor="middle" class="cap">enough context to argue about it later. passed = every score above the bar.</text>
+</svg>

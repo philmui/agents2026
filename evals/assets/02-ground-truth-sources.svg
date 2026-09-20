@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}</style>
+  </defs>
+  <title id="title">Labeled data you already own, and back-testing</title>
+  <desc id="desc">Four everyday business records already carry a label as a side effect of the work, and back-testing runs the system over past inputs to compare against what actually happened.</desc>
+  <text x="34" y="40" class="title">You already own labeled data. It does not look labeled.</text>
+  <text x="34" y="68" class="sub">The label was a side effect of doing the work. Ask "what did we do last year, and did it work?" first.</text>
+
+  <!-- four source cards -->
+  <rect x="34" y="94" width="196" height="82" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="132" y="126" text-anchor="middle" class="lbl">Resolved tickets</text>
+  <text x="132" y="150" text-anchor="middle" class="cap">label: which team, and</text>
+  <text x="132" y="168" text-anchor="middle" class="cap">whether it was reopened</text>
+
+  <rect x="242" y="94" width="196" height="82" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="340" y="126" text-anchor="middle" class="lbl">Approved docs</text>
+  <text x="340" y="150" text-anchor="middle" class="cap">label: a human</text>
+  <text x="340" y="168" text-anchor="middle" class="cap">approved this one</text>
+
+  <rect x="450" y="94" width="196" height="82" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="548" y="126" text-anchor="middle" class="lbl">Past decisions</text>
+  <text x="548" y="150" text-anchor="middle" class="cap">label: the outcome</text>
+  <text x="548" y="168" text-anchor="middle" class="cap">that actually happened</text>
+
+  <rect x="658" y="94" width="208" height="82" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="762" y="126" text-anchor="middle" class="lbl">Audit trails</text>
+  <text x="762" y="150" text-anchor="middle" class="cap">label: every state</text>
+  <text x="762" y="168" text-anchor="middle" class="cap">transition, dated</text>
+
+  <!-- funnel to back-testing -->
+  <line x1="132" y1="178" x2="420" y2="220" stroke="#475569" stroke-width="2"/>
+  <line x1="340" y1="178" x2="440" y2="220" stroke="#475569" stroke-width="2"/>
+  <line x1="548" y1="178" x2="460" y2="220" stroke="#475569" stroke-width="2"/>
+  <line x1="762" y1="178" x2="480" y2="220" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="272" y="222" width="356" height="64" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="450" y="250" text-anchor="middle" class="lbl">Back-testing</text>
+  <text x="450" y="273" text-anchor="middle" class="cap">run your system over past inputs, compare to what happened</text>
+
+  <!-- the other half: error analysis -->
+  <rect x="70" y="302" width="760" height="98" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="2.5"/>
+  <text x="450" y="329" text-anchor="middle" class="lbl">The other half: read your traces, one at a time</text>
+  <text x="450" y="352" text-anchor="middle" class="cap">Back-testing tells you WHETHER an answer was right. It does not tell you HOW yours go wrong.</text>
+  <text x="450" y="372" text-anchor="middle" class="cap">Sample 50 to 100 traces. Write one sentence per failure. Group. Count. Stop when it goes quiet.</text>
+  <text x="450" y="392" text-anchor="middle" class="cap" font-weight="700">This is 60 to 80% of the job. The taxonomy is the deliverable, not the score.</text>
+</svg>

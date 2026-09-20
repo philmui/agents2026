@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+    <style>.title{font-size:26px;font-weight:700;fill:#0f172a;}.lbl{font-size:18px;font-weight:700;fill:#0f172a;}.sub{font-size:14px;fill:#64748b;}.cap{font-size:13.5px;fill:#334155;}.mono{font-size:15px;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;fill:#0f172a;}</style>
+  </defs>
+  <title id="title">Three tiers of scorer, cheap to expensive</title>
+  <desc id="desc">Programmatic scorers are free and run on every commit, an LLM judge costs a model call per case and runs nightly on a sample, and human review is the ground truth you calibrate against.</desc>
+  <text x="34" y="40" class="title">The scorer ladder: put the cheapest gate first</text>
+  <text x="34" y="68" class="sub">Cost rises as you climb. Coverage rises too. The trick is which tier gates the merge and which runs nightly.</text>
+
+  <!-- tier 1: programmatic -->
+  <rect x="34" y="92" width="560" height="94" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="58" y="124" class="lbl">1. Programmatic scorers</text>
+  <text x="58" y="150" class="cap">exact match, token F1, contains-required, declines-when-it-should</text>
+  <text x="58" y="174" class="cap" font-weight="700">free, instant, deterministic. Runs on every commit and blocks the merge.</text>
+
+  <!-- tier 2: judge -->
+  <rect x="34" y="196" width="690" height="94" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.5"/>
+  <text x="58" y="228" class="lbl">2. LLM judge</text>
+  <text x="58" y="254" class="cap">a scorer with a rubric, for what code cannot check (faithful? right tone?)</text>
+  <text x="58" y="278" class="cap" font-weight="700">one model call per case. Runs nightly, on a sample. Must be calibrated first.</text>
+
+  <!-- tier 3: human -->
+  <rect x="34" y="300" width="756" height="94" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="58" y="332" class="lbl">3. Human review</text>
+  <text x="58" y="358" class="cap">the ground truth every tier above is measured against</text>
+  <text x="58" y="382" class="cap" font-weight="700">slow and dear. Spend it on the labels that calibrate the judge, not on grading everything.</text>
+
+  <!-- cost/coverage axis: cheap at top, dear at bottom, arrow points down as cost climbs -->
+  <line x1="812" y1="110" x2="812" y2="378" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="826" y="145" class="sub" fill="#059669">$ cheap</text>
+  <text x="826" y="248" class="sub" fill="#7c3aed">$$</text>
+  <text x="826" y="352" class="sub" fill="#2563eb">$$$ dear</text>
+</svg>

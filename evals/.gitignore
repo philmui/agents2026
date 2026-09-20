@@ -1,0 +1,20 @@
+# Secrets: never commit your real API key
+.env
+
+# The uv-managed virtual environment (recreate with `uv sync`)
+.venv/
+
+# Python bytecode caches
+__pycache__/
+
+# Jupyter checkpoint files
+.ipynb_checkpoints/
+
+# Cached model calls written by the notebook. This module intentionally SHIPS a
+# small cache of real judge responses (see artifacts/README.md) so the calibration
+# sections show genuine numbers with no API key. New calls you make are cached here
+# too; they are harmless to commit or to leave uncommitted.
+# artifacts/
+
+# macOS noise
+.DS_Store
