@@ -1,0 +1,4 @@
+# Optional service clients and graph workflow. Install requirements.txt first.
+typesafe-sdk>=0.7.2,<1
+langchain-typesafe>=0.0.1a3,<0.1
+langgraph>=1.2,<2

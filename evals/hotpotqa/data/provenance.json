@@ -1,0 +1,58 @@
+{
+  "dataset": "HotpotQA",
+  "split": "development / validation",
+  "setting": "distractor",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "attribution": "Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Bengio, William W. Cohen, Ruslan Salakhutdinov, Christopher D. Manning (2018). HotpotQA.",
+  "homepage": "https://hotpotqa.github.io/",
+  "canonical_json_url": "https://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json",
+  "source_url": "https://huggingface.co/datasets/hotpotqa/hotpot_qa/resolve/1908d6afbbead072334abe2965f91bd2709910ab/distractor/validation-00000-of-00001.parquet?download=true",
+  "source_revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+  "source_sha256": "c20b638ca82b21d04fe12e14ff417ad05153d4d215a65de54497fca4e972f7c6",
+  "source_rows": 7405,
+  "source_type_counts": {
+    "comparison": 1487,
+    "bridge": 5918
+  },
+  "retrieved_date": "2026-10-10",
+  "format_note": "CMU JSON endpoint timed out/reset. Downloaded pinned HotpotQA Hugging Face validation parquet mirror. Lossless structural conversion id->_id, supporting_facts dict->pairs, context dict->pairs; text, sentence ordering, titles, labels, IDs and all ten contexts retained. JSON serialization differs from original.",
+  "selection_rule": "First five bridge and first five comparison records in source order; preserve relative source order. Teaching slice, not a random or representative performance benchmark.",
+  "selected_source_indices_zero_based": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    9,
+    13,
+    17
+  ],
+  "selected_ids": [
+    "5a8b57f25542995d1e6f1371",
+    "5a8c7595554299585d9e36b6",
+    "5a85ea095542994775f606a8",
+    "5adbf0a255429947ff17385a",
+    "5a8e3ea95542995a26add48d",
+    "5abd94525542992ac4f382d2",
+    "5a85b2d95542997b5ce40028",
+    "5a8db19d5542994ba4e3dd00",
+    "5ab56e32554299637185c594",
+    "5ab29c24554299449642c932"
+  ],
+  "selected_type_counts": {
+    "comparison": 5,
+    "bridge": 5
+  },
+  "example_id": "5abd94525542992ac4f382d2",
+  "scorer_revision": "3635853403a8735609ee997664e1528f4480762a",
+  "scorer_url": "https://raw.githubusercontent.com/hotpotqa/hotpot/3635853403a8735609ee997664e1528f4480762a/hotpot_evaluate_v1.py",
+  "file_sha256": {
+    "dev_sample.json": "ee382b3228e06ec9c8b9bb163c38098242854b36d75d2ce00fcfb25a4f7bf62f",
+    "example.json": "4bda529610ad120c0ea203993309070a89d7384cc14b3e15d6a805bd540e423b",
+    "toy_example.json": "34333238ae95f2745e372bba228ea544096254e230d32acd9594654a5120dddf",
+    "upstream/hotpot_evaluate_v1.py": "d35fc91a6db21d791dbdda11daf3856e9359f5701d54e3eefba20d88fecc02c0"
+  }
+}
