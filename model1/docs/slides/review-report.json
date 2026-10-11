@@ -1,0 +1,15 @@
+{
+  "browser": "152.0.7977.152",
+  "slides": 52,
+  "viewport_checks": 208,
+  "geometry_failures": [],
+  "browser_errors": [],
+  "remote_requests": [],
+  "interaction_checks": "passed",
+  "review_date": "2026-10-03",
+  "pdf_pages": 52,
+  "pdf_attribution": "@mui-group on every page",
+  "shared_notebook_illustrations": 20,
+  "standalone_svg_bounds_checks": 52,
+  "standalone_svg_bounds_failures": []
+}

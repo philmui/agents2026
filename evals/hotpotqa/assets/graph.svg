@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 430" role="img" aria-labelledby="title desc"><title id="title">A bounded LangGraph RAG workflow</title><desc id="desc">Retrieve then grade. If evidence is sufficient or two rounds have run, generate. Otherwise rewrite and retrieve again. Errors terminate with a recorded failure.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#486581" stroke-width="1.5"/></marker></defs>
+<rect width="1040" height="430" fill="#f7fafc"/>
+<text x="32" y="44" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="#183b56">A bounded LangGraph RAG workflow</text>
+<path d="M237,168 L295,168" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M507,168 L730,168" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M402,228 L402,290" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M298,345 L132,345" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M132,343 L132,230" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<rect x="30" y="115" width="205" height="110" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="46" y="146" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Retrieve</text>
+<text x="46" y="179" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Search current query</text>
+<rect x="300" y="115" width="205" height="110" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="316" y="146" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Grade</text>
+<text x="316" y="179" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Enough evidence?</text>
+<rect x="735" y="115" width="265" height="110" rx="8" fill="#fff3c4" stroke="#627d98"/>
+<text x="751" y="146" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Generate</text>
+<text x="751" y="179" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Short answer + citations</text>
+<rect x="300" y="295" width="265" height="100" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="316" y="326" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Rewrite</text>
+<text x="316" y="359" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Target missing evidence</text>
+<text x="531" y="144" font-family="Arial,sans-serif" font-size="18" fill="#334e68">Yes, or at round cap</text>
+<text x="426" y="265" font-family="Arial,sans-serif" font-size="18" fill="#334e68">No, with budget left</text>
+<text x="610" y="329" font-family="Arial,sans-serif" font-size="18" fill="#334e68">At most two retrieval rounds</text>
+<text x="610" y="364" font-family="Arial,sans-serif" font-size="18" fill="#334e68">Errors end with a failure record</text></svg>

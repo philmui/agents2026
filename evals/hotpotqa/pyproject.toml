@@ -1,0 +1,26 @@
+[project]
+name = "hotpotqa-rag-evaluation"
+version = "0.1.0"
+description = "An illustrated LangGraph and HotpotQA evaluation tutorial"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "langgraph>=1.0,<2",
+  "langchain-openai>=1.0,<2",
+  "scikit-learn>=1.6,<2",
+  "pandas>=2.2,<3",
+  "pydantic>=2.10,<3",
+  "python-dotenv>=1,<2",
+  "jupyterlab>=4.3,<5",
+  "ipykernel>=6.29,<8",
+  "nbformat>=5.10,<6",
+  "nbclient>=0.10,<1",
+  "nbconvert>=7.16,<8",
+  "ujson>=5.10,<6",
+]
+[dependency-groups]
+dev = ["pytest>=8.3,<10", "playwright>=1.50,<2", "beautifulsoup4>=4.12,<5"]
+[tool.uv]
+package = false
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

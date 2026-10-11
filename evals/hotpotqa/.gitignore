@@ -1,0 +1,10 @@
+.venv/
+.env
+.cache/
+.ipynb_checkpoints/
+__pycache__/
+.pytest_cache/
+artifacts/
+
+# Keep the dependency lockfile for the documented locked installation.
+!uv.lock

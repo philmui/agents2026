@@ -1,0 +1,43 @@
+{
+  "_id": "synthetic-lantern-atlas-001",
+  "question": "In which city was the creator of Lantern Atlas born?",
+  "answer": "Harbor City",
+  "type": "bridge",
+  "level": "toy",
+  "supporting_facts": [
+    [
+      "Lantern Atlas",
+      0
+    ],
+    [
+      "Mira Vale",
+      0
+    ]
+  ],
+  "context": [
+    [
+      "Lantern Atlas",
+      [
+        "Lantern Atlas is an invented book whose creator is Mira Vale."
+      ]
+    ],
+    [
+      "Mira Vale",
+      [
+        "Mira Vale was born in Harbor City."
+      ]
+    ],
+    [
+      "Harbor City",
+      [
+        "Harbor City is an invented coastal city."
+      ]
+    ],
+    [
+      "Cloud Almanac",
+      [
+        "Cloud Almanac is an invented book created by Niko Fern."
+      ]
+    ]
+  ]
+}

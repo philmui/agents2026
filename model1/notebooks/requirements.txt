@@ -1,0 +1,6 @@
+# Base notebook environment. Model calculations use only the standard library.
+jupyterlab>=4.4,<5
+nbformat>=5.10,<6
+nbclient>=0.10,<1
+nbconvert>=7.16,<8
+ipykernel>=6.29,<8

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 430" role="img" aria-labelledby="title desc"><title id="title">Inference and scoring use different inputs</title><desc id="desc">The agent gets question and candidate text only. The evaluator gets predictions plus reference answers and supporting facts.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#486581" stroke-width="1.5"/></marker></defs>
+<rect width="1040" height="430" fill="#f7fafc"/>
+<text x="32" y="44" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="#183b56">Inference and scoring use different inputs</text>
+<path d="M302,162 L380,162" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M642,162 L720,162" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M687,334 L864,228" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<rect x="30" y="100" width="270" height="125" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="46" y="131" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Agent inputs</text>
+<text x="46" y="164" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Question</text>
+<text x="46" y="191" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Candidate paragraphs</text>
+<rect x="385" y="100" width="255" height="125" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="401" y="131" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">LangGraph agent</text>
+<text x="401" y="164" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Retrieve and read</text>
+<text x="401" y="191" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Answer with citations</text>
+<rect x="725" y="100" width="280" height="125" rx="8" fill="#fff3c4" stroke="#627d98"/>
+<text x="741" y="131" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Evaluator</text>
+<text x="741" y="164" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Compare predictions</text>
+<text x="741" y="191" font-family="Arial,sans-serif" font-size="19" fill="#243b53">with reference labels</text>
+<rect x="385" y="285" width="300" height="105" rx="8" fill="#fce4ec" stroke="#627d98"/>
+<text x="401" y="316" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Reference labels</text>
+<text x="401" y="349" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Answer + supporting facts</text>
+<text x="40" y="365" font-family="Arial,sans-serif" font-size="18" fill="#334e68">Keep gold labels outside inference.</text></svg>

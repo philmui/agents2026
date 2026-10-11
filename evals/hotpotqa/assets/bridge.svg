@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 430" role="img" aria-labelledby="title desc"><title id="title">A question needs two pieces of evidence</title><desc id="desc">Invented story. The book paragraph identifies Mira Vale. The Mira Vale paragraph identifies Harbor City as birthplace.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#486581" stroke-width="1.5"/></marker></defs>
+<rect width="1040" height="430" fill="#f7fafc"/>
+<text x="32" y="44" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="#183b56">A question needs two pieces of evidence</text>
+<path d="M312,183 L375,183" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M662,183 L725,183" stroke="#486581" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<rect x="30" y="115" width="280" height="140" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="46" y="146" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Lantern Atlas</text>
+<text x="46" y="179" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Sentence 0 identifies</text>
+<text x="46" y="206" font-family="Arial,sans-serif" font-size="19" fill="#243b53">its creator: Mira Vale.</text>
+<rect x="380" y="115" width="280" height="140" rx="8" fill="#e3f8f5" stroke="#627d98"/>
+<text x="396" y="146" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Mira Vale</text>
+<text x="396" y="179" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Sentence 0 gives</text>
+<text x="396" y="206" font-family="Arial,sans-serif" font-size="19" fill="#243b53">birthplace: Harbor City.</text>
+<rect x="730" y="115" width="280" height="140" rx="8" fill="#fff3c4" stroke="#627d98"/>
+<text x="746" y="146" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#102a43">Answer</text>
+<text x="746" y="179" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Harbor City</text>
+<text x="746" y="206" font-family="Arial,sans-serif" font-size="19" fill="#243b53">Cite both sentence 0s.</text>
+<text x="35" y="315" font-family="Arial,sans-serif" font-size="18" fill="#334e68">Bridge entity: Mira Vale links the book to the birthplace.</text>
+<text x="35" y="351" font-family="Arial,sans-serif" font-size="18" fill="#334e68">A city description alone cannot establish where the creator was born.</text></svg>

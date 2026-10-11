@@ -1,0 +1,522 @@
+[
+  {
+    "chapter": "Start here",
+    "title": "From Bag-of-Words to Jev",
+    "lead": "How does a computer turn a message into a useful decision? Follow one help-desk example from simple word counts to contextual models and Jev.",
+    "diagram": "title-flow",
+    "takeaway": "Language models for text classification · A visual tutorial",
+    "notes": "Begin with an everyday message, not a definition of intelligence. Ask students to name the team they would contact if a laptop would not start, then ask what information they used. The rest of the lesson turns that familiar judgment into a software workflow.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "Start here",
+    "title": "An inbox needs a destination",
+    "lead": "A school help desk receives different requests. Classification assigns each message to a category the software can use.",
+    "diagram": "inbox",
+    "takeaway": "A category is also called a class; its name is a label.",
+    "notes": "Have students route the three messages before introducing a model. These categories were chosen by the application designer. If a message fits none of them, the application needs an explicit fallback rather than silently assuming the closest category is correct.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "Start here",
+    "title": "Choosing a label and writing a reply",
+    "lead": "A classifier can choose “technical.” A generator can write troubleshooting advice. An application may need both capabilities.",
+    "diagram": "classify-generate",
+    "takeaway": "Define the output you need before choosing a model.",
+    "notes": "The distinction is about the task and output interface. A generative language model can also perform classification, including with constrained structured output. It may still generate output tokens to do so. A classifier does not automatically know how to write a useful explanation.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "Start here",
+    "title": "Examples provide an answer key",
+    "lead": "In supervised learning, people supply example texts and their labels. The model learns patterns that help predict labels for new texts.",
+    "diagram": "examples-labels",
+    "takeaway": "A training example pairs an input with a known answer.",
+    "notes": "Introduce supervised as learning with an answer key. Labels should match a written definition, and people can disagree about ambiguous examples. Training does not store a perfect rule for every possible message; we must inspect behavior on unseen examples.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "Start here",
+    "title": "The same four steps keep returning",
+    "lead": "We collect examples, represent the text, learn a decision rule, and check it on new examples. The representation changes across generations of models.",
+    "diagram": "pipeline",
+    "takeaway": "A representation is a form of the input that the model can compute with.",
+    "notes": "Use this slide as a map. Bag-of-words makes counts, embeddings make learned vectors, and contextual models use neighboring text. In Jev's hosted API, the user supplies the task descriptions instead of training a new model in this notebook.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "Start here",
+    "title": "A timeline of useful ideas",
+    "lead": "These milestones changed how models represent language and return answers. Earlier methods remain useful when their strengths match the task.",
+    "diagram": "timeline",
+    "takeaway": "A newer architecture does not guarantee a better result on your dataset.",
+    "notes": "The timeline groups selected developments rather than claiming each idea appeared only once or replaced everything before it. Transformers arrived in 2017, BERT in 2018, T5 in 2019, ModernBERT in 2024, and Jev's launch and these tutorials belong to 2026. ULMFiT demonstrates that transfer learning was useful even with recurrent architectures.",
+    "source": "https://magazine.sebastianraschka.com/p/classifier-history-and-jev",
+    "source_title": "Historical overview"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "First, decide what counts as a token",
+    "lead": "For our first model, we lowercase the text and split it into words. Real tokenizers may also split words into smaller pieces.",
+    "diagram": "tokens",
+    "takeaway": "A token is one unit produced by the tokenizer.",
+    "notes": "Tokenization is a design choice. Punctuation, spelling, and contractions affect the units we produce. Our deliberately simple tokenizer makes the first experiment inspectable, but its limitations are part of the lesson.",
+    "source": "https://scikit-learn.org/stable/modules/feature_extraction.html",
+    "source_title": "Text feature extraction"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Give every known word a position",
+    "lead": "A vocabulary is the list of words found in the training examples. Each word gets a fixed position in a list of numbers.",
+    "diagram": "vocabulary",
+    "takeaway": "Fit the vocabulary using training examples only.",
+    "notes": "Call the numerical list a vector after showing the positions. A future message uses the same positions. Words outside this vocabulary need a handling rule; our small model ignores them, which can erase useful information.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Count into those positions",
+    "lead": "The message “screen screen frozen” becomes a vector. Most positions are zero because the message uses only a few vocabulary words.",
+    "diagram": "counts",
+    "takeaway": "Bag-of-words represents a whole document by its word counts.",
+    "notes": "Ask a student to verify each entry. The vector stays the same length regardless of message length. A real vocabulary could contain many thousands of entries, so implementations often store only the nonzero counts.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Naive Bayes combines word evidence",
+    "lead": "Begin with how common each class is, then multiply by the word evidence within that class. These invented numbers show how “screen frozen” favors technical help.",
+    "diagram": "naive-bayes",
+    "takeaway": "The result is a comparison score; divide by the total to obtain probabilities.",
+    "notes": "Prior means the class frequency before reading the message. Conditional probability asks how often a word appears within a class. Multiplying word evidence assumes the words are conditionally independent given the class; language violates that assumption, but the model can still be a useful baseline. Our code uses logarithms and smoothing. The two rows are a two-class toy calculation; the numerical scores are deliberately invented and have not yet been normalized.",
+    "source": "https://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html",
+    "source_title": "Naive Bayes reference"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Another option is weighted evidence",
+    "lead": "For a two-class decision, logistic regression adds weighted word counts and a starting offset. A smooth curve converts that evidence score into a probability.",
+    "diagram": "weighted-clues",
+    "takeaway": "Training learns the weights. The numbers here illustrate the calculation.",
+    "notes": "Weights are learned from labeled examples, not supplied by a person in ordinary training. Positive and negative weights push toward different labels. The bias is a starting offset. The logistic curve is a smooth conversion from any real score to a value between zero and one; that value still needs calibration checks. This is a binary example, such as technical versus other. Ask students to check the two occurrences of screen before adding the contributions.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Some words are more informative",
+    "lead": "A word appearing in every training document tells us little about which document is different. TF-IDF combines its frequency here with its rarity across documents.",
+    "diagram": "tfidf",
+    "takeaway": "Rarity can make a useful clue stand out, but it does not guarantee relevance.",
+    "notes": "TF stands for term frequency; IDF stands for inverse document frequency. This changes the features, not the classifier architecture. The vocabulary and document-frequency statistics must come from training data. A rare word is not automatically relevant, and negation words can be important even if common.",
+    "source": "https://scikit-learn.org/stable/modules/feature_extraction.html",
+    "source_title": "TF-IDF documentation"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Counting loses the sentence order",
+    "lead": "These sentences describe different situations, yet they contain the same words with the same counts. A count-only classifier cannot distinguish them.",
+    "diagram": "order-loss",
+    "takeaway": "If the representation loses a distinction, the next model cannot recover it.",
+    "notes": "Ask who is helping whom in each sentence. The limitation lies in the features before classification begins. This is an information-loss problem, not simply a matter of training longer or using a bigger classifier.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Word pairs restore a little order",
+    "lead": "A bigram is a pair of neighboring tokens. Adding these pairs can help distinguish phrases such as “not helpful” from “very helpful.”",
+    "diagram": "bigrams",
+    "takeaway": "Useful features can improve a simple model without replacing it.",
+    "notes": "Bigrams expand the vocabulary, so they can create more rare features and require more examples. They preserve short local relationships but do not capture all sentence structure. Students can add bigrams to the notebook as an exercise.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "01 · Count words",
+    "title": "Keep an honest test set",
+    "lead": "Learn from training data, choose settings on development data, and evaluate the final choices on test data that stayed separate.",
+    "diagram": "data-splits",
+    "takeaway": "A test set loses its purpose if you repeatedly tune to its answers.",
+    "notes": "Development and validation are often used for similar roles. Explain this as studying with practice questions before opening the final exam. Repeated messages and messages from one conversation should stay in the same split when that could leak information.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "Embeddings replace isolated counts",
+    "lead": "An embedding represents a word or token with a learned vector. Words used in similar contexts can acquire similar representations.",
+    "diagram": "embeddings",
+    "takeaway": "A two-dimensional drawing simplifies a vector with many coordinates.",
+    "notes": "The points here are invented, not extracted from a trained model. The coordinates are numerical features learned through an objective, and usually do not have simple human names. A word embedding represents a token, while a bag-of-words vector represents a whole document.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "Context changes what a word means",
+    "lead": "A static embedding gives “bank” one lookup vector. A contextual model can build different representations from the words around it.",
+    "diagram": "context-bank",
+    "takeaway": "Meaning depends on the sentence, not only the word.",
+    "notes": "Ask which clues identify a river edge and which identify a financial institution. Static embeddings can feed a later sequence model that adds context; their lookup vectors alone are context independent. Avoid claiming each learned coordinate corresponds to a dictionary meaning.",
+    "source": "https://arxiv.org/abs/1810.04805",
+    "source_title": "BERT paper"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "An RNN carries a running state",
+    "lead": "A recurrent neural network, or RNN, reads one token at a time. Each update combines that token with a numerical memory of the earlier tokens.",
+    "diagram": "rnn",
+    "takeaway": "The boxes show repeated uses of the same learned update rule.",
+    "notes": "The diagram is unrolled: four boxes do not mean four separately learned networks. The state is a fixed-size numerical summary. Reordering words changes the sequence of updates, although important earlier information can still become hard to retain.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "Gates help retain useful information",
+    "lead": "An LSTM is an RNN with learned gates: numerical controls that keep some old information and add new information. This helps useful clues survive across many steps.",
+    "diagram": "lstm",
+    "takeaway": "LSTM means long short-term memory; it is a kind of RNN.",
+    "notes": "A gate is a numerical operation that scales information. It does not consciously decide what to remember. LSTMs made sequence learning more practical, but finite state capacity and sequential processing still matter.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "A CNN looks for local patterns",
+    "lead": "A convolutional neural network, or CNN, slides a learned pattern checker across small token windows. The same filter produces a response at each position.",
+    "diagram": "cnn",
+    "takeaway": "The responses are invented. The shared filter can learn useful local phrases.",
+    "notes": "This is a one-dimensional text convolution over token embeddings. A three-token window moves one position at a time. Filters can recognize local phrase patterns, and several positions can be processed in parallel. More layers can expand the receptive field.",
+    "source": "https://arxiv.org/abs/1408.5882",
+    "source_title": "Text CNN paper"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "Pooling keeps a compact summary",
+    "lead": "A filter produces several responses, even when messages have different lengths. Max pooling keeps its strongest response; other filters contribute their own summaries.",
+    "diagram": "pooling",
+    "takeaway": "A classification head is the final small layer that converts these clues into label scores.",
+    "notes": "The maximum is a summary that loses exact position and some weaker signals. With multiple filters, keep one maximum per filter, then pass that vector to the head. Other pooling choices are possible; max pooling is one inspectable example.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "02 · Learn representations",
+    "title": "Learning can transfer between tasks",
+    "lead": "Pretraining learns reusable language patterns from much text. Fine-tuning then adapts the model to a smaller labeled classification dataset.",
+    "diagram": "transfer",
+    "takeaway": "ULMFiT showed this approach with an RNN in 2018.",
+    "notes": "Pretraining and fine-tuning are different phases, often with different objectives. Transfer learning does not require transformers. Good pretraining can help when labels are scarce, but the adapted model still needs evaluation on the target task.",
+    "source": "https://arxiv.org/abs/1801.06146",
+    "source_title": "ULMFiT paper"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "Attention connects relevant tokens",
+    "lead": "To update “bank,” attention combines information from token representations using learned weights. Context such as “river” and “muddy” can help shape the result.",
+    "diagram": "attention",
+    "takeaway": "These weights illustrate mixing; they are not measurements or a proof of reasoning.",
+    "notes": "A transformer combines attention with other learned operations and position information. Multiple layers progressively change representations. Drawing thick lines is a teaching simplification: attention weights do not automatically explain a model's full decision or establish human-like understanding.",
+    "source": "https://arxiv.org/abs/1706.03762",
+    "source_title": "Transformer paper"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "Two useful ways to read context",
+    "lead": "Read a row to see which positions a token may use. An encoder can read both sides; a causal decoder can read the current position and earlier ones.",
+    "diagram": "attention-masks",
+    "takeaway": "For “bank,” the causal mask blocks “was” and “muddy,” which come later.",
+    "notes": "Rows represent the token doing the reading; columns represent tokens it can attend to. The triangular mask supports predicting the next token without seeing future tokens. An encoder's unrestricted mask is useful for representing complete input text. Have students read across the outlined bank row. In the decoder panel, The, river, and bank are available; was and muddy are blocked. The check marks indicate permission, not actual attention strength.",
+    "source": "https://arxiv.org/abs/1706.03762",
+    "source_title": "Transformer paper"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "BERT reads before classifying",
+    "lead": "An encoder builds representations using context on both sides. In a BERT-style classifier, a summary position called [CLS] feeds a small layer trained to predict your labels.",
+    "diagram": "bert",
+    "takeaway": "ModernBERT updates the encoder approach rather than abandoning it.",
+    "notes": "The special CLS position can summarize the input through attention. A head trained for your label set predicts task categories. ModernBERT modernizes bidirectional encoders for efficiency and longer context; we are not benchmarking it in the notebook.",
+    "source": "https://arxiv.org/abs/2412.13663",
+    "source_title": "ModernBERT paper"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "A decoder can generate a label",
+    "lead": "A causal decoder predicts the next token from the earlier context. Given “classify this review,” a generative model can write a label such as “positive.”",
+    "diagram": "decoder",
+    "takeaway": "A label written as text is still produced through token generation.",
+    "notes": "Zero-shot means no labeled demonstrations in the request, not no training in the model's history. Few-shot means including a few task examples. A generated label's token probability is not automatically a calibrated probability of a semantic class.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "A decoder can also use a small head",
+    "lead": "A causal model can also feed a small trained classifier. Its final input position has access to the full message, so that representation can support a label prediction.",
+    "diagram": "decoder-head",
+    "takeaway": "A classification head offers another route besides prompting for label text.",
+    "notes": "The first token in a causal model cannot see later words, so it is an unsuitable full-text summary without other changes. The final non-padding token can attend to earlier input. This is a standard architectural adaptation, not a statement about Jev's proprietary internals.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "T5 treats tasks as text in, text out",
+    "lead": "An encoder reads the input, and a decoder writes the answer. A classification answer can be a short label expressed as text.",
+    "diagram": "t5",
+    "takeaway": "T5 is an encoder–decoder model, introduced in 2019.",
+    "notes": "The original transformer also used an encoder and decoder for translation. T5 combines that style with text-to-text task formatting and transfer learning. Its decoder can produce a class label, or a separate classifier can use representations.",
+    "source": "https://arxiv.org/abs/1910.10683",
+    "source_title": "T5 paper"
+  },
+  {
+    "chapter": "03 · Use context",
+    "title": "Choose the approach for the job",
+    "lead": "A small classifier, a fine-tuned encoder, a generative model, and a hosted decision model solve overlapping tasks with different practical tradeoffs.",
+    "diagram": "design-menu",
+    "takeaway": "Compare quality on your data along with setup effort, latency, and cost.",
+    "notes": "Avoid a universal ranking. A narrow trained model can be excellent for a stable task at high volume. A generator is needed for open writing. A decision API can reduce per-task training work, but it must be checked for task fit, ambiguous inputs, and failure cases.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "System One is a decision interface",
+    "lead": "TypeSafe calls this a System One interface: give a model the relevant evidence and a few narrow questions, then receive typed decisions. Jev is its flagship model.",
+    "diagram": "system-one",
+    "takeaway": "The model predicts an answer. Your code decides what happens next.",
+    "notes": "The state is the relevant evidence supplied to the model; questions define the decisions. The application retains control over what actions follow. The name borrows the idea of fast judgment, but does not establish a cognitive architecture.",
+    "source": "https://docs.typesafe.ai/concepts/system-one",
+    "source_title": "System One documentation"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Separate the interface from the internals",
+    "lead": "We can explain Jev’s public inputs, outputs, and stated training goal. The full architecture and training procedure have not been disclosed.",
+    "diagram": "known-unknown",
+    "takeaway": "A useful interface description is different from a verified diagram of the model’s internals.",
+    "notes": "Raschka discusses possible implementations but explicitly marks them as guesses. TypeSafe calls its method reinforcement learning for calibrated decisions, or RLCD. A public method called RLCR is related by topic, but no published connection establishes that it is Jev's method.",
+    "source": "https://magazine.sebastianraschka.com/p/classifier-history-and-jev",
+    "source_title": "Architecture discussion"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Choice selects one described option",
+    "lead": "Give each option a clear description. The answer includes the selected option, a probability for every option, and a confidence value.",
+    "diagram": "choice",
+    "takeaway": "These three probabilities are invented and sum to 1.",
+    "notes": "The option descriptions matter more than their short programmatic labels. Choice is single-label even when the message has several properties. Include an other or insufficient-context option when your task needs one, then test its behavior.",
+    "source": "https://docs.typesafe.ai/primitives/choice",
+    "source_title": "Choice documentation"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Noul asks a yes-or-no question",
+    "lead": "Noul estimates whether one statement is true. A value near 1 favors yes, near 0 favors no, and near 0.5 leaves the answer uncertain.",
+    "diagram": "noul",
+    "takeaway": "Noul is P(yes) for one question; it does not include a separate confidence field.",
+    "notes": "A value near zero is a strong no, not simply low confidence. The application can use a low boundary and a high boundary, reviewing values between them. Several different Noul questions can all have large yes probabilities because they describe different events.",
+    "source": "https://docs.typesafe.ai/primitives/noul",
+    "source_title": "Noul documentation"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Several properties can be true together",
+    "lead": "Use one Choice for a single topic, and separate Noul questions for properties such as urgency and frustration. Their probabilities do not need to sum across questions.",
+    "diagram": "multi-label",
+    "takeaway": "Single-label categories and multi-label properties answer different questions.",
+    "notes": "The probability distribution belongs to each individual question. Topic billing and property urgent are compatible. Separately evaluated questions can still be statistically correlated because they share an input; independent evaluation does not prove independence between events.",
+    "source": "https://docs.typesafe.ai/primitives",
+    "source_title": "Question types"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Score places an input on a rubric",
+    "lead": "Score uses ordered levels that you describe in a rubric. It averages their positions using the predicted probabilities, so the returned value can fall between levels.",
+    "diagram": "score",
+    "takeaway": "A score of 1.5 is an expected rubric position, rather than a new category.",
+    "notes": "A score of 1.5 is a position between rubric levels. It is not a precise count, percentage, or physical quantity. Two different distributions can have the same average, so inspect the distribution as well as the scalar score. Score confidence accounts for distance between levels.",
+    "source": "https://docs.typesafe.ai/primitives/score",
+    "source_title": "Score documentation"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Confidence differs from probability",
+    "lead": "For three Choice options, an even split gives each one ⅓. Jev’s confidence rescales the top probability relative to that baseline; it is a different number from P(top option).",
+    "diagram": "confidence",
+    "takeaway": "Choice confidence depends on how many options you offer and still needs validation.",
+    "notes": "With three options and top probability 0.8, the documented formula gives 0.7 confidence. This is a computed statistic, not an independently verified correctness probability. Score uses a different statistic because its levels have an order. Calibration must be evaluated with actual outcomes. Have students compare the even split with the top probability before evaluating the rescaling formula. Changing the candidate set changes this baseline, so compare configurations carefully.",
+    "source": "https://docs.typesafe.ai/confidence",
+    "source_title": "Confidence formulas"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "Calibration is checked over many cases",
+    "lead": "If events given probability 0.8 occur about 80% of the time on representative data, those estimates are calibrated around that probability.",
+    "diagram": "calibration",
+    "takeaway": "Accuracy asks which label wins; calibration asks whether the probabilities match outcomes.",
+    "notes": "The ten circles are only a teaching illustration. Small groups have substantial sampling noise, so real checks need much more data. Calibration can change under distribution shift. In the notebook we use synthetic probabilities to explain the calculation without claiming a result for Jev.",
+    "source": "https://arxiv.org/abs/1706.04599",
+    "source_title": "Calibration research"
+  },
+  {
+    "chapter": "04 · Meet Jev",
+    "title": "RLCD names the training goal",
+    "lead": "TypeSafe describes training Jev for correct decisions and probabilities that reflect uncertainty. It names the approach RLCD; its exact training procedure remains proprietary.",
+    "diagram": "training-goal",
+    "takeaway": "This diagram explains the goal; it does not reconstruct RLCD.",
+    "notes": "Reinforcement learning uses feedback to improve behavior according to an objective. Correct labels and reliable uncertainty are related but distinct targets. We can study public calibration methods as research ideas without calling them Jev's training procedure.",
+    "source": "https://docs.typesafe.ai/introduction/machine-learning-primer",
+    "source_title": "TypeSafe AI primer"
+  },
+  {
+    "chapter": "05 · Build a workflow",
+    "title": "Ask narrow questions together",
+    "lead": "Jev evaluates multiple questions about a shared state in one request. Your code can combine the returned answers into a visible policy.",
+    "diagram": "parallel",
+    "takeaway": "A question that needs an earlier answer requires a later workflow step.",
+    "notes": "TypeSafe documents parallel, separate question evaluation. Shared-state batching can avoid repeatedly sending the same context, but it does not promise unlimited throughput or zero extra latency. Do not write one question that depends on a sibling question's answer. Combine returned values in code or make another call with updated state.",
+    "source": "https://docs.typesafe.ai/patterns/fan-out",
+    "source_title": "Batching pattern"
+  },
+  {
+    "chapter": "05 · Build a workflow",
+    "title": "Supply relevant facts in the state",
+    "lead": "Text and JSON can provide a message, current policy, and verified facts. Keep instructions in the questions and point them at the fields they should judge.",
+    "diagram": "structured-state",
+    "takeaway": "Structured inputs help clarify what evidence belongs to each decision.",
+    "notes": "The model only receives the context supplied in the request, plus whatever prior knowledge its training produced. JSON does not prove that a factual field is true. Include trusted current facts when needed and reduce irrelevant content. Images and audio require preprocessing into text for this documented Jev version.",
+    "source": "https://docs.typesafe.ai/primitives/advanced",
+    "source_title": "Structured questions"
+  },
+  {
+    "chapter": "05 · Build a workflow",
+    "title": "Write questions with clear boundaries",
+    "lead": "A useful question defines one decision and gives concrete criteria. Missing context and overlapping categories often need review or clarification.",
+    "diagram": "good-questions",
+    "takeaway": "Evaluate changes on labeled examples rather than judging them by higher confidence alone.",
+    "notes": "Have students compare which team with is this good. The latter hides many possible dimensions. Test negation, quoted instructions, mixed requests, unseen categories, and option reordering. TypeSafe's version-specific limitations also recommend keeping arithmetic in code.",
+    "source": "https://docs.typesafe.ai/concepts/how-to-build-with-system-one",
+    "source_title": "Workflow design guide"
+  },
+  {
+    "chapter": "05 · Build a workflow",
+    "title": "A request becomes ordinary data",
+    "lead": "Send model, state, and questions to the API. Read the typed answers, then let explicit code choose the handler.",
+    "diagram": "request-response",
+    "takeaway": "The notebook includes HTTP, Python SDK, and LangChain examples.",
+    "notes": "An API is a software interface. JSON packages fields as data; a POST sends the request. The current direct Python package is typesafe-sdk and its import is typesafe_sdk. LangChain's adapter has its own response convenience fields, so distinguish those from raw HTTP JSON. An API key is needed only for live calls.",
+    "source": "https://docs.typesafe.ai/introduction/quickstart",
+    "source_title": "TypeSafe quickstart"
+  },
+  {
+    "chapter": "05 · Build a workflow",
+    "title": "Give uncertainty a route",
+    "lead": "Application code compares Choice confidence with a chosen threshold. Here 0.70 clears an illustrative 0.60 gate, so the message reaches its selected handler.",
+    "diagram": "routing",
+    "takeaway": "A threshold is a policy setting. Choose it using development-set errors and review capacity.",
+    "notes": "A confidence threshold cannot certify correctness. Consequences, calibration, and fallback quality all influence the policy. The notebook routes messages without performing real external actions. Exact permissions and numeric calculations belong in deterministic code.",
+    "source": "https://docs.typesafe.ai/patterns/confidence-routing",
+    "source_title": "Confidence routing"
+  },
+  {
+    "chapter": "05 · Build a workflow",
+    "title": "More review changes the workload",
+    "lead": "Raising a confidence threshold sends more cases to review and fewer to automatic handlers. Compare those fractions with error rates to decide whether the tradeoff helps.",
+    "diagram": "coverage",
+    "takeaway": "Coverage measures how often you act automatically; it does not measure correctness.",
+    "notes": "Coverage is the fraction automatically handled. Selective accuracy measures correctness among those accepted cases. A classifier that sends everything to review has zero coverage and no automatic accuracy to report. The graphic shows invented counts; the notebook measures this on its synthetic examples. The letter A marks an automatic route and R marks review. The diagram shows the same ten invented cases at each threshold, so the accepted set shrinks as the gate rises. It contains no correctness labels.",
+    "source": "https://docs.typesafe.ai/patterns/intent-routing",
+    "source_title": "Intent routing"
+  },
+  {
+    "chapter": "06 · Connect to agents",
+    "title": "An agent chooses steps toward a goal",
+    "lead": "An agent takes steps, runs tools, and uses the results to choose what to do next. Jev can judge bounded choices while application code controls the loop and permissions.",
+    "diagram": "agent-loop",
+    "takeaway": "Tool results become evidence for the next step. Completion and budgets stop the loop.",
+    "notes": "A harness is the surrounding code that controls the agent's tools, state, and permissions. Model routing and tool-risk classification are examples in LangChain's article. A semantic risk classifier is one signal; code must still enforce the actions the user actually authorized.",
+    "source": "https://www.langchain.com/blog/building-a-harness-with-jev",
+    "source_title": "Jev in an agent harness"
+  },
+  {
+    "chapter": "06 · Connect to agents",
+    "title": "A graph makes the workflow visible",
+    "lead": "LangGraph represents work as nodes connected by edges. State carries the message and results, and conditional edges select the next node.",
+    "diagram": "langgraph",
+    "takeaway": "A node may call Jev, run ordinary code, or invoke another model.",
+    "notes": "The graph can make a workflow easier to inspect and resume. The diagram's edges specify routing; they do not mean the model independently controls the graph. The notebook builds a small graph with inert handlers that return messages rather than contacting a service.",
+    "source": "https://www.langchain.com/blog/building-prod-with-jev-and-langgraph",
+    "source_title": "Production workflow example"
+  },
+  {
+    "chapter": "06 · Connect to agents",
+    "title": "Judge the recorded behavior",
+    "lead": "A trace records what an agent was asked, what it did, and what evidence it received. Focused questions can evaluate whether the final answer used that evidence.",
+    "diagram": "trace-eval",
+    "takeaway": "A judge's score is a model prediction that also needs validation.",
+    "notes": "Code checks can verify exact fields or tool names. A semantic judge can assess whether the answer matches the retrieved evidence. Jev returns typed judgments without a written rationale. LangSmith can store these as feedback keys for inspection and monitoring, but the observer still needs human-labeled references.",
+    "source": "https://www.langchain.com/blog/jev-is-now-available-in-langsmith-evals",
+    "source_title": "LangSmith evaluation setup"
+  },
+  {
+    "chapter": "06 · Connect to agents",
+    "title": "Read early evidence at its real scale",
+    "lead": "LangChain reported strong repeatability and agreement in a small weather-agent judge study. Repeating a fixed run tests stability, not breadth across new tasks.",
+    "diagram": "judge-study",
+    "takeaway": "The study's observations are useful evidence, not a universal ranking of judges.",
+    "notes": "The study captured five weather-agent runs and repeated judgment 100 times per run. Jev matched the human binary labels in those repetitions, with low observed score variance. These are not 500 independently sampled tasks. The article notes observational results, provider defaults, and missing Jev service-version metadata.",
+    "source": "https://www.langchain.com/blog/jev-agent-evals-langsmith",
+    "source_title": "Early judge study"
+  },
+  {
+    "chapter": "07 · Investigate",
+    "title": "A similar API is easier than a similar model",
+    "lead": "An open-model experiment could score each candidate description with a shared scorer. That illustrates one design, but says nothing definite about Jev's internals.",
+    "diagram": "candidate-scoring",
+    "takeaway": "Matching an interface does not demonstrate generalization or calibration.",
+    "notes": "The shared scorer receives state, task description, and one candidate. A normalization step can turn scores into a distribution over candidates. Novel task evaluation and calibration require training data, held-out tasks, and careful testing. The shown numbers are invented, and the diagram is an illustrative research design.",
+    "source": "https://magazine.sebastianraschka.com/p/classifier-history-and-jev",
+    "source_title": "Open-model design discussion"
+  },
+  {
+    "chapter": "07 · Investigate",
+    "title": "Could a coordinator route specialist agents?",
+    "lead": "A decision model might assign work and check handoffs between agents. Research should measure the whole team's success, not only the coordinator's label accuracy.",
+    "diagram": "multi-agent",
+    "takeaway": "Shared mistakes can make several agreeing agents confidently wrong.",
+    "notes": "This is a research proposal, not a validated result. Compare the same specialists under fixed routing, model-driven routing, and uncertainty-based escalation. Hold the tasks, tool budgets, and retry limits constant. Measure final success, cost, latency, and handoff failures, and check whether agents share failure modes.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "07 · Investigate",
+    "title": "Turn an idea into a fair experiment",
+    "lead": "Choose a hypothesis, separate development from testing, compare alternatives, and inspect the cases where the approach fails.",
+    "diagram": "research-loop",
+    "takeaway": "The notebook and research roadmap give six concrete projects.",
+    "notes": "Possible projects study confidence under shift, multi-agent routing, judge alignment, candidate-set completeness, learned composition of atomic signals, and open-model decision training. Each needs a baseline and a useful failure analysis. Keep test tasks untouched while designing rubrics or an automated research loop.",
+    "source": "",
+    "source_title": "Source"
+  },
+  {
+    "chapter": "Try it yourself",
+    "title": "Now build the decision path",
+    "lead": "The companion notebook starts with a small word-count classifier, then teaches typed decisions, routing, agent evaluation, and research design.",
+    "diagram": "lesson-path",
+    "takeaway": "Open notebooks/system1_tutorial.ipynb and run the offline path first.",
+    "notes": "Ask students to explain one representation choice, one API distinction, and one fair-test requirement. They should now be able to distinguish what a model predicts from what application code permits. The notebook contains exercises, worked answers, optional live calls, and source links.",
+    "source": "",
+    "source_title": "Source"
+  }
+]
