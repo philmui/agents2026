@@ -4,7 +4,9 @@ load_dotenv(find_dotenv())  # read local .env file
 import bs4
 import requests
 from functools import lru_cache
+from pprint import pprint
 
+from langchain_core.tools import tool
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
@@ -44,3 +46,17 @@ def _get_retriever():
         embedding=OpenAIEmbeddings(),
     )
     return vectorstore.as_retriever()
+
+@tool
+def retrieve_blog_posts(query: str) -> str:
+    """Search and return information about Lilian Weng blog posts."""
+    retriever = _get_retriever()
+    retrieved_docs = retriever.invoke(query)
+    return "\n\n".join([doc.page_content for doc in retrieved_docs])
+
+
+retriever_tool = retrieve_blog_posts
+
+if __name__ == "__main__":
+    response = retriever_tool.invoke({"query": "types of harness design patterns"})
+    pprint(response, indent=2, width=80, compact=True)
