@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+<title id="title">The RAG StateGraph: retrieve, grade, rewrite, generate</title>
+<desc id="desc">START goes to retrieve. Successful retrieval goes to grade. A successful grade goes to generate if evidence is sufficient or rounds reach max_rounds; otherwise it goes to rewrite. Successful rewriting loops to retrieve. Errors in retrieve, grade, or rewrite go to END. Generate always goes to END, including when it records an error. The two END boxes denote the same terminal state.</desc>
+<defs>
+  <marker id="normal-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#315a78"/></marker>
+  <marker id="error-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#b42338"/></marker>
+</defs>
+<rect width="1200" height="700" rx="16" fill="#f7fafc"/>
+<g font-family="Arial, sans-serif" fill="#183b56">
+  <text x="36" y="48" font-size="28" font-weight="bold">The RAG StateGraph</text>
+  <text x="36" y="80" font-size="18">One shared state · conditional routing · a bounded retrieval loop</text>
+  <g fill="none" stroke="#315a78" stroke-width="2.5" marker-end="url(#normal-arrow)">
+    <path d="M126 220 H180"/>
+    <path d="M400 220 H480"/>
+    <path d="M700 220 H850"/>
+    <path d="M1080 220 H1110"/>
+    <path d="M590 270 V370"/>
+    <path d="M480 420 H304 Q290 400 276 420 H140 V220 H180"/>
+  </g>
+  <g fill="none" stroke="#b42338" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#error-arrow)">
+    <path d="M290 270 V555 H1000"/>
+    <path d="M700 250 H780 V555 H1000"/>
+    <path d="M700 420 H780 V555 H1000"/>
+  </g>
+  <g stroke="#52758e" stroke-width="1.5">
+    <rect x="30" y="190" width="96" height="60" rx="30" fill="#e7eef5"/>
+    <rect x="180" y="170" width="220" height="100" rx="12" fill="#e3f8f5"/>
+    <rect x="480" y="170" width="220" height="100" rx="12" fill="#e3efff"/>
+    <rect x="480" y="370" width="220" height="100" rx="12" fill="#e3efff"/>
+    <rect x="850" y="170" width="230" height="100" rx="12" fill="#fff3c4"/>
+    <rect x="1110" y="190" width="74" height="60" rx="30" fill="#e7eef5"/>
+    <rect x="1000" y="520" width="150" height="70" rx="30" fill="#fff0f1" stroke="#b42338"/>
+  </g>
+  <g font-size="23" font-weight="bold" text-anchor="middle">
+    <text x="78" y="228" font-size="19">START</text>
+    <text x="290" y="205">retrieve</text>
+    <text x="590" y="205">grade</text>
+    <text x="590" y="405">rewrite</text>
+    <text x="965" y="205">generate</text>
+    <text x="1147" y="228" font-size="19">END</text>
+    <text x="1075" y="551" font-size="21" fill="#b42338">END</text>
+  </g>
+  <g font-size="17" text-anchor="middle">
+    <text x="290" y="235">Search current query</text>
+    <text x="290" y="257">Accumulate documents</text>
+    <text x="590" y="235">Is evidence sufficient?</text>
+    <text x="590" y="257">Backend call</text>
+    <text x="590" y="435">Target missing evidence</text>
+    <text x="590" y="457">Backend call</text>
+    <text x="965" y="235">Answer + citations</text>
+    <text x="965" y="257">Backend call</text>
+    <text x="1075" y="575" font-size="15" fill="#b42338">Recorded failure</text>
+  </g>
+  <g font-size="16">
+    <text x="417" y="202">OK</text>
+    <text x="720" y="123">sufficient OR</text>
+    <text x="720" y="146">rounds ≥ max_rounds</text>
+    <text x="607" y="310">not sufficient AND</text>
+    <text x="607" y="333">rounds &lt; max_rounds</text>
+    <text x="312" y="394">OK: search rewritten query</text>
+    <text x="889" y="302">Always → END</text>
+    <text x="889" y="325">Even on generation error</text>
+    <text x="306" y="515" fill="#b42338">error</text>
+    <text x="797" y="382" fill="#b42338">error</text>
+    <text x="797" y="486" fill="#b42338">error</text>
+    <text x="36" y="625" font-weight="bold">Solid = normal route · Dashed red = error exit · Both END boxes are the same terminal</text>
+    <text x="36" y="656">MAX_ROUNDS = 2: at most two retrieval rounds. The round cap does not guarantee enough evidence.</text>
+    <text x="36" y="681">record_node wraps every node: trace + timing + errors; backend_calls increases for grade, rewrite, generate.</text>
+  </g>
+</g>
+</svg>
