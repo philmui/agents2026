@@ -54,6 +54,16 @@ md('''## 2. What are RAG and HotpotQA?
 
 **Retrieval-augmented generation (RAG)** first finds text relevant to a question, then gives that text to a language model to produce an answer. A retriever chooses the material; a reader or generator uses it. An **agentic** workflow can choose another search when the evidence seems insufficient.
 
+### The RAG StateGraph at a glance
+
+![RAG StateGraph: START → retrieve → grade; grade generates when evidence is sufficient or the round limit is reached, otherwise rewrites the query and retrieves again. Errors in retrieve, grade or rewrite route to END; generate always routes to END.](assets/stategraph.svg)
+
+Read the solid arrows as the normal workflow and the dashed red arrows as error exits. Both **END** boxes represent the same terminal state. `retrieve` searches the current query and accumulates evidence; `grade`, `rewrite`, and `generate` call the backend (a model in live mode). Every node is wrapped by `record_node` to capture timing, trace events, and errors.
+
+The shared `RAGState` carries `question`, `query`, `documents`, `rounds`, `sufficient`, `answer`, `backend_calls`, `trace`, and `error`. A rewrite changes the search query, not the original question. With `MAX_ROUNDS = 2`, retrieval runs at most twice. Reaching the cap routes to generation even if evidence is insufficient; the generator may abstain. Section 8 builds this graph in code.
+
+### HotpotQA: evaluating answers and evidence
+
 **HotpotQA** is a question-answering dataset introduced by Yang and colleagues in 2018. It contains about 113,000 Wikipedia-based questions across its splits. Many require connecting information across documents. In labeled data, a question comes with a reference answer and **supporting facts**: human-annotated sentence addresses that support that answer. This lets us evaluate evidence selection as well as answer text. [Paper](https://aclanthology.org/D18-1259/)
 
 A **bridge** question uses an intermediate entity: book → creator → birthplace. A **comparison** question asks about two entities, such as which person was born earlier. Not every question requires a literal two-step search, and two supporting documents can contain more than two annotated sentences.
