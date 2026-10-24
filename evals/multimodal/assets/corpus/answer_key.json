@@ -1,0 +1,64 @@
+{
+  "chart_energy": {
+    "data_points": [
+      {
+        "label": "April",
+        "value": 42,
+        "unit": "kWh"
+      },
+      {
+        "label": "May",
+        "value": 57,
+        "unit": "kWh"
+      },
+      {
+        "label": "June",
+        "value": 51,
+        "unit": "kWh"
+      }
+    ]
+  },
+  "chart_temperature": {
+    "data_points": [
+      {
+        "label": "Roof",
+        "value": 46,
+        "unit": "°C"
+      },
+      {
+        "label": "Garden",
+        "value": 34,
+        "unit": "°C"
+      },
+      {
+        "label": "Shade",
+        "value": 27,
+        "unit": "°C"
+      }
+    ]
+  },
+  "chart_water": {
+    "data_points": [
+      {
+        "label": "Hose",
+        "value": 18,
+        "unit": "L"
+      },
+      {
+        "label": "Bucket",
+        "value": 8,
+        "unit": "L"
+      },
+      {
+        "label": "Mist",
+        "value": 3,
+        "unit": "L"
+      }
+    ]
+  },
+  "screenshot_controller": {
+    "code": "E17",
+    "meaning": "ventilation blocked",
+    "action": "clear the vent before restarting"
+  }
+}

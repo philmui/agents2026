@@ -1,0 +1,4 @@
+# Preserve binary teaching artifacts and avoid text diffs for PDF streams.
+*.pdf binary
+*.pptx binary
+*.avi binary

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "chart_energy",
+    "modality": "image",
+    "path": "chart_energy.png",
+    "source_id": "chart_energy",
+    "parent_id": "chart_energy"
+  },
+  {
+    "id": "chart_temperature",
+    "modality": "image",
+    "path": "chart_temperature.png",
+    "source_id": "chart_temperature",
+    "parent_id": "chart_temperature"
+  },
+  {
+    "id": "chart_water",
+    "modality": "image",
+    "path": "chart_water.png",
+    "source_id": "chart_water",
+    "parent_id": "chart_water"
+  },
+  {
+    "id": "screenshot_controller",
+    "modality": "image",
+    "path": "screenshot_controller.png",
+    "source_id": "screenshot_controller",
+    "parent_id": "screenshot_controller"
+  },
+  {
+    "id": "memo_safety",
+    "modality": "text",
+    "path": "memo_safety.md",
+    "source_id": "memo_safety",
+    "parent_id": "memo_safety"
+  },
+  {
+    "id": "memo_schedule",
+    "modality": "text",
+    "path": "memo_schedule.md",
+    "source_id": "memo_schedule",
+    "parent_id": "memo_schedule"
+  },
+  {
+    "id": "memo_cleaning",
+    "modality": "text",
+    "path": "memo_cleaning.md",
+    "source_id": "memo_cleaning",
+    "parent_id": "memo_cleaning"
+  }
+]
