@@ -1,0 +1,78 @@
+{
+  "chart_energy": {
+    "kind": "bar chart",
+    "title": "Solar energy by month",
+    "summary": "Energy delivered by the school rooftop panels. A orange bar chart.",
+    "data_points": [
+      {
+        "label": "April",
+        "value": 42,
+        "unit": "kWh"
+      },
+      {
+        "label": "May",
+        "value": 57,
+        "unit": "kWh"
+      },
+      {
+        "label": "June",
+        "value": 51,
+        "unit": "kWh"
+      }
+    ],
+    "provenance": "hand-authored reference fixture; not a model prediction"
+  },
+  "chart_temperature": {
+    "kind": "bar chart",
+    "title": "Panel temperature by location",
+    "summary": "Surface temperature during the same midday inspection. A purple bar chart.",
+    "data_points": [
+      {
+        "label": "Roof",
+        "value": 46,
+        "unit": "°C"
+      },
+      {
+        "label": "Garden",
+        "value": 34,
+        "unit": "°C"
+      },
+      {
+        "label": "Shade",
+        "value": 27,
+        "unit": "°C"
+      }
+    ],
+    "provenance": "hand-authored reference fixture; not a model prediction"
+  },
+  "chart_water": {
+    "kind": "bar chart",
+    "title": "Cleaning water by method",
+    "summary": "Water needed to clean one demonstration panel. A green bar chart.",
+    "data_points": [
+      {
+        "label": "Hose",
+        "value": 18,
+        "unit": "L"
+      },
+      {
+        "label": "Bucket",
+        "value": 8,
+        "unit": "L"
+      },
+      {
+        "label": "Mist",
+        "value": 3,
+        "unit": "L"
+      }
+    ],
+    "provenance": "hand-authored reference fixture; not a model prediction"
+  },
+  "screenshot_controller": {
+    "kind": "screenshot",
+    "title": "Solar controller inspection screen",
+    "summary": "A teal status header. Rooftop controller A shows E17: ventilation blocked. Clear the vent before restarting. Tuesday inspection recorded at 14:20.",
+    "data_points": [],
+    "provenance": "hand-authored reference fixture; not a model prediction"
+  }
+}
